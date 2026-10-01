@@ -489,8 +489,8 @@
         let usersDB = JSON.parse(localStorage.getItem('users_db')) || {
             'admin': { pass: 'admin123', role: 'Administrador' },
             'operador': { pass: 'operador123', role: 'Operador' },
-            'consulta': { pass: '1234', role: 'Consulta' }
-            'Efrios': { pass: 'Rios2328', role: 'Operador' }
+            'consulta': { pass: '1234', role: 'Consulta' },
+            'efrios': { pass: 'Rios2328', role: 'Consulta' }
         };
 
         let auditLogDB = JSON.parse(localStorage.getItem('audit_log_db')) || [];
@@ -978,7 +978,7 @@
             toggleAmbitoViaje();
 
             if (document.getElementById('viajeAmbito').value === 'Nacional') {
-                document.getElementById('viajeProvincia').value = 'Buenos Aires'; // default o parseo simple
+                document.getElementById('viajeProvincia').value = 'Buenos Aires';
                 document.getElementById('viajeCiudadNacional').value = v.lugar || '';
             } else {
                 document.getElementById('viajePais').value = 'Estados Unidos';
