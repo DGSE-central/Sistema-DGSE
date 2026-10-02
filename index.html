@@ -457,16 +457,16 @@
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
         
-        let usersDB = JSON.parse(localStorage.getItem('users_db')) || {
+        // Fusión inteligente para garantizar usuarios por defecto (incluyendo efrios) y persistencia
+        let defaultUsers = {
             'admin': { pass: 'admin123', role: 'Administrador' },
             'operador': { pass: 'operador123', role: 'Operador' },
             'consulta': { pass: '1234', role: 'Consulta' },
-            'efrios': { pass: 'rios', role: 'Administrador' },
+            'efrios': { pass: 'Rios2328', role: 'Consulta' }
         };
-        // Sincronizar inmediatamente al cargar por primera vez si no existía en localStorage
-        if (!localStorage.getItem('users_db')) {
-            localStorage.setItem('users_db', JSON.stringify(usersDB));
-        }
+        let savedUsers = JSON.parse(localStorage.getItem('users_db')) || {};
+        let usersDB = { ...defaultUsers, ...savedUsers };
+        localStorage.setItem('users_db', JSON.stringify(usersDB));
 
         let auditLogDB = JSON.parse(localStorage.getItem('audit_log_db')) || [];
         let currentUser = JSON.parse(sessionStorage.getItem('activeUser')) || null;
@@ -534,14 +534,14 @@
         function closeUsersModal() { document.getElementById('usersModal').classList.add('hidden'); }
 
         function renderUsersTable() {
-            usersDB = JSON.parse(localStorage.getItem('users_db')) || usersDB;
+            let currentDB = JSON.parse(localStorage.getItem('users_db')) || {};
             const body = document.getElementById('usersTableBody');
             body.innerHTML = '';
-            for (let u in usersDB) {
+            for (let u in currentDB) {
                 body.innerHTML += `
                     <tr class="border-b">
                         <td class="p-2.5 font-bold">${u.toUpperCase()}</td>
-                        <td class="p-2.5"><span class="bg-slate-100 border px-2 py-0.5 rounded text-[11px]">${usersDB[u].role}</span></td>
+                        <td class="p-2.5"><span class="bg-slate-100 border px-2 py-0.5 rounded text-[11px]">${currentDB[u].role}</span></td>
                         <td class="p-2.5 text-center"><button onclick="deleteUser('${u}')" class="text-red-600 hover:text-red-800"><i class="fa-solid fa-user-xmark"></i></button></td>
                     </tr>
                 `;
@@ -552,15 +552,14 @@
             e.preventDefault();
             if (currentUser && currentUser.role !== 'Administrador') return;
             
-            // Cargar siempre la versión más reciente de localStorage
-            usersDB = JSON.parse(localStorage.getItem('users_db')) || usersDB;
+            let currentDB = JSON.parse(localStorage.getItem('users_db')) || {};
             
             const u = document.getElementById('newUser').value.toLowerCase().trim();
             const p = document.getElementById('newPass').value;
             const r = document.getElementById('newRole').value;
             
-            usersDB[u] = { pass: p, role: r };
-            localStorage.setItem('users_db', JSON.stringify(usersDB));
+            currentDB[u] = { pass: p, role: r };
+            localStorage.setItem('users_db', JSON.stringify(currentDB));
             
             document.getElementById('newUser').value = '';
             document.getElementById('newPass').value = '';
@@ -570,11 +569,11 @@
 
         function deleteUser(u) {
             if (currentUser && currentUser.role !== 'Administrador') return;
-            usersDB = JSON.parse(localStorage.getItem('users_db')) || usersDB;
-            if (Object.keys(usersDB).length <= 1) { alert('Debe quedar al menos un usuario.'); return; }
+            let currentDB = JSON.parse(localStorage.getItem('users_db')) || {};
+            if (Object.keys(currentDB).length <= 1) { alert('Debe quedar al menos un usuario.'); return; }
             if (confirm(`¿Eliminar usuario ${u.toUpperCase()}?`)) {
-                delete usersDB[u];
-                localStorage.setItem('users_db', JSON.stringify(usersDB));
+                delete currentDB[u];
+                localStorage.setItem('users_db', JSON.stringify(currentDB));
                 renderUsersTable();
             }
         }
@@ -615,14 +614,13 @@
 
         function handleLogin(e) {
             e.preventDefault();
-            // Cargar siempre la base de datos actualizada desde localStorage al intentar iniciar sesión
-            usersDB = JSON.parse(localStorage.getItem('users_db')) || usersDB;
+            let currentDB = JSON.parse(localStorage.getItem('users_db')) || {};
             
             const u = document.getElementById('loginUser').value.toLowerCase().trim();
             const p = document.getElementById('loginPass').value;
             
-            if (usersDB[u] && usersDB[u].pass === p) {
-                currentUser = { name: u.toUpperCase(), role: usersDB[u].role };
+            if (currentDB[u] && currentDB[u].pass === p) {
+                currentUser = { name: u.toUpperCase(), role: currentDB[u].role };
                 sessionStorage.setItem('activeUser', JSON.stringify(currentUser));
                 checkAuth();
             } else { 
