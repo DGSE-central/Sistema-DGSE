@@ -19,7 +19,6 @@
         .row-contestado:hover { background-color: #dcfce7; }
         .row-archivado { background-color: #f3f4f6; }
         .row-archivado:hover { background-color: #e5e7eb; }
-
         .tab-active {
             border-bottom: 3px solid #2563eb;
             color: #2563eb;
@@ -28,14 +27,12 @@
     </style>
 </head>
 <body class="bg-slate-100 min-h-screen text-slate-800 font-sans pb-12" onload="checkAuth()">
-
     <!-- PANTALLA DE LOGIN -->
     <div id="loginScreen" class="fixed inset-0 bg-slate-900 z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl text-center border border-slate-700">
             <img src="HERLADICO_DGSE_ANTIGUO.png" id="loginLogo" class="h-32 mx-auto mb-4 object-contain" alt="Escudo Oficial DGSE" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'><text y=\'50%\' x=\'50%\' text-anchor=\'middle\' font-size=\'14\' fill=\'%231e293b\'>DGSE</text></svg>'">
             <h2 class="text-xl font-bold text-slate-800">DIRECCIÓN GENERAL DE SEGURIDAD</h2>
             <p class="text-xs text-slate-500 mb-6 uppercase tracking-wider font-semibold">Sistema de Control</p>
-
             <form onsubmit="handleLogin(event)" class="space-y-4 text-left">
                 <div>
                     <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Usuario</label>
@@ -51,7 +48,6 @@
             </form>
         </div>
     </div>
-
     <!-- APLICACIÓN PRINCIPAL -->
     <div id="appScreen" class="hidden">
         
@@ -70,7 +66,6 @@
                     <button onclick="openAuditModal()" id="btnAuditLog" class="bg-indigo-900 hover:bg-indigo-800 border border-indigo-700 text-indigo-200 font-medium px-3 py-1.5 rounded-lg text-xs transition flex items-center shadow hidden" title="Ver Historial de Modificaciones">
                         <i class="fa-solid fa-clock-rotate-left mr-1.5 text-indigo-400"></i> Auditoría
                     </button>
-
                     <button onclick="openUsersModal()" id="btnGestionUsuarios" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-medium px-3 py-1.5 rounded-lg text-xs transition flex items-center shadow hidden" title="Configurar Acceso de Personal">
                         <i class="fa-solid fa-users-gear mr-1.5"></i> Personal
                     </button>
@@ -80,9 +75,7 @@
                 </div>
             </div>
         </header>
-
         <main class="max-w-7xl mx-auto px-4 mt-6">
-
             <!-- NAVEGACIÓN POR SOLAPAS -->
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 mb-6">
                 <div class="flex border-b border-slate-200 overflow-x-auto">
@@ -100,7 +93,6 @@
                     </button>
                 </div>
             </div>
-
             <!-- SOLAPA 1: NOTAS -->
             <div id="registroTab" class="tab-content">
                 <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 mb-6">
@@ -117,7 +109,6 @@
                             </button>
                         </div>
                     </div>
-
                     <!-- CARGA AUTOMÁTICA -->
                     <div id="autoUploadSection" class="hidden my-6 p-6 bg-slate-50 border-2 border-blue-200 rounded-2xl transition">
                         <div class="flex justify-between items-center mb-4">
@@ -151,7 +142,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
                         <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200"><p class="text-xs text-slate-500 uppercase font-semibold">Total Registros</p><p id="metricTotal" class="text-2xl font-bold text-slate-800 mt-1">0</p></div>
                         <div class="bg-yellow-50 p-4 rounded-xl shadow-sm border border-yellow-200 cursor-pointer" onclick="filterByMetric('Pendiente')"><p class="text-xs text-yellow-700 uppercase font-semibold">Pendientes</p><p id="metricPendientes" class="text-2xl font-bold text-yellow-800 mt-1">0</p></div>
@@ -159,7 +149,6 @@
                         <div class="bg-green-50 p-4 rounded-xl shadow-sm border border-green-200 cursor-pointer" onclick="filterByMetric('Contestado')"><p class="text-xs text-green-700 uppercase font-semibold">Contestados</p><p id="metricContestados" class="text-2xl font-bold text-green-800 mt-1">0</p></div>
                         <div class="bg-slate-100 p-4 rounded-xl shadow-sm border border-slate-300 cursor-pointer" onclick="filterByMetric('Archivado')"><p class="text-xs text-slate-600 uppercase font-semibold">Archivados</p><p id="metricArchivados" class="text-2xl font-bold text-slate-700 mt-1">0</p></div>
                     </div>
-
                     <div class="flex flex-col md:flex-row justify-between items-center gap-4">
                         <div class="relative w-full md:w-72">
                             <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400"></i>
@@ -174,7 +163,6 @@
                         </select>
                     </div>
                 </div>
-
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
                     <table class="w-full text-left text-xs md:text-sm">
                         <thead class="bg-slate-800 text-white uppercase text-xs">
@@ -186,7 +174,6 @@
                     </table>
                 </div>
             </div>
-
             <!-- SOLAPA 2: EXPEDIENTES (GDE) -->
             <div id="expedientesTab" class="tab-content hidden">
                 <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 mb-6">
@@ -204,7 +191,6 @@
                     </div>
                 </div>
             </div>
-
             <!-- SOLAPA 3: CONTROL DE VIAJES -->
             <div id="viajesTab" class="tab-content hidden">
                 <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 mb-6">
@@ -221,7 +207,6 @@
                             </button>
                         </div>
                     </div>
-
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                         <div class="bg-sky-50 p-4 rounded-xl shadow-sm border border-sky-200">
                             <p class="text-xs text-sky-800 uppercase font-bold flex items-center gap-1.5"><i class="fa-solid fa-earth-americas text-sky-600"></i> En el Exterior</p>
@@ -236,12 +221,10 @@
                             <p id="viajesMetricCumplidos" class="text-2xl font-bold text-slate-800 mt-1">0</p>
                         </div>
                     </div>
-
                     <div class="relative mb-4">
                         <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400"></i>
                         <input type="text" id="searchViajesInput" oninput="renderViajesTable()" placeholder="Buscar por Grado, Personal, Destino, Evento, Lugar..." class="w-full pl-9 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
                     </div>
-
                     <div class="overflow-x-auto border rounded-xl">
                         <table class="w-full text-left text-xs md:text-sm">
                             <thead class="bg-slate-800 text-white uppercase text-xs">
@@ -264,7 +247,6 @@
                     </div>
                 </div>
             </div>
-
             <!-- SOLAPA 4: ESTADÍSTICAS DGSE -->
             <div id="estadisticasTab" class="tab-content hidden">
                 <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 mb-6">
@@ -280,10 +262,8 @@
                     </div>
                 </div>
             </div>
-
         </main>
     </div>
-
     <!-- MODAL AUDITORÍA -->
     <div id="auditModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
         <div class="bg-white rounded-2xl w-full max-w-3xl p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
@@ -298,7 +278,6 @@
             </div>
         </div>
     </div>
-
     <!-- MODAL USUARIOS -->
     <div id="usersModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
         <div class="bg-white rounded-2xl w-full max-w-xl p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
@@ -317,7 +296,6 @@
             <div class="flex justify-end"><button onclick="closeUsersModal()" class="px-4 py-2 border rounded-lg text-xs">Cerrar</button></div>
         </div>
     </div>
-
     <!-- MODAL NOTA -->
     <div id="itemModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
         <div class="bg-white rounded-2xl w-full max-w-2xl p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
@@ -342,7 +320,6 @@
             </form>
         </div>
     </div>
-
     <!-- MODAL EXPEDIENTE -->
     <div id="expModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
         <div class="bg-white rounded-2xl w-full max-w-xl p-6 shadow-2xl relative">
@@ -363,7 +340,6 @@
             </form>
         </div>
     </div>
-
     <!-- MODAL VIAJE -->
     <div id="viajeModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
         <div class="bg-white rounded-2xl w-full max-w-3xl p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
@@ -377,7 +353,6 @@
                     </div>
                     <div id="personasContainer" class="space-y-2 bg-slate-50 p-3 rounded-xl border"></div>
                 </div>
-
                 <!-- SELECTOR ÁMBITO (NACIONAL / INTERNACIONAL) -->
                 <div class="grid grid-cols-2 gap-4">
                     <div>
@@ -389,7 +364,6 @@
                     </div>
                     <div><label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Evento / Misión</label><input type="text" id="viajeEvento" required placeholder="Ej. REUNIÓN..." class="w-full border p-2 rounded-lg text-sm"></div>
                 </div>
-
                 <!-- CONTENEDOR DINÁMICO SEGÚN ÁMBITO -->
                 <div id="containerNacional" class="grid grid-cols-2 gap-4 bg-slate-50 p-3 rounded-xl border">
                     <div>
@@ -426,7 +400,6 @@
                         <input type="text" id="viajeCiudadNacional" placeholder="Ej. Mar del Plata, Bahía Blanca..." class="w-full border p-2 rounded-lg text-sm bg-white">
                     </div>
                 </div>
-
                 <div id="containerInternacional" class="hidden grid grid-cols-2 gap-4 bg-slate-50 p-3 rounded-xl border">
                     <div>
                         <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">País de Destino</label>
@@ -457,7 +430,6 @@
                         <input type="text" id="viajeCiudadInternacional" placeholder="Ej. San Pedro Sula, Yorktown..." class="w-full border p-2 rounded-lg text-sm bg-white">
                     </div>
                 </div>
-
                 <div class="grid grid-cols-3 gap-3">
                     <div><label class="block text-xs font-semibold text-slate-600 mb-1">Fecha Partida</label><input type="date" id="viajeSalida" required class="w-full border p-2 rounded-lg text-sm font-semibold"></div>
                     <div><label class="block text-xs font-semibold text-slate-600 mb-1">Fecha Llegada</label><input type="date" id="viajeLlegada" required class="w-full border p-2 rounded-lg text-sm font-semibold"></div>
@@ -482,27 +454,28 @@
             </form>
         </div>
     </div>
-
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-
+        
         let usersDB = JSON.parse(localStorage.getItem('users_db')) || {
             'admin': { pass: 'admin123', role: 'Administrador' },
             'operador': { pass: 'operador123', role: 'Operador' },
             'consulta': { pass: '1234', role: 'Consulta' },
-            'rios': { pass: 'Rios2328', role: 'Consulta' }
+            'efrios': { pass: 'Rios2328', role: 'Consulta' }
         };
+        // Sincronizar inmediatamente al cargar por primera vez si no existía en localStorage
+        if (!localStorage.getItem('users_db')) {
+            localStorage.setItem('users_db', JSON.stringify(usersDB));
+        }
 
         let auditLogDB = JSON.parse(localStorage.getItem('audit_log_db')) || [];
         let currentUser = JSON.parse(sessionStorage.getItem('activeUser')) || null;
         let notas = JSON.parse(localStorage.getItem('notas_db')) || [];
         let expedientesDB = JSON.parse(localStorage.getItem('expedientes_db')) || [];
         let viajesDB = JSON.parse(localStorage.getItem('viajes_db_v2')) || [];
-
         let autoPdfFileBase64 = null;
         let currentFileName = '';
         let globalExtractedText = '';
-
         let chartNotasInstance = null;
         let chartExpInstance = null;
         let chartViajesInstance = null;
@@ -523,7 +496,7 @@
             }
         }
         function closeAuditModal() { document.getElementById('auditModal').classList.add('hidden'); }
-
+        
         function renderAuditTable() {
             const body = document.getElementById('auditTableBody');
             body.innerHTML = '';
@@ -561,6 +534,7 @@
         function closeUsersModal() { document.getElementById('usersModal').classList.add('hidden'); }
 
         function renderUsersTable() {
+            usersDB = JSON.parse(localStorage.getItem('users_db')) || usersDB;
             const body = document.getElementById('usersTableBody');
             body.innerHTML = '';
             for (let u in usersDB) {
@@ -577,18 +551,26 @@
         function saveUser(e) {
             e.preventDefault();
             if (currentUser && currentUser.role !== 'Administrador') return;
+            
+            // Cargar siempre la versión más reciente de localStorage
+            usersDB = JSON.parse(localStorage.getItem('users_db')) || usersDB;
+            
             const u = document.getElementById('newUser').value.toLowerCase().trim();
             const p = document.getElementById('newPass').value;
             const r = document.getElementById('newRole').value;
+            
             usersDB[u] = { pass: p, role: r };
             localStorage.setItem('users_db', JSON.stringify(usersDB));
+            
             document.getElementById('newUser').value = '';
             document.getElementById('newPass').value = '';
             renderUsersTable();
+            alert('Usuario guardado exitosamente.');
         }
 
         function deleteUser(u) {
             if (currentUser && currentUser.role !== 'Administrador') return;
+            usersDB = JSON.parse(localStorage.getItem('users_db')) || usersDB;
             if (Object.keys(usersDB).length <= 1) { alert('Debe quedar al menos un usuario.'); return; }
             if (confirm(`¿Eliminar usuario ${u.toUpperCase()}?`)) {
                 delete usersDB[u];
@@ -610,13 +592,11 @@
                 document.getElementById('loginScreen').classList.add('hidden');
                 document.getElementById('appScreen').classList.remove('hidden');
                 document.getElementById('userInfo').innerHTML = `<i class="fa-solid fa-user-shield mr-1.5 text-blue-400"></i> ${currentUser.name} (${currentUser.role})`;
-
                 const esConsulta = (currentUser.role === 'Consulta');
                 document.getElementById('btnNuevaNotaModal').classList.toggle('hidden', esConsulta);
                 document.getElementById('btnAutoUpload').classList.toggle('hidden', esConsulta);
                 document.getElementById('btnNuevoExpediente').classList.toggle('hidden', esConsulta);
                 document.getElementById('btnNuevoViaje').classList.toggle('hidden', esConsulta);
-
                 if (currentUser.role === 'Administrador') {
                     document.getElementById('btnGestionUsuarios').classList.remove('hidden');
                     document.getElementById('btnAuditLog').classList.remove('hidden');
@@ -624,7 +604,6 @@
                     document.getElementById('btnGestionUsuarios').classList.add('hidden');
                     document.getElementById('btnAuditLog').classList.add('hidden');
                 }
-
                 renderTable();
                 renderExpedientesTable();
                 renderViajesTable();
@@ -636,13 +615,19 @@
 
         function handleLogin(e) {
             e.preventDefault();
+            // Cargar siempre la base de datos actualizada desde localStorage al intentar iniciar sesión
+            usersDB = JSON.parse(localStorage.getItem('users_db')) || usersDB;
+            
             const u = document.getElementById('loginUser').value.toLowerCase().trim();
             const p = document.getElementById('loginPass').value;
+            
             if (usersDB[u] && usersDB[u].pass === p) {
                 currentUser = { name: u.toUpperCase(), role: usersDB[u].role };
                 sessionStorage.setItem('activeUser', JSON.stringify(currentUser));
                 checkAuth();
-            } else { alert('Usuario o contraseña incorrectos.'); }
+            } else { 
+                alert('Usuario o contraseña incorrectos.'); 
+            }
         }
 
         function handleLogout() {
@@ -665,42 +650,35 @@
             notas = JSON.parse(localStorage.getItem('notas_db')) || [];
             expedientesDB = JSON.parse(localStorage.getItem('expedientes_db')) || [];
             viajesDB = JSON.parse(localStorage.getItem('viajes_db_v2')) || [];
-
             const pend = notas.filter(n => n.estado === 'Pendiente').length;
             const espera = notas.filter(n => n.estado === 'En espera').length;
             const contestado = notas.filter(n => n.estado === 'Contestado').length;
             const archivado = notas.filter(n => n.estado === 'Archivado').length;
-
             if (chartNotasInstance) chartNotasInstance.destroy();
             chartNotasInstance = new Chart(document.getElementById('chartNotasEstado'), {
                 type: 'doughnut',
                 data: { labels: ['Pendientes', 'En espera', 'Contestados', 'Archivados'], datasets: [{ data: [pend, espera, contestado, archivado], backgroundColor: ['#eab308', '#f97316', '#22c55e', '#64748b'] }] },
                 options: { responsive: true, maintainAspectRatio: false }
             });
-
             let expRev = expedientesDB.filter(e => e.estado === 'En revision DGSE').length;
             let expDev = expedientesDB.filter(e => e.estado === 'Devuelto').length;
             let expFin = expedientesDB.filter(e => e.estado === 'Finalizado').length;
-
             if (chartExpInstance) chartExpInstance.destroy();
             chartExpInstance = new Chart(document.getElementById('chartExpedientesEstado'), {
                 type: 'bar',
                 data: { labels: ['En Revisión', 'Devueltos', 'Finalizados'], datasets: [{ data: [expRev, expDev, expFin], backgroundColor: ['#3b82f6', '#ef4444', '#10b981'] }] },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
             });
-
             let ext = 0, pais = 0;
             viajesDB.forEach(v => {
                 if (v.ambito === 'Internacional') { ext++; } else { pais++; }
             });
-
             if (chartViajesInstance) chartViajesInstance.destroy();
             chartViajesInstance = new Chart(document.getElementById('chartViajesLugar'), {
                 type: 'pie',
                 data: { labels: ['Comisión en el País (Nacional)', 'En el Exterior (Internacional)'], datasets: [{ data: [pais, ext], backgroundColor: ['#10b981', '#0ea5e9'] }] },
                 options: { responsive: true, maintainAspectRatio: false }
             });
-
             let promotorCounts = {};
             notas.forEach(n => { let p = n.promotor ? n.promotor.trim().toUpperCase() : 'S/D'; promotorCounts[p] = (promotorCounts[p] || 0) + 1; });
             if (chartPromotoresInstance) chartPromotoresInstance.destroy();
@@ -760,20 +738,18 @@
 
         function clearAutoForm() { document.getElementById('parsedResultForm').classList.add('hidden'); autoPdfFileBase64 = null; }
         function filterByMetric(est) { document.getElementById('filterEstado').value = est; renderTable(); }
-
+        
         function renderTable() {
             const body = document.getElementById('tableBody');
             const search = document.getElementById('searchInput').value.toLowerCase();
             const filterEstado = document.getElementById('filterEstado').value;
             body.innerHTML = '';
             let filtered = notas.filter(n => ((n.nroNota && n.nroNota.toLowerCase().includes(search)) || (n.referencia && n.referencia.toLowerCase().includes(search))) && (filterEstado === 'TODOS' || n.estado === filterEstado));
-
             document.getElementById('metricTotal').innerText = notas.length;
             document.getElementById('metricPendientes').innerText = notas.filter(n => n.estado === 'Pendiente').length;
             document.getElementById('metricEspera').innerText = notas.filter(n => n.estado === 'En espera').length;
             document.getElementById('metricContestados').innerText = notas.filter(n => n.estado === 'Contestado').length;
             document.getElementById('metricArchivados').innerText = notas.filter(n => n.estado === 'Archivado').length;
-
             filtered.forEach(n => {
                 let accionesHTML = '-';
                 if (currentUser && currentUser.role !== 'Consulta') {
@@ -797,6 +773,7 @@
 
         function openModal() { document.getElementById('fecha').value = new Date().toISOString().split('T')[0]; document.getElementById('itemModal').classList.remove('hidden'); }
         function closeModal() { document.getElementById('itemModal').classList.add('hidden'); }
+        
         function saveNota(e) {
             e.preventDefault();
             notas.unshift({
@@ -809,6 +786,7 @@
             registrarAuditoria('Creó', 'Notas', `Nota Nro: ${document.getElementById('nroNota').value}`);
             closeModal(); renderTable();
         }
+
         function deleteNota(id) {
             const notaDel = notas.find(n => n.id === id);
             notas = notas.filter(n => n.id !== id);
@@ -819,6 +797,7 @@
 
         function openExpedienteModal() { document.getElementById('expModal').classList.remove('hidden'); }
         function closeExpModal() { document.getElementById('expModal').classList.add('hidden'); }
+        
         function saveExpediente(e) {
             e.preventDefault();
             expedientesDB.unshift({
@@ -830,6 +809,7 @@
             registrarAuditoria('Creó', 'Expedientes', `Expediente: ${document.getElementById('expNro').value}`);
             closeExpModal(); renderExpedientesTable();
         }
+
         function renderExpedientesTable() {
             const body = document.getElementById('expTableBody'); body.innerHTML = '';
             expedientesDB.forEach(e => {
@@ -848,6 +828,7 @@
                 `;
             });
         }
+
         function deleteExp(id) {
             const expDel = expedientesDB.find(e => e.id === id);
             expedientesDB = expedientesDB.filter(e => e.id !== id);
@@ -916,9 +897,7 @@
                 const destino = fila.querySelector('.input-destino').value.trim();
                 if (grado || nombre || destino) personas.push({ grado, nombre, destino });
             });
-
             if (personas.length === 0) { alert('Ingrese al menos una persona.'); return; }
-
             const ambito = document.getElementById('viajeAmbito').value;
             let lugarFinal = '';
             if (ambito === 'Nacional') {
@@ -930,7 +909,6 @@
                 const ciudadInt = document.getElementById('viajeCiudadInternacional').value.trim();
                 lugarFinal = ciudadInt ? `${ciudadInt}, ${pais}` : pais;
             }
-
             const viajeData = {
                 id: id ? id : Date.now(),
                 personas,
@@ -944,7 +922,6 @@
                 calidad: document.getElementById('viajeCalidad').value,
                 gastosCargo: document.getElementById('viajeGastosCargo').value
             };
-
             if (id) {
                 const idx = viajesDB.findIndex(v => v.id == id);
                 viajesDB[idx] = viajeData;
@@ -953,7 +930,6 @@
                 viajesDB.unshift(viajeData);
                 registrarAuditoria('Creó', 'Viajes', `Evento: ${viajeData.evento}`);
             }
-
             localStorage.setItem('viajes_db_v2', JSON.stringify(viajesDB));
             closeViajeModal();
             renderViajesTable();
@@ -962,7 +938,6 @@
         function editViaje(id) {
             const v = viajesDB.find(item => item.id == id);
             if (!v) return;
-
             document.getElementById('viajeId').value = v.id;
             document.getElementById('personasContainer').innerHTML = '';
             
@@ -973,10 +948,8 @@
             } else {
                 agregarFilaPersona();
             }
-
             document.getElementById('viajeAmbito').value = v.ambito || (v.lugar && v.lugar.includes('Argentina') ? 'Nacional' : 'Internacional');
             toggleAmbitoViaje();
-
             if (document.getElementById('viajeAmbito').value === 'Nacional') {
                 document.getElementById('viajeProvincia').value = 'Buenos Aires';
                 document.getElementById('viajeCiudadNacional').value = v.lugar || '';
@@ -984,7 +957,6 @@
                 document.getElementById('viajePais').value = 'Estados Unidos';
                 document.getElementById('viajeCiudadInternacional').value = v.lugar || '';
             }
-
             document.getElementById('viajeEvento').value = v.evento || '';
             document.getElementById('viajeSalida').value = v.salida || '';
             document.getElementById('viajeLlegada').value = v.llegada || '';
@@ -992,7 +964,6 @@
             document.getElementById('viajeInvita').value = v.invita || '';
             document.getElementById('viajeCalidad').value = v.calidad || '';
             document.getElementById('viajeGastosCargo').value = v.gastosCargo || '';
-
             document.getElementById('viajeModalTitle').innerHTML = '<i class="fa-solid fa-pen-to-square text-emerald-600"></i> Editar Comisión / Viaje';
             document.getElementById('viajeModal').classList.remove('hidden');
         }
@@ -1011,29 +982,23 @@
             const body = document.getElementById('viajesTableBody');
             const search = document.getElementById('searchViajesInput').value.toLowerCase();
             body.innerHTML = '';
-
             let exterior = 0, pais = 0, finalizadosCount = 0;
             const hoy = new Date();
-
             viajesDB.forEach(v => {
                 if (v.ambito === 'Internacional') { exterior++; } else { pais++; }
                 if (v.estadoComision === 'Finalizado' || (v.llegada && new Date(v.llegada + 'T00:00:00') < hoy)) finalizadosCount++;
             });
-
             document.getElementById('viajesMetricExterior').innerText = exterior;
             document.getElementById('viajesMetricPais').innerText = pais;
             document.getElementById('viajesMetricCumplidos').innerText = finalizadosCount;
-
             if (viajesDB.length === 0) {
                 body.innerHTML = `<tr><td colspan="11" class="p-6 text-center text-slate-400">No hay registros de viajes cargados.</td></tr>`;
                 return;
             }
-
             let filtered = viajesDB.filter(v => {
                 let personasStr = v.personas ? v.personas.map(p => `${p.grado || ''} ${p.nombre || p.apellidoNombre || ''} ${p.destino || ''}`).join(' ') : (v.personal || '');
                 return personasStr.toLowerCase().includes(search) || (v.evento && v.evento.toLowerCase().includes(search)) || (v.lugar && v.lugar.toLowerCase().includes(search));
             });
-
             filtered.forEach(v => {
                 let personasHTML = '<div class="flex flex-col space-y-1">';
                 let destinosHTML = '<div class="flex flex-col space-y-1">';
@@ -1050,7 +1015,6 @@
                     personasHTML += '-'; destinosHTML += '-';
                 }
                 personasHTML += '</div>'; destinosHTML += '</div>';
-
                 let estadoBadge = '<span class="px-2 py-1 rounded text-[11px] font-bold bg-slate-100 text-slate-700">Próximamente</span>';
                 let estVal = v.estadoComision;
                 if (!estVal && v.llegada) {
@@ -1060,11 +1024,9 @@
                     else if (salidaDate <= hoy && llegadaDate >= hoy) estVal = 'Continua';
                     else estVal = 'Proximamente';
                 }
-
                 if (estVal === 'Finalizado') estadoBadge = '<span class="px-2 py-1 rounded text-[11px] font-bold bg-green-100 text-green-800">🟢 Finalizado</span>';
                 else if (estVal === 'Continua') estadoBadge = '<span class="px-2 py-1 rounded text-[11px] font-bold bg-blue-100 text-blue-800">🔵 Continúa</span>';
                 else if (estVal === 'Proximamente') estadoBadge = '<span class="px-2 py-1 rounded text-[11px] font-bold bg-amber-100 text-amber-800">🟠 Próximamente</span>';
-
                 let accionesHTML = '-';
                 if (currentUser && currentUser.role !== 'Consulta') {
                     accionesHTML = `
@@ -1072,7 +1034,6 @@
                         <button onclick="deleteViaje(${v.id})" class="text-red-600 hover:text-red-800 px-1" title="Eliminar"><i class="fa-solid fa-trash"></i></button>
                     `;
                 }
-
                 body.innerHTML += `
                     <tr class="border-b hover:bg-slate-50 transition">
                         <td class="p-3">${personasHTML}</td>
