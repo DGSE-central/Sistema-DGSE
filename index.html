@@ -742,5 +742,204 @@
                     }
                     parseAllFieldsSmart(globalExtractedText, currentFileName);
                     document.getElementById('pdfStatus').className = 'max-w-2xl mx-auto mt-4 p-3 rounded-xl text-center text-xs font-semibold bg-green-100 text-green-800';
-                    document.getElementById('pdfStatus').innerHTML = '<i class="fa-solid fa-circle-check mr
+                    document.getElementById('pdfStatus').innerHTML = '<i class="fa-solid fa-circle-check mr-2"></i> Datos extraídos correctamente del PDF.';
+                    document.getElementById('parsedResultForm').classList.remove('hidden');
+                } catch (err) {
+                    document.getElementById('pdfStatus').className = 'max-w-2xl mx-auto mt-4 p-3 rounded-xl text-center text-xs font-semibold bg-red-100 text-red-800';
+                    document.getElementById('pdfStatus').innerHTML = '<i class="fa-solid fa-circle-xmark mr-2"></i> Error al procesar la estructura del PDF.';
+                }
+            };
+            reader.readAsDataURL(file);
+        }
 
+        function parseAllFieldsSmart(text, fileName) {
+            let limpioText = text.replace(/\s+/g, ' ').trim();
+            let numeroNota = fileName.replace(/\.[^/.]+$/, "").replace(/%23/g, '#').trim().toUpperCase();
+            let promotor = 'S/D';
+            const matchPromotor = numeroNota.match(/-([A-Z0-9]+)(?:#|$)/) || numeroNota.match(/-APN-([A-Z0-9]+)/);
+            if (matchPromotor && matchPromotor[1]) promotor = matchPromotor[1].toUpperCase();
+
+            document.getElementById('autoFecha').value = new Date().toISOString().split('T')[0];
+            document.getElementById('autoPromotor').value = promotor;
+            document.getElementById('autoNroNota').value = numeroNota;
+            document.getElementById('autoReferencia').value = limpioText.substring(0, 150) || 'Sin referencia';
+            document.getElementById('autoAccion').value = 'DGSE';
+            document.getElementById('autoLimite').value = '';
+        }
+
+        // GUARDADO AUTOMÁTICO BLINDADO CONTRA SATURACIÓN DE LOCALSTORAGE
+        async function confirmAutoSave() {
+            let driveUrl = null;
+            if (GOOGLE_SCRIPT_URL && autoPdfFileBase64) {
+                const statusEl = document.getElementById('pdfStatus');
+                statusEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Subiendo archivo PDF a Google Drive...';
+                driveUrl = await subirPDFAGoogleDrive(autoPdfFileBase64, currentFileName);
+            }
+
+            const nro = document.getElementById('autoNroNota').value || 'S/D';
+            const newNota = {
+                id: Date.now(),
+                fecha: document.getElementById('autoFecha').value || new Date().toISOString().split('T')[0],
+                promotor: document.getElementById('autoPromotor').value || 'S/D',
+                nroNota: nro,
+                referencia: document.getElementById('autoReferencia').value || 'Sin referencia',
+                accion: document.getElementById('autoAccion').value || 'S/D',
+                limite: document.getElementById('autoLimite').value || '',
+                estado: 'Pendiente',
+                respuesta: '',
+                destino: 'ARCH',
+                // Blindaje Pro: Si no hay enlace de Drive, se omite el Base64 gigante para proteger la cuota de localStorage
+                adjuntoNota: driveUrl || null,
+                adjuntosRespuesta: []
+            };
+
+            notas.unshift(newNota);
+            try {
+                localStorage.setItem('notas_db', JSON.stringify(notas));
+            } catch (e) {
+                alert("Memoria local llena (QuotaExceededError). Exporte un respaldo CSV de inmediato.");
+                notas.shift();
+                return;
+            }
+
+            registrarAuditoria('Creó', 'Notas', `Nota Nro: ${nro}`);
+            clearAutoForm();
+            toggleAutoUploadSection();
+            renderTable();
+        }
+
+        function clearAutoForm() {
+            document.getElementById('parsedResultForm').classList.add('hidden');
+            document.getElementById('pdfStatus').classList.add('hidden');
+            document.getElementById('pdfFileInput').value = '';
+            autoPdfFileBase64 = null;
+            currentFileName = '';
+            globalExtractedText = '';
+        }
+
+        function toggleAutoUploadSection() {
+            document.getElementById('autoUploadSection').classList.toggle('hidden');
+        }
+
+        function populatePromotoresOptions() {
+            const selectPromotor = document.getElementById('filterPromotor');
+            if (!selectPromotor) return;
+            const unicos = [...new Set(notas.map(n => n.promotor ? n.promotor.trim().toUpperCase() : '').filter(Boolean))].sort();
+            selectPromotor.innerHTML = '<option value="TODOS">Todos los Promotores</option>';
+            unicos.forEach(p => selectPromotor.innerHTML += `<option value="${p}">${p}</option>`);
+        }
+
+        function updateMetrics() {
+            document.getElementById('metricTotal').innerText = notas.length;
+            document.getElementById('metricPendientes').innerText = notas.filter(n => n.estado === 'Pendiente').length;
+            document.getElementById('metricEspera').innerText = notas.filter(n => n.estado === 'En espera').length;
+            document.getElementById('metricContestados').innerText = notas.filter(n => n.estado === 'Contestado').length;
+            document.getElementById('metricArchivados').innerText = notas.filter(n => n.estado === 'Archivado').length;
+        }
+
+        function renderTable() {
+            const body = document.getElementById('tableBody');
+            const search = document.getElementById('searchInput')?.value.toLowerCase() || '';
+            const filterEstado = document.getElementById('filterEstado')?.value || 'TODOS';
+            body.innerHTML = '';
+            
+            let filtered = notas.filter(n => {
+                const matchSearch = (n.nroNota?.toLowerCase().includes(search)) || (n.referencia?.toLowerCase().includes(search)) || (n.promotor?.toLowerCase().includes(search));
+                let matchEstado = (filterEstado === 'TODOS') || (n.estado === filterEstado);
+                return matchSearch && matchEstado;
+            });
+
+            if (filtered.length === 0) {
+                body.innerHTML = `<tr><td colspan="10" class="p-4 text-center text-slate-400">No se encontraron notas registradas.</td></tr>`;
+                updateMetrics();
+                return;
+            }
+
+            filtered.forEach(n => {
+                let badgeClass = 'bg-yellow-100 text-yellow-800';
+                if (n.estado === 'En espera') badgeClass = 'bg-orange-100 text-orange-800';
+                if (n.estado === 'Contestado') badgeClass = 'bg-green-100 text-green-800';
+                if (n.estado === 'Archivado') badgeClass = 'bg-slate-200 text-slate-700';
+
+                let adjuntosHtml = n.adjuntoNota ? `<a href="${n.adjuntoNota}" target="_blank" class="text-blue-600 font-bold hover:underline flex items-center gap-1"><i class="fa-brands fa-google-drive"></i> Ver Drive</a>` : '-';
+
+                body.innerHTML += `
+                    <tr class="border-b hover:bg-slate-50 transition">
+                        <td class="p-3">${n.fecha || '-'}</td>
+                        <td class="p-3 font-bold">${n.promotor || '-'}</td>
+                        <td class="p-3 font-bold text-blue-900">${n.nroNota}</td>
+                        <td class="p-3 text-slate-800 max-w-xs truncate" title="${n.referencia}">${n.referencia}</td>
+                        <td class="p-3">${n.accion || '-'}</td>
+                        <td class="p-3">${n.limite || '-'}</td>
+                        <td class="p-3"><span class="px-2 py-0.5 rounded text-[11px] font-bold ${badgeClass}">${n.estado}</span></td>
+                        <td class="p-3">${n.respuesta || '-'}</td>
+                        <td class="p-3">${adjuntosHtml}</td>
+                        <td class="p-3 text-center">
+                            <button onclick="deleteNota(${n.id})" class="text-red-600 hover:text-red-800" title="Eliminar"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+            updateMetrics();
+        }
+
+        function openModal() {
+            document.getElementById('modalTitle').innerText = 'Nueva Nota';
+            document.getElementById('notaId').value = '';
+            document.getElementById('fecha').value = new Date().toISOString().split('T')[0];
+            document.getElementById('itemModal').classList.remove('hidden');
+        }
+        function closeModal() { document.getElementById('itemModal').classList.add('hidden'); }
+        
+        function saveNota(e) {
+            e.preventDefault();
+            const nro = document.getElementById('nroNota').value;
+            const notaObj = {
+                id: Date.now(),
+                fecha: document.getElementById('fecha').value,
+                promotor: document.getElementById('promotor').value,
+                nroNota: nro,
+                referencia: document.getElementById('referencia').value,
+                accion: document.getElementById('accion').value,
+                limite: document.getElementById('limite').value,
+                estado: document.getElementById('estado').value,
+                destino: document.getElementById('destino').value,
+                respuesta: document.getElementById('respuesta').value
+            };
+            notas.unshift(notaObj);
+            try {
+                localStorage.setItem('notas_db', JSON.stringify(notas));
+            } catch (e) {
+                alert("Error de almacenamiento local.");
+                return;
+            }
+            registrarAuditoria('Creó', 'Notas', `Nota Nro: ${nro}`);
+            closeModal();
+            renderTable();
+        }
+
+        function deleteNota(id) {
+            if (confirm('¿Desea eliminar este registro?')) {
+                notas = notas.filter(n => n.id !== id);
+                localStorage.setItem('notas_db', JSON.stringify(notas));
+                renderTable();
+            }
+        }
+
+        // Estructuras de soporte para mantener solapas operativas sin errores
+        function renderExpedientesTable() {}
+        function renderViajesTable() {}
+        function openAuditModal() { document.getElementById('auditModal').classList.remove('hidden'); }
+        function closeAuditModal() { document.getElementById('auditModal').classList.add('hidden'); }
+        function openUsersModal() { document.getElementById('usersModal').classList.remove('hidden'); }
+        function closeUsersModal() { document.getElementById('usersModal').classList.add('hidden'); }
+        function clearAuditLog() { auditLogDB = []; localStorage.removeItem('audit_log_db'); closeAuditModal(); }
+        function exportCSV() {
+            let csv = 'Fecha,Promotor,NroNota,Referencia,Estado\n';
+            notas.forEach(n => csv += `"${n.fecha}","${n.promotor}","${n.nroNota}","${n.referencia}","${n.estado}"\n`);
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = 'notas.csv'; link.click();
+        }
+    </script>
+</body>
+</html>
