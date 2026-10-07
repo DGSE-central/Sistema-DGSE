@@ -593,12 +593,10 @@
             </form>
         </div>
     </div>
-
     <!-- SCRIPT DE INGENIERÍA PRO Y BLINDADO -->
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
         let GOOGLE_SCRIPT_URL = localStorage.getItem('dgse_script_url') || '';
-
         function openDriveConfigModal() { document.getElementById('inputScriptUrl').value = GOOGLE_SCRIPT_URL; document.getElementById('driveConfigModal').classList.remove('hidden'); }
         function closeDriveConfigModal() { document.getElementById('driveConfigModal').classList.add('hidden'); }
         function saveDriveConfig() {
@@ -607,7 +605,7 @@
             closeDriveConfigModal();
             alert('Configuración de Google Drive guardada correctamente.');
         }
-
+        
         // VINCULACIÓN OFICIAL CON GOOGLE APPS SCRIPT / DRIVE (INTACTA SEGÚN SOLICITUD)
         async function subirPDFAGoogleDrive(base64Completo, nombreArchivo) {
             if (!GOOGLE_SCRIPT_URL) {
@@ -634,18 +632,24 @@
             return null;
         }
 
-        // GESTIÓN DE BASES DE DATOS LOCALES CON BLINDAJE DE EXCEPCIONES
-        let usersDB = JSON.parse(localStorage.getItem('users_db')) || {
+        // GESTIÓN DE BASES DE DATOS LOCALES Y NORMALIZACIÓN DE USUARIOS
+        let rawUsersDB = JSON.parse(localStorage.getItem('users_db')) || {
             'admin': { pass: 'admin123', role: 'Administrador' },
             'operador': { pass: 'operador123', role: 'Operador' },
             'consulta': { pass: '1234', role: 'Consulta' }
         };
+        
+        // Asegurar que las claves de los usuarios estén siempre normalizadas en minúsculas
+        let usersDB = {};
+        for (let key in rawUsersDB) {
+            usersDB[key.toLowerCase().trim()] = rawUsersDB[key];
+        }
+
         let auditLogDB = JSON.parse(localStorage.getItem('audit_log_db')) || [];
         let currentUser = JSON.parse(sessionStorage.getItem('activeUser')) || null;
         let notas = JSON.parse(localStorage.getItem('notas_db')) || [];
         let expedientesDB = JSON.parse(localStorage.getItem('expedientes_db')) || [];
         let viajesDB = JSON.parse(localStorage.getItem('viajes_db_v2')) || [];
-
         let autoPdfFileBase64 = null;
         let currentFileName = '';
         let globalExtractedText = '';
@@ -677,11 +681,9 @@
                 document.getElementById('btnAutoUpload')?.classList.toggle('hidden', esConsulta);
                 document.getElementById('btnNuevoExpediente')?.classList.toggle('hidden', esConsulta);
                 document.getElementById('btnNuevoViaje')?.classList.toggle('hidden', esConsulta);
-
                 const esAdmin = (currentUser.role === 'Administrador');
                 document.getElementById('btnGestionUsuarios')?.classList.toggle('hidden', !esAdmin);
                 document.getElementById('btnAuditLog')?.classList.toggle('hidden', !esAdmin);
-
                 populatePromotoresOptions();
                 renderTable();
                 renderExpedientesTable();
@@ -692,10 +694,12 @@
             }
         }
 
+        // FUNCIÓN DE LOGIN CORREGIDA Y ROBUSTA
         function handleLogin(e) {
             e.preventDefault();
             const u = document.getElementById('loginUser').value.toLowerCase().trim();
             const p = document.getElementById('loginPass').value;
+            
             if (usersDB[u] && usersDB[u].pass === p) {
                 currentUser = { name: u.toUpperCase(), role: usersDB[u].role };
                 sessionStorage.setItem('activeUser', JSON.stringify(currentUser));
@@ -758,7 +762,6 @@
             let promotor = 'S/D';
             const matchPromotor = numeroNota.match(/-([A-Z0-9]+)(?:#|$)/) || numeroNota.match(/-APN-([A-Z0-9]+)/);
             if (matchPromotor && matchPromotor[1]) promotor = matchPromotor[1].toUpperCase();
-
             document.getElementById('autoFecha').value = new Date().toISOString().split('T')[0];
             document.getElementById('autoPromotor').value = promotor;
             document.getElementById('autoNroNota').value = numeroNota;
@@ -767,7 +770,6 @@
             document.getElementById('autoLimite').value = '';
         }
 
-        // GUARDADO AUTOMÁTICO BLINDADO CONTRA SATURACIÓN DE LOCALSTORAGE
         async function confirmAutoSave() {
             let driveUrl = null;
             if (GOOGLE_SCRIPT_URL && autoPdfFileBase64) {
@@ -775,7 +777,6 @@
                 statusEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Subiendo archivo PDF a Google Drive...';
                 driveUrl = await subirPDFAGoogleDrive(autoPdfFileBase64, currentFileName);
             }
-
             const nro = document.getElementById('autoNroNota').value || 'S/D';
             const newNota = {
                 id: Date.now(),
@@ -788,11 +789,9 @@
                 estado: 'Pendiente',
                 respuesta: '',
                 destino: 'ARCH',
-                // Blindaje Pro: Si no hay enlace de Drive, se omite el Base64 gigante para proteger la cuota de localStorage
                 adjuntoNota: driveUrl || null,
                 adjuntosRespuesta: []
             };
-
             notas.unshift(newNota);
             try {
                 localStorage.setItem('notas_db', JSON.stringify(notas));
@@ -801,7 +800,6 @@
                 notas.shift();
                 return;
             }
-
             registrarAuditoria('Creó', 'Notas', `Nota Nro: ${nro}`);
             clearAutoForm();
             toggleAutoUploadSection();
@@ -848,21 +846,17 @@
                 let matchEstado = (filterEstado === 'TODOS') || (n.estado === filterEstado);
                 return matchSearch && matchEstado;
             });
-
             if (filtered.length === 0) {
                 body.innerHTML = `<tr><td colspan="10" class="p-4 text-center text-slate-400">No se encontraron notas registradas.</td></tr>`;
                 updateMetrics();
                 return;
             }
-
             filtered.forEach(n => {
                 let badgeClass = 'bg-yellow-100 text-yellow-800';
                 if (n.estado === 'En espera') badgeClass = 'bg-orange-100 text-orange-800';
                 if (n.estado === 'Contestado') badgeClass = 'bg-green-100 text-green-800';
                 if (n.estado === 'Archivado') badgeClass = 'bg-slate-200 text-slate-700';
-
                 let adjuntosHtml = n.adjuntoNota ? `<a href="${n.adjuntoNota}" target="_blank" class="text-blue-600 font-bold hover:underline flex items-center gap-1"><i class="fa-brands fa-google-drive"></i> Ver Drive</a>` : '-';
-
                 body.innerHTML += `
                     <tr class="border-b hover:bg-slate-50 transition">
                         <td class="p-3">${n.fecha || '-'}</td>
@@ -926,7 +920,6 @@
             }
         }
 
-        // Estructuras de soporte para mantener solapas operativas sin errores
         function renderExpedientesTable() {}
         function renderViajesTable() {}
         function openAuditModal() { document.getElementById('auditModal').classList.remove('hidden'); }
