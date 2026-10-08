@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         .row-pendiente { background-color: #fefce8; }
@@ -70,6 +71,7 @@
     </div>
     <!-- APLICACIÓN PRINCIPAL -->
     <div id="appScreen" class="hidden">
+        
         <header class="bg-slate-900 text-white shadow-lg sticky top-0 z-30">
             <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
                 <div class="flex items-center space-x-3">
@@ -81,12 +83,16 @@
                 </div>
                 <div class="flex items-center space-x-3">
                     <span id="userInfo" class="text-xs bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-full text-slate-300"></span>
+                    
+                    <!-- Botón Config Google Drive -->
                     <button onclick="openDriveConfigModal()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-blue-300 font-medium px-3 py-1.5 rounded-lg text-xs transition flex items-center shadow" title="Configurar Google Drive">
                         <i class="fa-brands fa-google-drive mr-1.5"></i> Drive
                     </button>
+                    <!-- Botón Auditoría (Solo Admin) -->
                     <button onclick="openAuditModal()" id="btnAuditLog" class="bg-indigo-900 hover:bg-indigo-800 border border-indigo-700 text-indigo-200 font-medium px-3 py-1.5 rounded-lg text-xs transition flex items-center shadow hidden" title="Ver Historial de Modificaciones">
                         <i class="fa-solid fa-clock-rotate-left mr-1.5 text-indigo-400"></i> Auditoría
                     </button>
+                    <!-- Botón Gestión de Personal (Solo Admin) -->
                     <button onclick="openUsersModal()" id="btnGestionUsuarios" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-medium px-3 py-1.5 rounded-lg text-xs transition flex items-center shadow hidden" title="Configurar Acceso de Personal">
                         <i class="fa-solid fa-users-gear mr-1.5"></i> Personal
                     </button>
@@ -97,6 +103,7 @@
             </div>
         </header>
         <main class="max-w-7xl mx-auto px-4 mt-6">
+            <!-- NAVEGACIÓN POR SOLAPAS -->
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 mb-6">
                 <div class="flex border-b border-slate-200 overflow-x-auto">
                     <button onclick="switchTab('registroTab')" id="tabBtnRegistro" class="tab-active px-6 py-4 text-sm font-semibold flex items-center gap-2 focus:outline-none transition whitespace-nowrap">
@@ -115,9 +122,11 @@
             </div>
             <!-- SOLAPA 1: REGISTRO PRINCIPAL DE NOTAS -->
             <div id="registroTab" class="tab-content">
+                <!-- ALERTA DE NOTAS PRÓXIMAS A VENCER / VENCIDAS (SOLO AQUÍ) -->
                 <div id="alertBanner" class="hidden mb-6 p-4 rounded-xl border shadow-sm transition">
                     <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-3" id="alertBannerContent"></div>
+                        <div class="flex items-center gap-3" id="alertBannerContent">
+                        </div>
                         <button onclick="filtrarUrgentes()" class="text-xs font-bold px-3 py-1.5 bg-white border rounded-lg shadow-sm hover:bg-slate-50 transition">
                             Ver Notas Afectadas
                         </button>
@@ -225,6 +234,53 @@
                             <p id="metricArchivados" class="text-2xl font-bold text-slate-700 mt-1">0</p>
                         </div>
                     </div>
+                    <!-- BUSCADOR Y FILTROS -->
+                    <div class="flex flex-col xl:flex-row justify-between items-center gap-4">
+                        <div class="flex flex-col md:flex-row items-center gap-3 w-full xl:w-auto">
+                            <div class="relative w-full md:w-72">
+                                <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400"></i>
+                                <input type="text" id="searchInput" oninput="renderTable()" placeholder="Buscar nro de nota, referencia, promotor..." class="w-full pl-9 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div class="flex items-center gap-1.5 w-full md:w-auto">
+                                <select id="filterMes" onchange="renderTable()" class="border rounded-lg text-sm px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 w-full md:w-auto">
+                                    <option value="TODOS">Todos</option>
+                                    <option value="01">Enero</option>
+                                    <option value="02">Febrero</option>
+                                    <option value="03">Marzo</option>
+                                    <option value="04">Abril</option>
+                                    <option value="05">Mayo</option>
+                                    <option value="06">Junio</option>
+                                    <option value="07">Julio</option>
+                                    <option value="08">Agosto</option>
+                                    <option value="09">Septiembre</option>
+                                    <option value="10">Octubre</option>
+                                    <option value="11">Noviembre</option>
+                                    <option value="12">Diciembre</option>
+                                </select>
+                                <span id="mesCountBadge" class="bg-blue-50 text-blue-800 text-xs font-bold px-2.5 py-2 rounded-lg border border-blue-200 whitespace-nowrap shadow-sm">
+                                    Recibidas: 0
+                                </span>
+                            </div>
+                            <div class="flex items-center gap-1.5 w-full md:w-auto">
+                                <select id="filterPromotor" onchange="renderTable()" class="border rounded-lg text-sm px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 w-full md:w-auto">
+                                    <option value="TODOS">Promotores</option>
+                                </select>
+                                <span id="promotorCountBadge" class="bg-indigo-50 text-indigo-800 text-xs font-bold px-2.5 py-2 rounded-lg border border-indigo-200 whitespace-nowrap shadow-sm">
+                                    Por cantidad: 0
+                                </span>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-3 w-full xl:w-auto justify-end">
+                            <select id="filterEstado" onchange="renderTable()" class="border rounded-lg text-sm px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="TODOS">Todos los Estados</option>
+                                <option value="URGENTES">🚨 Vencidos y Próximos</option>
+                                <option value="Pendiente">Pendientes</option>
+                                <option value="En espera">En espera</option>
+                                <option value="Contestado">Contestados</option>
+                                <option value="Archivado">Archivados</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
                     <table class="w-full text-left text-xs md:text-sm">
@@ -242,23 +298,472 @@
                                 <th class="p-3 text-center">Acciones</th>
                             </tr>
                         </thead>
-                        <tbody id="tableBody" class="divide-y divide-slate-200"></tbody>
+                        <tbody id="tableBody" class="divide-y divide-slate-200">
+                        </tbody>
                     </table>
                 </div>
             </div>
-            <!-- Las demás solapas se mantienen igual en estructura -->
-            <div id="expedientesTab" class="tab-content hidden"></div>
-            <div id="viajesTab" class="tab-content hidden"></div>
-            <div id="estadisticasTab" class="tab-content hidden"></div>
+            <!-- SOLAPA 2: REGISTRO DE EXPEDIENTES (GDE) -->
+            <div id="expedientesTab" class="tab-content hidden">
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 mb-6">
+                    <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
+                        <div>
+                            <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                                <i class="fa-solid fa-folder-tree text-amber-600"></i>Expedientes (GDE)
+                            </h2>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <button onclick="openExpedienteModal()" id="btnNuevoExpediente" class="bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold px-3.5 py-2 rounded-lg transition shadow flex items-center gap-1.5">
+                                <i class="fa-solid fa-plus"></i> Carga Expediente
+                            </button>
+                            <button onclick="exportExpedientesCSV()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-semibold px-3 py-2 rounded-lg transition flex items-center gap-1">
+                                <i class="fa-solid fa-download"></i> Exportar
+                            </button>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-6 gap-3 mb-6">
+                        <div class="bg-blue-50 p-3 rounded-xl shadow-sm border border-blue-200 cursor-pointer hover:bg-blue-100 transition" onclick="filterExpByMetric('En revision DGSE')">
+                            <p class="text-[11px] text-blue-800 uppercase font-bold">En Revisión DGSE</p>
+                            <p id="expMetricRevision" class="text-2xl font-bold text-blue-900 mt-1">0</p>
+                        </div>
+                        <div class="bg-red-50 p-3 rounded-xl shadow-sm border border-red-200 cursor-pointer hover:bg-red-100 transition" onclick="filterExpByMetric('Devuelto')">
+                            <p class="text-[11px] text-red-800 uppercase font-bold">Devueltos</p>
+                            <p id="expMetricDevueltos" class="text-2xl font-bold text-red-900 mt-1">0</p>
+                        </div>
+                        <div class="bg-slate-100 p-3 rounded-xl shadow-sm border border-slate-300 cursor-pointer hover:bg-slate-200 transition" onclick="filterExpByMetric('Finalizado')">
+                            <p class="text-[11px] text-slate-700 uppercase font-bold">Finalizados</p>
+                            <p id="expMetricFinalizados" class="text-2xl font-bold text-slate-800 mt-1">0</p>
+                        </div>
+                        <div class="bg-rose-100 p-3 rounded-xl shadow-sm border border-rose-300 cursor-pointer hover:bg-rose-200 transition" onclick="filterExpByMetric('ANTIGUOS')" title="Expedientes con más de 30 días en la DGSE sin finalizar">
+                            <p class="text-[11px] text-rose-900 uppercase font-bold flex items-center gap-1">
+                                <i class="fa-solid fa-clock-rotate-left text-rose-600"></i> +30 Días DGSE
+                            </p>
+                            <p id="expMetricAntiguos" class="text-2xl font-bold text-rose-900 mt-1">0</p>
+                        </div>
+                    </div>
+                    <div class="flex flex-col md:flex-row justify-between items-center gap-3 mb-4">
+                        <div class="relative w-full md:w-96">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400"></i>
+                            <input type="text" id="searchExpInput" oninput="renderExpedientesTable()" placeholder="Buscar por Nro Expediente, Tema / Trámite, Proveniente..." class="w-full pl-9 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
+                        </div>
+                        <div class="flex items-center gap-2 w-full md:w-auto">
+                            <select id="filterExpEstado" onchange="renderExpedientesTable()" class="border rounded-lg text-sm px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 w-full md:w-auto">
+                                <option value="TODOS">Todos los Estados</option>
+                                <option value="En revision DGSE">En revisión DGSE</option>
+                                <option value="Devuelto">Devuelto</option>
+                                <option value="Finalizado">Finalizado</option>
+                                <option value="ANTIGUOS">⚠️ Hace más de 1 mes en DGSE</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto border rounded-xl">
+                        <table class="w-full text-left text-xs md:text-sm">
+                            <thead class="bg-slate-800 text-white uppercase text-xs">
+                                <tr>
+                                    <th class="p-3">Fecha</th>
+                                    <th class="p-3">Nro. Expediente</th>
+                                    <th class="p-3">Proveniente</th>
+                                    <th class="p-3">Tema / Trámite</th>
+                                    <th class="p-3">IF / Intervención DGSE</th>
+                                    <th class="p-3">Estado</th>
+                                    <th class="p-3">Pase Actual</th>
+                                    <th class="p-3">Observaciones</th>
+                                    <th class="p-3 text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="expTableBody" class="divide-y divide-slate-200">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <!-- SOLAPA 3: CONTROL DE VIAJES -->
+            <div id="viajesTab" class="tab-content hidden">
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 mb-6">
+                    <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
+                        <div>
+                            <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                                <i class="fa-solid fa-plane-departure text-emerald-600"></i> Control de Viajes y Comisiones DGSE
+                            </h2>
+                            <p class="text-xs text-slate-500">Planilla de viajes con intervención de la Dirección General de Seguridad.</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <button onclick="openViajeModal()" id="btnNuevoViaje" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-3.5 py-2 rounded-lg transition shadow flex items-center gap-1.5">
+                                <i class="fa-solid fa-plus"></i> Carga Manual Viaje
+                            </button>
+                            <button onclick="exportViajesCSV()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-semibold px-3 py-2 rounded-lg transition flex items-center gap-1">
+                                <i class="fa-solid fa-download"></i> Exportar
+                            </button>
+                        </div>
+                    </div>
+                    <!-- NUEVOS AVISOS / MÉTRICAS DE VIAJES -->
+                    <div class="grid grid-cols-2 md:grid-cols-6 gap-3 mb-6">
+                        <div class="bg-sky-50 p-3 rounded-xl shadow-sm border border-sky-200">
+                            <p class="text-[11px] text-sky-800 uppercase font-bold flex items-center gap-1">
+                                <i class="fa-solid fa-earth-americas text-sky-600"></i> Al Exterior
+                            </p>
+                            <p id="viajesMetricExterior" class="text-2xl font-bold text-sky-900 mt-1">0</p>
+                        </div>
+                        <div class="bg-emerald-50 p-3 rounded-xl shadow-sm border border-emerald-200">
+                            <p class="text-[11px] text-emerald-800 uppercase font-bold flex items-center gap-1">
+                                <i class="fa-solid fa-map-location-dot text-emerald-600"></i> En Argentina
+                            </p>
+                            <p id="viajesMetricPais" class="text-2xl font-bold text-emerald-900 mt-1">0</p>
+                        </div>
+                        <div class="bg-indigo-50 p-3 rounded-xl shadow-sm border border-indigo-200">
+                            <p class="text-[11px] text-indigo-800 uppercase font-bold flex items-center gap-1">
+                                <i class="fa-solid fa-circle-check text-indigo-600"></i> Realizados
+                            </p>
+                            <p id="viajesMetricRealizados" class="text-2xl font-bold text-indigo-900 mt-1">0</p>
+                        </div>
+                        <div class="bg-red-50 p-3 rounded-xl shadow-sm border border-red-200">
+                            <p class="text-[11px] text-red-800 uppercase font-bold flex items-center gap-1">
+                                <i class="fa-solid fa-ban text-red-600"></i> Rechazados
+                            </p>
+                            <p id="viajesMetricRechazados" class="text-2xl font-bold text-red-900 mt-1">0</p>
+                        </div>
+                        <div class="bg-amber-50 p-3 rounded-xl shadow-sm border border-amber-200">
+                            <p class="text-[11px] text-amber-800 uppercase font-bold flex items-center gap-1">
+                                <i class="fa-solid fa-clock text-amber-600"></i> Próximos
+                            </p>
+                            <p id="viajesMetricProximos" class="text-2xl font-bold text-amber-900 mt-1">0</p>
+                        </div>
+                        <div class="bg-purple-50 p-3 rounded-xl shadow-sm border border-purple-200" title="Personas únicas en el exterior que han hecho viajes">
+                            <p class="text-[11px] text-purple-800 uppercase font-bold flex items-center gap-1">
+                                <i class="fa-solid fa-user-shield text-purple-600"></i> Pers. Exterior
+                            </p>
+                            <p id="viajesMetricPersExterior" class="text-2xl font-bold text-purple-900 mt-1">0</p>
+                        </div>
+                    </div>
+                    <div class="relative mb-4">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400"></i>
+                        <input type="text" id="searchViajesInput" oninput="renderViajesTable()" placeholder="Buscar por Grado, Apellido, Destino, Evento, Lugar, Invita, Calidad..." class="w-full pl-9 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                    <div class="overflow-x-auto border rounded-xl">
+                        <table class="w-full text-left text-xs md:text-sm">
+                            <thead class="bg-slate-800 text-white uppercase text-xs">
+                                <tr>
+                                    <th class="p-3">Grado</th>
+                                    <th class="p-3">Apellido y Nombre</th>
+                                    <th class="p-3">Destino / Organismo</th>
+                                    <th class="p-3">Evento / Misión</th>
+                                    <th class="p-3">Fecha Partida</th>
+                                    <th class="p-3">Fecha Llegada</th>
+                                    <th class="p-3">Lugar</th>
+                                    <th class="p-3">Invita</th>
+                                    <th class="p-3">Calidad</th>
+                                    <th class="p-3">Gastos a Cargo</th>
+                                    <th class="p-3">Estado</th>
+                                    <th class="p-3 text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="viajesTableBody" class="divide-y divide-slate-200">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <!-- SOLAPA 4: ESTADÍSTICAS DGSE -->
+            <div id="estadisticasTab" class="tab-content hidden">
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 mb-6">
+                    <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
+                        <div>
+                            <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                                <i class="fa-solid fa-chart-pie text-indigo-600"></i> Estadísticas DGSE
+                            </h2>
+                            <p class="text-xs text-slate-500"></p>
+                        </div>
+                    </div>
+                    <div class="p-8 text-center border-2 border-dashed border-slate-200 rounded-xl text-slate-500">
+                        <i class="fa-solid fa-chart-line text-4xl text-indigo-400 mb-3"></i>
+                        <p class="font-bold text-sm">Sección en desarrollo</p>
+                        <p class="text-xs text-slate-400 mt-1">Aquí se trabajarán los gráficos y reportes estadísticos.</p>
+                    </div>
+                </div>
+            </div>
         </main>
     </div>
-
-    <!-- Modales adicionales (Auditoría, Usuarios, Notas, Expedientes, Viajes) se mantienen igual -->
-
+    <!-- MODAL HISTORIAL DE AUDITORÍA (SOLO ADMIN) -->
+    <div id="auditModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-2xl w-full max-w-3xl p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-clock-rotate-left text-indigo-600"></i> Historial de Auditoría (Modificaciones y Eliminaciones)
+                </h2>
+                <button onclick="closeAuditModal()" class="text-slate-400 hover:text-slate-600 text-sm">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <div class="border rounded-xl overflow-hidden mb-4">
+                <table class="w-full text-left text-xs">
+                    <thead class="bg-slate-800 text-white uppercase text-[10px]">
+                        <tr>
+                            <th class="p-2.5">Fecha y Hora</th>
+                            <th class="p-2.5">Usuario</th>
+                            <th class="p-2.5">Acción</th>
+                            <th class="p-2.5">Módulo</th>
+                            <th class="p-2.5">Detalle / Referencia</th>
+                        </tr>
+                    </thead>
+                    <tbody id="auditTableBody" class="divide-y divide-slate-200">
+                    </tbody>
+                </table>
+            </div>
+            <div class="flex justify-between items-center">
+                <button onclick="clearAuditLog()" class="bg-red-50 hover:bg-red-100 text-red-700 text-xs font-semibold px-3 py-2 rounded-lg border border-red-200 transition">
+                    <i class="fa-solid fa-trash mr-1"></i> Limpiar Historial
+                </button>
+                <button type="button" onclick="closeAuditModal()" class="px-4 py-2 border rounded-lg text-xs font-semibold hover:bg-slate-100">Cerrar</button>
+            </div>
+        </div>
+    </div>
+    <!-- MODAL GESTIÓN DE ACCESOS / PERSONAL (SOLO ADMINISTRADOR) -->
+    <div id="usersModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-2xl w-full max-w-xl p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <h2 class="text-lg font-bold mb-4 text-slate-800 flex items-center gap-2">
+                <i class="fa-solid fa-users-gear text-blue-600"></i> Configuración de Acceso de Personal
+            </h2>
+            <form onsubmit="saveUser(event)" class="bg-slate-50 p-4 rounded-xl border mb-6 space-y-3">
+                <h3 class="text-xs font-bold uppercase text-slate-700">Agregar o Modificar Usuario</h3>
+                <div class="grid grid-cols-3 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Usuario</label>
+                        <input type="text" id="newUser" required placeholder="Ej. jperez" class="w-full border p-2 rounded-lg text-xs">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Contraseña</label>
+                        <input type="password" id="newPass" required placeholder="••••••••" class="w-full border p-2 rounded-lg text-xs">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Rol / Permisos</label>
+                        <select id="newRole" class="w-full border p-2 rounded-lg text-xs bg-white">
+                            <option value="Operador">Operador</option>
+                            <option value="Consulta">Solo Consulta</option>
+                            <option value="Administrador">Administrador</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex justify-end pt-2">
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-500 text-white font-medium px-3 py-1.5 rounded-lg text-xs shadow">
+                        Guardar Usuario
+                    </button>
+                </div>
+            </form>
+            <h3 class="text-xs font-bold uppercase text-slate-700 mb-2">Personal Autorizado</h3>
+            <div class="border rounded-xl overflow-hidden mb-4">
+                <table class="w-full text-left text-xs">
+                    <thead class="bg-slate-800 text-white uppercase text-[10px]">
+                        <tr>
+                            <th class="p-2.5">Usuario</th>
+                            <th class="p-2.5">Contraseña</th>
+                            <th class="p-2.5">Rol</th>
+                            <th class="p-2.5 text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTableBody" class="divide-y divide-slate-200">
+                    </tbody>
+                </table>
+            </div>
+            <div class="flex justify-end">
+                <button type="button" onclick="closeUsersModal()" class="px-4 py-2 border rounded-lg text-xs font-semibold hover:bg-slate-100">Cerrar</button>
+            </div>
+        </div>
+    </div>
+    <!-- MODAL CARGA MANUAL DE NOTA -->
+    <div id="itemModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-2xl w-full max-w-2xl p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <h2 id="modalTitle" class="text-xl font-bold mb-4 text-slate-800">Nueva Nota</h2>
+            
+            <form id="notaForm" onsubmit="saveNota(event)" class="space-y-4">
+                <input type="hidden" id="notaId">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Fecha</label>
+                        <input type="date" id="fecha" required class="w-full border p-2 rounded-lg text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Promotor</label>
+                        <input type="text" id="promotor" required placeholder="Ej. DIOP, SBGC" class="w-full border p-2 rounded-lg text-sm">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Número de Nota</label>
+                    <input type="text" id="nroNota" required placeholder="Ej. NO-2026-93527297-APN-PNAR#PNA" class="w-full border p-2 rounded-lg text-sm font-bold text-blue-800">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Referencia</label>
+                    <textarea id="referencia" required rows="2" placeholder="Detalle del expediente o nota..." class="w-full border p-2 rounded-lg text-sm"></textarea>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Destinatario</label>
+                        <input type="text" id="accion" placeholder="Ej. AGAL, MSG, DEDU" class="w-full border p-2 rounded-lg text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Tiempo Límite</label>
+                        <input type="date" id="limite" class="w-full border p-2 rounded-lg text-sm">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Estado</label>
+                        <select id="estado" class="w-full border p-2 rounded-lg text-sm bg-white">
+                            <option value="Pendiente">🟡 Pendiente</option>
+                            <option value="En espera">🟠 En espera de respuesta</option>
+                            <option value="Contestado">🟢 Contestado / Finalizado</option>
+                            <option value="Archivado">⚪ Archivado</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Destino</label>
+                        <input type="text" id="destino" placeholder="Ej. ARCH" class="w-full border p-2 rounded-lg text-sm">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Observaciones</label>
+                    <input type="text" id="respuesta" placeholder="Detalle de contestación u observaciones..." class="w-full border p-2 rounded-lg text-sm mb-2">
+                    
+                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Adjuntar Respuesta (PDFs Múltiples)</label>
+                    <input type="file" id="respuestaArchivos" multiple accept="application/pdf" class="w-full border p-2 rounded-lg text-xs bg-slate-50">
+                </div>
+                <div class="flex justify-end space-x-3 pt-4">
+                    <button type="button" onclick="closeModal()" class="px-4 py-2 border rounded-lg text-sm hover:bg-slate-100">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-500 font-medium">Guardar Nota</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- MODAL CARGA MANUAL / EDICIÓN DE EXPEDIENTE -->
+    <div id="expModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-2xl w-full max-w-xl p-6 shadow-2xl relative">
+            <h2 id="expModalTitle" class="text-xl font-bold mb-4 text-slate-800 flex items-center gap-2">
+                <i class="fa-solid fa-folder-plus text-amber-600"></i> Registrar / Editar Expediente
+            </h2>
+            <form onsubmit="saveExpediente(event)" class="space-y-4">
+                <input type="hidden" id="expId">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Fecha de Ingreso</label>
+                        <input type="date" id="expFecha" required class="w-full border p-2 rounded-lg text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Proveniente</label>
+                        <input type="text" id="expIniciador" required placeholder="Ej. DGSE, DIOP" class="w-full border p-2 rounded-lg text-sm">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Número de Expediente</label>
+                    <input type="text" id="expNro" required placeholder="Ej. EX-2026-12345678--APN-DGSE#PNA" class="w-full border p-2 rounded-lg text-sm font-bold text-amber-900">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Tema / Trámite</label>
+                    <textarea id="expExtracto" required rows="2" placeholder="Detalle del tema o trámite..." class="w-full border p-2 rounded-lg text-sm"></textarea>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">IF Intervención DGSE (Documentos PDF/GDE)</label>
+                    <input type="file" id="expAdjuntoIF" multiple accept="application/pdf" class="w-full border p-2 rounded-lg text-xs bg-slate-50">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Estado</label>
+                        <select id="expEstado" class="w-full border p-2 rounded-lg text-sm bg-white font-semibold">
+                            <option value="En revision DGSE">🔵 En revisión DGSE</option>
+                            <option value="Devuelto">🔴 Devuelto</option>
+                            <option value="Guarda temporal">🟡 Guarda temporal</option>
+                            <option value="En Tramite">🟠 En Trámite</option>
+                            <option value="Finalizado">🟢 Finalizado / Archivado</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Pase Actual</label>
+                        <input type="text" id="expPase" placeholder="Ej. DGSE, DEDU" class="w-full border p-2 rounded-lg text-sm">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Observaciones</label>
+                    <input type="text" id="expObservaciones" placeholder="Aclaraciones u observaciones sobre el trámite..." class="w-full border p-2 rounded-lg text-sm">
+                </div>
+                <div class="flex justify-end space-x-3 pt-3">
+                    <button type="button" onclick="closeExpModal()" class="px-4 py-2 border rounded-lg text-sm hover:bg-slate-100">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 bg-amber-600 text-white rounded-lg text-sm hover:bg-amber-500 font-medium">Guardar Expediente</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- MODAL CARGA MANUAL / EDICIÓN DE VIAJE -->
+    <div id="viajeModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-2xl w-full max-w-3xl p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <h2 id="viajeModalTitle" class="text-xl font-bold mb-4 text-slate-800 flex items-center gap-2">
+                <i class="fa-solid fa-plane-circle-check text-emerald-600"></i> Registrar Comisión / Viaje
+            </h2>
+            <form onsubmit="saveViajeManual(event)" class="space-y-4">
+                <input type="hidden" id="viajeId">
+                
+                <!-- SECCIÓN PERSONAL / MÚLTIPLES PERSONAS CON GRADO Y APELLIDO SEPARADOS -->
+                <div>
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="block text-xs font-semibold uppercase text-slate-600">Personal en Comisión (Grado, Apellido y Nombre y su Destino específico)</label>
+                        <button type="button" onclick="agregarFilaPersona()" class="text-xs bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 px-2 py-1 rounded font-bold flex items-center gap-1 transition">
+                            <i class="fa-solid fa-user-plus"></i> Agregar Persona
+                        </button>
+                    </div>
+                    <div id="personasContainer" class="space-y-2 bg-slate-50 p-3 rounded-xl border">
+                        <!-- Las filas de personas se cargarán dinámicamente aquí con Grado y Apellido separados -->
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Lugar general / País / Ciudad</label>
+                        <input type="text" id="viajeLugar" placeholder="Ej. YORKTOWN, EEUU o BUENOS AIRES, ARGENTINA" class="w-full border p-2 rounded-lg text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Evento / Misión</label>
+                        <input type="text" id="viajeEvento" required placeholder="Ej. CURSO INTERNACIONAL DE OFICIALES" class="w-full border p-2 rounded-lg text-sm">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Fecha Partida</label>
+                        <input type="date" id="viajeSalida" required class="w-full border p-2 rounded-lg text-sm font-semibold text-emerald-800">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Fecha Llegada</label>
+                        <input type="date" id="viajeLlegada" required class="w-full border p-2 rounded-lg text-sm font-semibold text-red-800">
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Invita</label>
+                        <input type="text" id="viajeInvita" placeholder="Ej. GUARDIA COSTERA EE.UU." class="w-full border p-2 rounded-lg text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Calidad</label>
+                        <input type="text" id="viajeCalidad" placeholder="Ej. CURSANTE / DELEGADO" class="w-full border p-2 rounded-lg text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Gastos a Cargo</label>
+                        <input type="text" id="viajeGastosCargo" placeholder="Ej. ESTADO / ORGANISMO" class="w-full border p-2 rounded-lg text-sm">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Estado</label>
+                    <select id="viajeEstado" class="w-full border p-2 rounded-lg text-sm bg-white font-semibold">
+                        <option value="Próximamente">Próximamente</option>
+                        <option value="Rechazado">Rechazado</option>
+                        <option value="Continúa">Continúa</option>
+                        <option value="Finalizado">Finalizado</option>
+                    </select>
+                </div>
+                <div class="flex justify-end space-x-3 pt-3">
+                    <button type="button" onclick="closeViajeModal()" class="px-4 py-2 border rounded-lg text-sm hover:bg-slate-100">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm hover:bg-emerald-500 font-medium">Guardar Viaje</button>
+                </div>
+            </form>
+        </div>
+    </div>
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
         let GOOGLE_SCRIPT_URL = localStorage.getItem('dgse_script_url') || '';
-
         function openDriveConfigModal() {
             document.getElementById('inputScriptUrl').value = GOOGLE_SCRIPT_URL;
             document.getElementById('driveConfigModal').classList.remove('hidden');
@@ -274,19 +779,29 @@
         }
 
         /* ==========================================================
-           FUNCIÓN UNIFICADA DE SUBIDA (EVITA BLOQUEO CORS)
+           FUNCIÓN ACTUALIZADA DE SUBIDA CON POSTMESSAGE (CAPTURA URL)
            ========================================================== */
         async function subirPDFAGoogleDrive(base64Completo, nombreArchivo) {
             if (!GOOGLE_SCRIPT_URL) {
-                alert("Por favor, configure primero la URL del Web App de Google Drive.");
+                alert('Por favor, configure la URL de Google Drive.');
                 openDriveConfigModal();
                 return null;
             }
             try {
                 const base64Data = base64Completo.split(',')[1] || base64Completo;
                 
-                // Usamos un formulario oculto para hacer POST directo sin restricciones CORS del navegador
                 return new Promise((resolve) => {
+                    const listener = function(event) {
+                        if (event.data && event.data.fileUrl) {
+                            window.removeEventListener('message', listener);
+                            resolve(event.data.fileUrl);
+                        } else if (event.data && event.data.status === "error") {
+                            window.removeEventListener('message', listener);
+                            resolve(null);
+                        }
+                    };
+                    window.addEventListener('message', listener);
+
                     const form = document.createElement('form');
                     form.method = 'POST';
                     form.action = GOOGLE_SCRIPT_URL;
@@ -316,10 +831,6 @@
                     document.body.appendChild(form);
                     form.submit();
                     document.body.removeChild(form);
-
-                    // Dado que el envío nativo procesa la subida en el servidor de Google Drive, 
-                    // devolvemos un estado de éxito para adjuntar la referencia del archivo subido.
-                    resolve("Subido a Google Drive");
                 });
             } catch (error) {
                 console.error("Error al subir a Google Drive:", error);
@@ -334,26 +845,133 @@
         };
         let auditLogDB = JSON.parse(localStorage.getItem('audit_log_db')) || [];
         let currentUser = JSON.parse(sessionStorage.getItem('activeUser')) || null;
-        let notas = JSON.parse(localStorage.getItem('notas_db')) || [];
-        let expedientesDB = JSON.parse(localStorage.getItem('expedientes_db')) || [];
-        let viajesDB = JSON.parse(localStorage.getItem('viajes_db_v2')) || [];
-
+        let notas = JSON.parse(localStorage.getItem('notas_db')) || [
+            { id: 1, fecha: '2026-05-18', promotor: 'DIOP', nroNota: 'NO-2026-1029381-APN-DIOP#PNA', referencia: 'Plan anual de navegación.', accion: 'DEDU', limite: '', estado: 'Contestado', respuesta: 'CON CONOCIMIENTO Sr DGSE', destino: 'ARCH', adjuntosRespuesta: [] },
+            { id: 2, fecha: '2026-08-20', promotor: 'DIGE', nroNota: 'NO-2026-2049182-APN-DIGE#PNA', referencia: 'REVISIÓN DE LA PUBLICACIÓN R.I. PNA 3-14 "C"', accion: 'DIOP', limite: '2026-10-05', estado: 'Pendiente', respuesta: '', destino: 'ARCH', adjuntosRespuesta: [] }
+        ];
+        let expedientesDB = JSON.parse(localStorage.getItem('expedientes_db')) || [
+            { id: 1, fecha: '2026-08-15', nroExpediente: 'EX-2026-88392019--APN-DGSE#PNA', iniciador: 'DIOP', extracto: 'Adquisición de equipamiento informático para la Dirección General.', estado: 'En revision DGSE', pase: 'DGSE', observaciones: 'Pendiente de firma del Director.', adjuntosIF: [] }
+        ];
+        let viajesDB = JSON.parse(localStorage.getItem('viajes_db_v2'));
+        if (!viajesDB) {
+            viajesDB = [];
+            localStorage.setItem('viajes_db_v2', JSON.stringify(viajesDB));
+        }
         let autoPdfFileBase64 = null;
         let currentFileName = '';
         let globalExtractedText = '';
-
+        function registrarAuditoria(accion, modulo, detalle) {
+            if (!currentUser) return;
+            const ahora = new Date();
+            const fechaHora = ahora.toLocaleString('es-AR');
+            
+            const registro = {
+                fechaHora: fechaHora,
+                usuario: currentUser.name,
+                rol: currentUser.role,
+                accion: accion, 
+                modulo: modulo, 
+                detalle: detalle
+            };
+            auditLogDB.unshift(registro);
+            if (auditLogDB.length > 100) auditLogDB.pop();
+            localStorage.setItem('audit_log_db', JSON.stringify(auditLogDB));
+        }
+        function openAuditModal() {
+            if (currentUser && currentUser.role !== 'Administrador') return;
+            renderAuditTable();
+            document.getElementById('auditModal').classList.remove('hidden');
+        }
+        function closeAuditModal() {
+            document.getElementById('auditModal').classList.add('hidden');
+        }
+        function renderAuditTable() {
+            const body = document.getElementById('auditTableBody');
+            body.innerHTML = '';
+            if (auditLogDB.length === 0) {
+                body.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-400">No hay registros de auditoría aún.</td></tr>`;
+                return;
+            }
+            auditLogDB.forEach(log => {
+                let badgeColor = 'bg-blue-50 text-blue-700 border-blue-200';
+                if (log.accion === 'Eliminó') badgeColor = 'bg-red-50 text-red-700 border-red-200';
+                if (log.accion === 'Modificó') badgeColor = 'bg-amber-50 text-amber-700 border-amber-200';
+                if (log.accion === 'Creó') badgeColor = 'bg-emerald-50 text-emerald-700 border-emerald-200';
+                body.innerHTML += `
+                    <tr class="border-b hover:bg-slate-50">
+                        <td class="p-2.5 whitespace-nowrap text-slate-600">${log.fechaHora}</td>
+                        <td class="p-2.5 font-bold text-slate-800">${log.usuario} <span class="text-[10px] text-slate-400 font-normal">(${log.rol})</span></td>
+                        <td class="p-2.5"><span class="px-2 py-0.5 rounded text-[11px] font-bold border ${badgeColor}">${log.accion}</span></td>
+                        <td class="p-2.5 font-semibold text-slate-700">${log.modulo}</td>
+                        <td class="p-2.5 text-slate-600">${log.detalle}</td>
+                    </tr>
+                `;
+            });
+        }
+        function clearAuditLog() {
+            if (confirm('¿Desea limpiar todo el historial de auditoría?')) {
+                auditLogDB = [];
+                localStorage.removeItem('audit_log_db');
+                renderAuditTable();
+            }
+        }
+        function formatFechaLatina(fechaStr) {
+            if (!fechaStr) return '-';
+            const partes = fechaStr.split('-');
+            if (partes.length === 3) {
+                return `${partes[2]}/${partes[1]}/${partes[0]}`;
+            }
+            return fechaStr;
+        }
+        function toggleAutoUploadSection() {
+            const section = document.getElementById('autoUploadSection');
+            section.classList.toggle('hidden');
+        }
+        function populatePromotoresOptions() {
+            const selectPromotor = document.getElementById('filterPromotor');
+            if (!selectPromotor) return;
+            const selectedActual = selectPromotor.value || 'TODOS';
+            const promotoresUnicos = [...new Set(notas.map(n => n.promotor ? n.promotor.trim().toUpperCase() : '').filter(p => p !== ''))].sort();
+            selectPromotor.innerHTML = '<option value="TODOS">Todos los Promotores</option>';
+            promotoresUnicos.forEach(p => {
+                selectPromotor.innerHTML += `<option value="${p}">${p}</option>`;
+            });
+            selectPromotor.value = selectedActual;
+        }
         function checkAuth() {
             if (currentUser) {
                 document.getElementById('loginScreen').classList.add('hidden');
                 document.getElementById('appScreen').classList.remove('hidden');
                 document.getElementById('userInfo').innerHTML = `<i class="fa-solid fa-user-shield mr-1.5 text-blue-400"></i> ${currentUser.name} (${currentUser.role})`;
+                const esConsulta = (currentUser.role === 'Consulta');
+                if (document.getElementById('btnNuevaNotaModal')) {
+                    document.getElementById('btnNuevaNotaModal').classList.toggle('hidden', esConsulta);
+                }
+                if (document.getElementById('btnAutoUpload')) {
+                    document.getElementById('btnAutoUpload').classList.toggle('hidden', esConsulta);
+                }
+                if (document.getElementById('btnNuevoExpediente')) {
+                    document.getElementById('btnNuevoExpediente').classList.toggle('hidden', esConsulta);
+                }
+                if (document.getElementById('btnNuevoViaje')) {
+                    document.getElementById('btnNuevoViaje').classList.toggle('hidden', esConsulta);
+                }
+                if (currentUser.role === 'Administrador') {
+                    document.getElementById('btnGestionUsuarios').classList.remove('hidden');
+                    document.getElementById('btnAuditLog').classList.remove('hidden');
+                } else {
+                    document.getElementById('btnGestionUsuarios').classList.add('hidden');
+                    document.getElementById('btnAuditLog').classList.add('hidden');
+                }
+                populatePromotoresOptions();
                 renderTable();
+                renderExpedientesTable();
+                renderViajesTable();
             } else {
                 document.getElementById('loginScreen').classList.remove('hidden');
                 document.getElementById('appScreen').classList.add('hidden');
             }
         }
-
         function handleLogin(e) {
             e.preventDefault();
             const u = document.getElementById('loginUser').value.toLowerCase().trim();
@@ -366,54 +984,933 @@
                 alert('Usuario o contraseña incorrectos.');
             }
         }
-
         function handleLogout() {
             sessionStorage.removeItem('activeUser');
             currentUser = null;
             checkAuth();
         }
-
-        function toggleAutoUploadSection() {
-            document.getElementById('autoUploadSection').classList.toggle('hidden');
+        function openUsersModal() {
+            if (currentUser && currentUser.role !== 'Administrador') return;
+            renderUsersTable();
+            document.getElementById('usersModal').classList.remove('hidden');
         }
-
+        function closeUsersModal() {
+            document.getElementById('usersModal').classList.add('hidden');
+        }
+        function renderUsersTable() {
+            const body = document.getElementById('usersTableBody');
+            body.innerHTML = '';
+            for (let u in usersDB) {
+                body.innerHTML += `
+                    <tr class="border-b">
+                        <td class="p-2.5 font-bold">${u.toUpperCase()}</td>
+                        <td class="p-2.5 font-mono text-slate-600">${usersDB[u].pass}</td>
+                        <td class="p-2.5"><span class="bg-slate-100 border px-2 py-0.5 rounded text-[11px]">${usersDB[u].role}</span></td>
+                        <td class="p-2.5 text-center">
+                            <button onclick="deleteUser('${u}')" class="text-red-600 hover:text-red-800" title="Eliminar"><i class="fa-solid fa-user-xmark"></i></button>
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+        function saveUser(e) {
+            e.preventDefault();
+            if (currentUser && currentUser.role !== 'Administrador') return;
+            const u = document.getElementById('newUser').value.toLowerCase().trim();
+            const p = document.getElementById('newPass').value;
+            const r = document.getElementById('newRole').value;
+            usersDB[u] = { pass: p, role: r };
+            localStorage.setItem('users_db', JSON.stringify(usersDB));
+            document.getElementById('newUser').value = '';
+            document.getElementById('newPass').value = '';
+            renderUsersTable();
+        }
+        function deleteUser(u) {
+            if (currentUser && currentUser.role !== 'Administrador') return;
+            if (Object.keys(usersDB).length <= 1) {
+                alert('Debe quedar al menos un usuario registrado en el sistema.');
+                return;
+            }
+            if (confirm(`¿Eliminar el usuario ${u.toUpperCase()}?`)) {
+                delete usersDB[u];
+                localStorage.setItem('users_db', JSON.stringify(usersDB));
+                renderUsersTable();
+            }
+        }
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(tabId).classList.remove('hidden');
+            document.getElementById('tabBtnRegistro').className = tabId === 'registroTab' ? 'tab-active px-6 py-4 text-sm font-semibold flex items-center gap-2 focus:outline-none transition whitespace-nowrap' : 'px-6 py-4 text-sm font-semibold text-slate-500 flex items-center gap-2 hover:text-slate-700 focus:outline-none transition whitespace-nowrap';
+            document.getElementById('tabBtnExpedientes').className = tabId === 'expedientesTab' ? 'tab-active px-6 py-4 text-sm font-semibold flex items-center gap-2 focus:outline-none transition whitespace-nowrap' : 'px-6 py-4 text-sm font-semibold text-slate-500 flex items-center gap-2 hover:text-slate-700 focus:outline-none transition whitespace-nowrap';
+            document.getElementById('tabBtnViajes').className = tabId === 'viajesTab' ? 'tab-active px-6 py-4 text-sm font-semibold flex items-center gap-2 focus:outline-none transition whitespace-nowrap' : 'px-6 py-4 text-sm font-semibold text-slate-500 flex items-center gap-2 hover:text-slate-700 focus:outline-none transition whitespace-nowrap';
+            document.getElementById('tabBtnEstadisticas').className = tabId === 'estadisticasTab' ? 'tab-active px-6 py-4 text-sm font-semibold flex items-center gap-2 focus:outline-none transition whitespace-nowrap' : 'px-6 py-4 text-sm font-semibold text-slate-500 flex items-center gap-2 hover:text-slate-700 focus:outline-none transition whitespace-nowrap';
+        }
         function handleFileSelect(file) {
             if (!file || file.type !== 'application/pdf') return;
             currentFileName = file.name;
+            const dropContent = document.getElementById('dropZoneContent');
+            dropContent.innerHTML = `
+                <i class="fa-solid fa-file-pdf text-3xl text-green-600 mb-1"></i>
+                <p class="font-bold text-slate-800 text-xs">PDF Adjuntado:</p>
+                <p class="text-xs text-blue-700 font-semibold mt-0.5 bg-slate-50 py-0.5 px-2.5 rounded-full border border-blue-200 inline-block shadow-sm">${file.name}</p>
+            `;
+            processPDF(file);
+        }
+        async function processPDF(file) {
+            const statusEl = document.getElementById('pdfStatus');
+            statusEl.classList.remove('hidden', 'bg-red-100', 'text-red-800', 'bg-green-100', 'text-green-800');
+            statusEl.classList.add('bg-blue-100', 'text-blue-800');
+            statusEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Leyendo datos y firma electrónica del PDF...';
             const reader = new FileReader();
             reader.onload = async function(e) {
-                autoPdfFileBase64 = e.target.result;
-                document.getElementById('parsedResultForm').classList.remove('hidden');
-                document.getElementById('pdfStatus').classList.remove('hidden');
-                document.getElementById('pdfStatus').innerText = "PDF cargado listo para enviar.";
+                autoPdfFileBase64 = e.target.result; 
+                
+                const base64Data = autoPdfFileBase64.split(',')[1];
+                const binaryString = atob(base64Data);
+                const len = binaryString.length;
+                const bytes = new Uint8Array(len);
+                for (let i = 0; i < len; i++) {
+                    bytes[i] = binaryString.charCodeAt(i);
+                }
+                try {
+                    const pdf = await pdfjsLib.getDocument(bytes).promise;
+                    globalExtractedText = '';
+                    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+                        const page = await pdf.getPage(pageNum);
+                        const content = await page.getTextContent();
+                        let items = content.items.map(item => ({
+                            text: item.str,
+                            x: item.transform[4],
+                            y: item.transform[5]
+                        }));
+                        items.sort((a, b) => b.y - a.y);
+                        globalExtractedText += ' ' + items.map(i => i.text).join(' ');
+                    }
+                    parseAllFieldsSmart(globalExtractedText, currentFileName);
+                    statusEl.classList.replace('bg-blue-100', 'bg-green-100');
+                    statusEl.classList.replace('text-blue-800', 'text-green-800');
+                    statusEl.innerHTML = '<i class="fa-solid fa-circle-check mr-2"></i> Firma electrónica y campos extraídos del documento.';
+                    document.getElementById('parsedResultForm').classList.remove('hidden');
+                } catch (err) {
+                    statusEl.classList.replace('bg-blue-100', 'bg-red-100');
+                    statusEl.classList.replace('text-blue-800', 'text-red-800');
+                    statusEl.innerHTML = '<i class="fa-solid fa-circle-xmark mr-2"></i> No se pudo procesar el PDF.';
+                }
             };
             reader.readAsDataURL(file);
         }
-
+        function parsePlazoSmart(text, fechaBaseStr) {
+            const regexFechaDirecta = /(?:antes\s+del|para\s+el|hasta\s+el|el)\s+(\d{1,2})[\/\-](\d{1,2})(?:[\/\-](\d{2,4}))?/i;
+            const matchFecha = text.match(regexFechaDirecta);
+            if (matchFecha) {
+                let dia = matchFecha[1].padStart(2, '0');
+                let mes = matchFecha[2].padStart(2, '0');
+                let anio = matchFecha[3];
+                if (!anio) {
+                    anio = fechaBaseStr ? fechaBaseStr.split('-')[0] : '2026';
+                } else if (anio.length === 2) {
+                    anio = '20' + anio;
+                }
+                return `${anio}-${mes}-${dia}`;
+            }
+            const numerosEnLetras = {
+                'un': 1, 'uno': 1, 'una': 1, 'dos': 2, 'tres': 3, 'cuatro': 4, 'cinco': 5,
+                'seis': 6, 'siete': 7, 'ocho': 8, 'nueve': 9, 'diez': 10, 'once': 11,
+                'doce': 12, 'trece': 13, 'catorce': 14, 'quince': 15, 'veinte': 20,
+                'treinta': 30, 'sesenta': 60, 'noventa': 90
+            };
+            const regexPlazo = /(?:plazo|término|lapso|dentro\s+de\s+los|por\s+el\s+término\s+de)\s*(?:de)?\s*(\d+|un[o]?|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez|once|doce|trece|catorce|quince|veinte|treinta|sesenta|noventa)\s*(?:días)?\s*(hábiles|corridos)?/i;
+            const match = text.match(regexPlazo) || text.match(/(?:a\s+los|vencido\s+el\s+plazo\s+de)\s*(\d+|un[o]?|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez|once|doce|trece|catorce|quince|veinte|treinta)\s*(días)?\s*(hábiles|corridos)?/i);
+            if (match) {
+                let valorStr = match[1].toLowerCase();
+                let dias = parseInt(valorStr, 10);
+                if (isNaN(dias)) {
+                    dias = numerosEnLetras[valorStr] || 0;
+                }
+                if (dias > 0) {
+                    const textoCapturado = match[0].toLowerCase();
+                    const esHabil = textoCapturado.includes('hábil') || textoCapturado.includes('hábiles');
+                    let fechaObj = fechaBaseStr ? new Date(fechaBaseStr + 'T00:00:00') : new Date();
+                    if (esHabil) {
+                        let diasAgregados = 0;
+                        while (diasAgregados < dias) {
+                            fechaObj.setDate(fechaObj.getDate() + 1);
+                            const diaSemana = fechaObj.getDay();
+                            if (diaSemana !== 0 && diaSemana !== 6) {
+                                diasAgregados++;
+                            }
+                        }
+                    } else {
+                        fechaObj.setDate(fechaObj.getDate() + dias);
+                    }
+                    return fechaObj.toISOString().split('T')[0];
+                }
+            }
+            return '';
+        }
+        function recalcularVencimientoManual() {
+            const fechaNota = document.getElementById('autoFecha').value;
+            if (globalExtractedText && fechaNota) {
+                const nuevoLimite = parsePlazoSmart(globalExtractedText, fechaNota);
+                document.getElementById('autoLimite').value = nuevoLimite;
+            }
+        }
+        function parseAllFieldsSmart(text, fileName) {
+            let limpioText = text.replace(/\s+/g, ' ').trim();
+            let numeroNota = fileName.replace(/\.[^/.]+$/, "")
+                                    .replace(/%23/g, '#')
+                                    .replace(/%/g, '#')
+                                    .trim()
+                                    .toUpperCase();
+            let promotor = 'S/D';
+            const matchPromotor1 = numeroNota.match(/-([A-Z0-9]+)(?:#|$)/);
+            if (matchPromotor1 && matchPromotor1[1]) {
+                promotor = matchPromotor1[1].toUpperCase();
+            }
+            if (promotor === 'S/D' || promotor === 'APN' || promotor === 'PNA') {
+                const matchPromotor2 = numeroNota.match(/-APN-([A-Z0-9]+)/);
+                if (matchPromotor2 && matchPromotor2[1]) {
+                    promotor = matchPromotor2[1].toUpperCase();
+                }
+            }
+            let reparticionDestino = 'S/D';
+            const matchBloqueA = limpioText.match(/\bA:\s*([\s\S]*?)(?=\bCon Copia A:|\bDe mi mayor consideración|\bDe nossa consideración|$)/i);
+            if (matchBloqueA && matchBloqueA[1]) {
+                const textoBloque = matchBloqueA[1];
+                const coincidenciasParentesis = [...textoBloque.matchAll(/\(([^)]+)\)/g)];
+                if (coincidenciasParentesis.length > 0) {
+                    let siglasEncontradas = [];
+                    for (let match of coincidenciasParentesis) {
+                        let contenido = match[1].trim();
+                        let sigla = contenido.includes('#') ? contenido.split('#')[0].trim() : contenido.trim();
+                        siglasEncontradas.push(sigla.toUpperCase());
+                    }
+                    siglasEncontradas = [...new Set(siglasEncontradas)];
+                    reparticionDestino = siglasEncontradas.join(', ');
+                }
+            }
+            let refExtraida = '';
+            const matchRef = limpioText.match(/(?:Referencia|Clave PC):\s*([\s\S]*)/i);
+            if (matchRef && matchRef[1]) {
+                refExtraida = matchRef[1];
+            } else {
+                refExtraida = limpioText.substring(0, 150);
+            }
+            const delimitadoresCorte = [
+                /\s+A:\s+/i, /\s+Con Copia A:\s+/i, /\s+De mi mayor consideración/i,
+                /\s+ORIGEN:/i, /\s+En relación al/i, /\s+Del registro del/i,
+                /\s+SOLICITA/i, /\s+Sin otro particular/i
+            ];
+            for (let regex of delimitadoresCorte) {
+                const pos = refExtraida.search(regex);
+                if (pos !== -1) {
+                    refExtraida = refExtraida.substring(0, pos);
+                }
+            }
+            refExtraida = refExtraida.trim();
+            if (refExtraida.length > 180) {
+                refExtraida = refExtraida.substring(0, 180) + '...';
+            }
+            document.getElementById('autoFecha').value = new Date().toISOString().split('T')[0];
+            document.getElementById('autoPromotor').value = promotor;
+            document.getElementById('autoNroNota').value = numeroNota;
+            document.getElementById('autoReferencia').value = refExtraida || 'Sin referencia detectable.';
+            document.getElementById('autoAccion').value = reparticionDestino;
+            document.getElementById('autoLimite').value = '';
+        }
         async function confirmAutoSave() {
             if (!GOOGLE_SCRIPT_URL) {
-                alert('Por favor, configure la URL de Google Drive antes de guardar notas con PDF.');
+                alert('Por favor, configure la URL de Google Drive antes de subir notas con PDF.');
                 openDriveConfigModal();
                 return;
             }
+            let driveUrl = null;
             if (autoPdfFileBase64) {
-                await subirPDFAGoogleDrive(autoPdfFileBase64, currentFileName);
+                const statusEl = document.getElementById('pdfStatus');
+                statusEl.classList.remove('hidden');
+                statusEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Subiendo archivo PDF a Google Drive...';
+                driveUrl = await subirPDFAGoogleDrive(autoPdfFileBase64, currentFileName);
+                if (!driveUrl) {
+                    alert('Error al subir el archivo a Google Drive. Verifique la URL del Web App.');
+                    return;
+                }
             }
-            alert("Nota procesada y enviada a Google Drive correctamente.");
+            const nro = document.getElementById('autoNroNota').value || 'S/D';
+            const fecha = document.getElementById('autoFecha').value || new Date().toISOString().split('T')[0];
+            const promotor = document.getElementById('autoPromotor').value || 'S/D';
+            const referencia = document.getElementById('autoReferencia').value || 'Sin referencia';
+            const accion = document.getElementById('autoAccion').value || 'S/D';
+            const limite = document.getElementById('autoLimite').value || '';
+            const newNota = {
+                id: Date.now(),
+                fecha: fecha,
+                promotor: promotor,
+                nroNota: nro,
+                referencia: referencia,
+                accion: accion,
+                limite: limite,
+                estado: 'Pendiente',
+                respuesta: '',
+                destino: 'ARCH',
+                adjuntoNota: driveUrl,
+                adjuntosRespuesta: []
+            };
+            notas.unshift(newNota);
+            localStorage.setItem('notas_db', JSON.stringify(notas));
+            registrarAuditoria('Creó', 'Notas', `Nota Nro: ${nro}`);
+            document.getElementById('filterEstado').value = 'TODOS';
+            document.getElementById('filterMes').value = 'TODOS';
+            document.getElementById('filterPromotor').value = 'TODOS';
+            document.getElementById('searchInput').value = '';
+            populatePromotoresOptions();
             clearAutoForm();
             toggleAutoUploadSection();
+            renderTable();
         }
-
         function clearAutoForm() {
             document.getElementById('parsedResultForm').classList.add('hidden');
             document.getElementById('pdfStatus').classList.add('hidden');
             document.getElementById('pdfFileInput').value = '';
+            globalExtractedText = '';
+            document.getElementById('dropZoneContent').innerHTML = `
+                <i class="fa-solid fa-cloud-arrow-up text-3xl text-blue-500 mb-2"></i>
+                <p class="font-bold text-slate-700 text-sm" id="dropText">Haz clic o arrastra aquí la nota en PDF</p>
+                <p class="text-xs text-slate-400 mt-1">Lectura automática de firma electrónica GDE y datos clave</p>
+            `;
             autoPdfFileBase64 = null;
             currentFileName = '';
         }
-
+        function checkUrgentAlerts() {
+            const hoy = new Date();
+            let vencidas = 0;
+            let proximas = 0;
+            notas.forEach(n => {
+                if (n.limite && n.estado !== 'Contestado' && n.estado !== 'Archivado') {
+                    const limiteFecha = new Date(n.limite + 'T00:00:00');
+                    const diffDays = Math.ceil((limiteFecha - hoy) / (1000 * 60 * 60 * 24));
+                    if (diffDays < 0) {
+                        vencidas++;
+                    } else if (diffDays <= 5) {
+                        proximas++;
+                    }
+                }
+            });
+            const banner = document.getElementById('alertBanner');
+            const content = document.getElementById('alertBannerContent');
+            if (vencidas > 0 || proximas > 0) {
+                banner.classList.remove('hidden', 'bg-red-50', 'border-red-200', 'bg-yellow-50', 'border-yellow-200');
+                if (vencidas > 0) {
+                    banner.classList.add('bg-red-50', 'border-red-200');
+                    content.innerHTML = `
+                        <i class="fa-solid fa-triangle-exclamation text-2xl text-red-600 animate-bounce"></i>
+                        <div>
+                            <h4 class="font-bold text-sm text-red-900">¡ATENCIÓN: NOTAS CON ALERTA DE VENCIMIENTO!</h4>
+                            <p class="text-xs text-red-700">Hay <strong>${vencidas}</strong> nota(s) vencida(s) y <strong>${proximas}</strong> próxima(s) a vencer sin responder.</p>
+                        </div>
+                    `;
+                } else {
+                    banner.classList.add('bg-yellow-50', 'border-yellow-200');
+                    content.innerHTML = `
+                        <i class="fa-solid fa-clock text-2xl text-yellow-600"></i>
+                        <div>
+                            <h4 class="font-bold text-sm text-yellow-900">NOTAS PRÓXIMAS A VENCER</h4>
+                            <p class="text-xs text-yellow-700">Hay <strong>${proximas}</strong> nota(s) que vencerá(n) en los próximos 5 días.</p>
+                        </div>
+                    `;
+                }
+            } else {
+                banner.classList.add('hidden');
+            }
+        }
+        function filtrarUrgentes() {
+            document.getElementById('filterEstado').value = 'URGENTES';
+            renderTable();
+        }
+        function filterByMetric(estado) {
+            document.getElementById('filterEstado').value = estado;
+            renderTable();
+        }
+        function filterExpByMetric(estado) {
+            document.getElementById('filterExpEstado').value = estado;
+            renderExpedientesTable();
+        }
+        function updateMetrics() {
+            document.getElementById('metricTotal').innerText = notas.length;
+            document.getElementById('metricPendientes').innerText = notas.filter(n => n.estado === 'Pendiente').length;
+            document.getElementById('metricEspera').innerText = notas.filter(n => n.estado === 'En espera').length;
+            document.getElementById('metricContestados').innerText = notas.filter(n => n.estado === 'Contestado').length;
+            document.getElementById('metricArchivados').innerText = notas.filter(n => n.estado === 'Archivado').length;
+        }
         function renderTable() {
-            // Función de renderizado principal
+            const body = document.getElementById('tableBody');
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const filterEstado = document.getElementById('filterEstado').value;
+            const filterMes = document.getElementById('filterMes').value;
+            const filterPromotor = document.getElementById('filterPromotor').value;
+            body.innerHTML = '';
+            const hoy = new Date();
+            let countMes = notas.filter(n => {
+                if (filterMes === 'TODOS') return true;
+                return n.fecha && n.fecha.split('-')[1] === filterMes;
+            }).length;
+            let countPromotor = notas.filter(n => {
+                if (filterPromotor === 'TODOS') return true;
+                return n.promotor && n.promotor.trim().toUpperCase() === filterPromotor.toUpperCase();
+            }).length;
+            document.getElementById('mesCountBadge').innerText = `Recibidas: ${countMes}`;
+            document.getElementById('promotorCountBadge').innerText = `Por cantidad: ${countPromotor}`;
+            let filtered = notas.filter(n => {
+                const matchSearch = (n.nroNota && n.nroNota.toLowerCase().includes(search)) || 
+                                    (n.referencia && n.referencia.toLowerCase().includes(search)) || 
+                                    (n.promotor && n.promotor.toLowerCase().includes(search)) || 
+                                    (n.accion && n.accion.toLowerCase().includes(search));
+                let matchEstado = true;
+                if (filterEstado === 'URGENTES') {
+                    if (n.limite && n.estado !== 'Contestado' && n.estado !== 'Archivado') {
+                        const limiteFecha = new Date(n.limite + 'T00:00:00');
+                        const diffDays = Math.ceil((limiteFecha - hoy) / (1000 * 60 * 60 * 24));
+                        matchEstado = (diffDays <= 5);
+                    } else {
+                        matchEstado = false;
+                    }
+                } else if (filterEstado !== 'TODOS') {
+                    matchEstado = (n.estado === filterEstado);
+                }
+                let matchMes = true;
+                if (filterMes !== 'TODOS') {
+                    matchMes = (n.fecha && n.fecha.split('-')[1] === filterMes);
+                }
+                let matchPromotor = true;
+                if (filterPromotor !== 'TODOS') {
+                    matchPromotor = (n.promotor && n.promotor.trim().toUpperCase() === filterPromotor.toUpperCase());
+                }
+                return matchSearch && matchEstado && matchMes && matchPromotor;
+            });
+            if (filtered.length === 0) {
+                body.innerHTML = `<tr><td colspan="10" class="p-4 text-center text-slate-400">No se encontraron notas registradas.</td></tr>`;
+                updateMetrics();
+                checkUrgentAlerts();
+                return;
+            }
+            filtered.forEach(n => {
+                let badgeClass = 'bg-yellow-100 text-yellow-800 border-yellow-300';
+                if (n.estado === 'En espera') badgeClass = 'bg-orange-100 text-orange-800 border-orange-300';
+                if (n.estado === 'Contestado') badgeClass = 'bg-green-100 text-green-800 border-green-300';
+                if (n.estado === 'Archivado') badgeClass = 'bg-slate-200 text-slate-700 border-slate-300';
+                let alertaBadge = '';
+                if (n.limite && n.estado !== 'Contestado' && n.estado !== 'Archivado') {
+                    const limiteFecha = new Date(n.limite + 'T00:00:00');
+                    const diffDays = Math.ceil((limiteFecha - hoy) / (1000 * 60 * 60 * 24));
+                    if (diffDays < 0) {
+                        alertaBadge = `<span class="block text-[10px] bg-red-600 text-white font-bold px-1.5 py-0.5 rounded mt-0.5 text-center shadow animate-pulse">VENCIDO (${Math.abs(diffDays)}d)</span>`;
+                    } else if (diffDays <= 5) {
+                        alertaBadge = `<span class="block text-[10px] bg-amber-500 text-white font-bold px-1.5 py-0.5 rounded mt-0.5 text-center shadow">Vence en ${diffDays}d</span>`;
+                    }
+                }
+                let rowClass = 'row-pendiente';
+                if (n.estado === 'En espera') rowClass = 'row-espera';
+                if (n.estado === 'Contestado') rowClass = 'row-contestado';
+                if (n.estado === 'Archivado') rowClass = 'row-archivado';
+                let adjuntosHtml = '-';
+                if (n.adjuntoNota) {
+                    if (typeof n.adjuntoNota === 'string' && (n.adjuntoNota.startsWith('http') || n.adjuntoNota.startsWith('data:'))) {
+                        adjuntosHtml = `<a href="${n.adjuntoNota}" download="${n.nroNota}.pdf" target="_blank" class="text-blue-600 hover:text-blue-800 font-bold flex items-center gap-1"><i class="fa-solid fa-file-arrow-down"></i> Original</a>`;
+                    } else {
+                        adjuntosHtml = `<span class="text-slate-500">Adjunto</span>`;
+                    }
+                }
+                body.innerHTML += `
+                    <tr class="${rowClass} border-b transition">
+                        <td class="p-3 whitespace-nowrap font-medium">${formatFechaLatina(n.fecha)}</td>
+                        <td class="p-3 font-bold text-slate-700">${n.promotor || '-'}</td>
+                        <td class="p-3 font-bold text-blue-900">${n.nroNota}</td>
+                        <td class="p-3 font-medium text-slate-800 max-w-xs truncate" title="${n.referencia}">${n.referencia}</td>
+                        <td class="p-3 font-semibold text-slate-700">${n.accion || '-'}</td>
+                        <td class="p-3 whitespace-nowrap">
+                            <span class="font-semibold text-slate-700">${formatFechaLatina(n.limite)}</span>
+                            ${alertaBadge}
+                        </td>
+                        <td class="p-3"><span class="px-2 py-1 rounded-full text-[11px] font-bold border ${badgeClass}">${n.estado}</span></td>
+                        <td class="p-3 text-slate-600">${n.respuesta || '-'}</td>
+                        <td class="p-3 whitespace-nowrap">${adjuntosHtml}</td>
+                        <td class="p-3 text-center whitespace-nowrap">
+                            <button onclick="editNota(${n.id})" class="text-blue-600 hover:text-blue-800 mr-2" title="Editar"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button onclick="deleteNota(${n.id})" class="text-red-600 hover:text-red-800" title="Eliminar"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+            updateMetrics();
+            checkUrgentAlerts();
+        }
+        function openModal() {
+            document.getElementById('modalTitle').innerText = 'Nueva Nota';
+            document.getElementById('notaId').value = '';
+            document.getElementById('fecha').value = new Date().toISOString().split('T')[0];
+            document.getElementById('promotor').value = '';
+            document.getElementById('nroNota').value = '';
+            document.getElementById('referencia').value = '';
+            document.getElementById('accion').value = '';
+            document.getElementById('limite').value = '';
+            document.getElementById('estado').value = 'Pendiente';
+            document.getElementById('destino').value = 'ARCH';
+            document.getElementById('respuesta').value = '';
+            document.getElementById('respuestaArchivos').value = '';
+            document.getElementById('itemModal').classList.remove('hidden');
+        }
+        function closeModal() {
+            document.getElementById('itemModal').classList.add('hidden');
+        }
+        function saveNota(e) {
+            e.preventDefault();
+            const id = document.getElementById('notaId').value;
+            const nro = document.getElementById('nroNota').value;
+            const notaObj = {
+                id: id ? parseInt(id) : Date.now(),
+                fecha: document.getElementById('fecha').value,
+                promotor: document.getElementById('promotor').value,
+                nroNota: nro,
+                referencia: document.getElementById('referencia').value,
+                accion: document.getElementById('accion').value,
+                limite: document.getElementById('limite').value,
+                estado: document.getElementById('estado').value,
+                destino: document.getElementById('destino').value,
+                respuesta: document.getElementById('respuesta').value,
+                adjuntosRespuesta: []
+            };
+            if (id) {
+                const idx = notas.findIndex(n => n.id === parseInt(id));
+                if (idx !== -1) {
+                    notaObj.adjuntoNota = notas[idx].adjuntoNota;
+                    notas[idx] = notaObj;
+                    registrarAuditoria('Modificó', 'Notas', `Nota Nro: ${nro}`);
+                }
+            } else {
+                notas.unshift(notaObj);
+                registrarAuditoria('Creó', 'Notas', `Nota Nro: ${nro}`);
+            }
+            localStorage.setItem('notas_db', JSON.stringify(notas));
+            populatePromotoresOptions();
+            closeModal();
+            renderTable();
+        }
+        function editNota(id) {
+            const n = notas.find(item => item.id === id);
+            if (!n) return;
+            document.getElementById('modalTitle').innerText = 'Editar Nota';
+            document.getElementById('notaId').value = n.id;
+            document.getElementById('fecha').value = n.fecha || '';
+            document.getElementById('promotor').value = n.promotor || '';
+            document.getElementById('nroNota').value = n.nroNota || '';
+            document.getElementById('referencia').value = n.referencia || '';
+            document.getElementById('accion').value = n.accion || '';
+            document.getElementById('limite').value = n.limite || '';
+            document.getElementById('estado').value = n.estado || 'Pendiente';
+            document.getElementById('destino').value = n.destino || '';
+            document.getElementById('respuesta').value = n.respuesta || '';
+            document.getElementById('itemModal').classList.remove('hidden');
+        }
+        function deleteNota(id) {
+            if (confirm('¿Desea eliminar este registro de nota?')) {
+                const n = notas.find(item => item.id === id);
+                notas = notas.filter(item => item.id !== id);
+                localStorage.setItem('notas_db', JSON.stringify(notas));
+                if (n) registrarAuditoria('Eliminó', 'Notas', `Nota Nro: ${n.nroNota}`);
+                populatePromotoresOptions();
+                renderTable();
+            }
+        }
+        function exportCSV() {
+            let csv = 'Fecha,Promotor,NroNota,Referencia,Destinatario,Limite,Estado,Observaciones\n';
+            notas.forEach(n => {
+                csv += `"${n.fecha}","${n.promotor}","${n.nroNota}","${n.referencia.replace(/"/g, '""')}","${n.accion}","${n.limite}","${n.estado}","${(n.respuesta || '').replace(/"/g, '""')}"\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'registro_notas_dgse.csv';
+            link.click();
+        }
+        function renderExpedientesTable() {
+            const body = document.getElementById('expTableBody');
+            const search = document.getElementById('searchExpInput').value.toLowerCase();
+            const filterEstado = document.getElementById('filterExpEstado').value;
+            body.innerHTML = '';
+            let countRevision = 0;
+            let countDevueltos = 0;
+            let countFinalizados = 0;
+            let countAntiguos = 0;
+            const hoy = new Date();
+            expedientesDB.forEach(exp => {
+                if (exp.estado === 'En revision DGSE') countRevision++;
+                if (exp.estado === 'Devuelto') countDevueltos++;
+                if (exp.estado === 'Finalizado') countFinalizados++;
+                if (exp.fecha && exp.estado !== 'Finalizado') {
+                    const fechaIngreso = new Date(exp.fecha + 'T00:00:00');
+                    const diffTime = Math.abs(hoy - fechaIngreso);
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    if (diffDays > 30) countAntiguos++;
+                }
+            });
+            document.getElementById('expMetricRevision').innerText = countRevision;
+            document.getElementById('expMetricDevueltos').innerText = countDevueltos;
+            document.getElementById('expMetricFinalizados').innerText = countFinalizados;
+            document.getElementById('expMetricAntiguos').innerText = countAntiguos;
+            let filtered = expedientesDB.filter(exp => {
+                const matchSearch = (exp.nroExpediente && exp.nroExpediente.toLowerCase().includes(search)) ||
+                                    (exp.extracto && exp.extracto.toLowerCase().includes(search)) ||
+                                    (exp.iniciador && exp.iniciador.toLowerCase().includes(search));
+                let matchEstado = true;
+                if (filterEstado === 'ANTIGUOS') {
+                    if (exp.fecha && exp.estado !== 'Finalizado') {
+                        const fechaIngreso = new Date(exp.fecha + 'T00:00:00');
+                        const diffDays = Math.ceil(Math.abs(hoy - fechaIngreso) / (1000 * 60 * 60 * 24));
+                        matchEstado = (diffDays > 30);
+                    } else {
+                        matchEstado = false;
+                    }
+                } else if (filterEstado !== 'TODOS') {
+                    matchEstado = (exp.estado === filterEstado);
+                }
+                return matchSearch && matchEstado;
+            });
+            if (filtered.length === 0) {
+                body.innerHTML = `<tr><td colspan="9" class="p-4 text-center text-slate-400">No se encontraron expedientes.</td></tr>`;
+                return;
+            }
+            filtered.forEach(exp => {
+                let badgeClass = 'bg-blue-100 text-blue-800 border-blue-300';
+                if (exp.estado === 'Devuelto') badgeClass = 'bg-red-100 text-red-800 border-red-300';
+                if (exp.estado === 'Finalizado') badgeClass = 'bg-green-100 text-green-800 border-green-300';
+                if (exp.estado === 'Guarda temporal') badgeClass = 'bg-yellow-100 text-yellow-800 border-yellow-300';
+                let alertaAntiguedad = '';
+                if (exp.fecha && exp.estado !== 'Finalizado') {
+                    const fechaIngreso = new Date(exp.fecha + 'T00:00:00');
+                    const diffDays = Math.ceil(Math.abs(hoy - fechaIngreso) / (1000 * 60 * 60 * 24));
+                    if (diffDays > 30) {
+                        alertaAntiguedad = `<span class="block text-[10px] bg-rose-600 text-white font-bold px-1.5 py-0.5 rounded mt-0.5 text-center shadow">+30 días en DGSE</span>`;
+                    }
+                }
+                body.innerHTML += `
+                    <tr class="border-b hover:bg-slate-50 transition">
+                        <td class="p-3 whitespace-nowrap font-medium">${formatFechaLatina(exp.fecha)}</td>
+                        <td class="p-3 font-bold text-amber-900">${exp.nroExpediente}</td>
+                        <td class="p-3 font-semibold text-slate-700">${exp.iniciador}</td>
+                        <td class="p-3 text-slate-800 max-w-xs truncate" title="${exp.extracto}">${exp.extracto}</td>
+                        <td class="p-3">-</td>
+                        <td class="p-3"><span class="px-2 py-1 rounded-full text-[11px] font-bold border ${badgeClass}">${exp.estado}</span>${alertaAntiguedad}</td>
+                        <td class="p-3 font-semibold text-slate-700">${exp.pase || '-'}</td>
+                        <td class="p-3 text-slate-600">${exp.observaciones || '-'}</td>
+                        <td class="p-3 text-center whitespace-nowrap">
+                            <button onclick="editExpediente(${exp.id})" class="text-blue-600 hover:text-blue-800 mr-2" title="Editar"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button onclick="deleteExpediente(${exp.id})" class="text-red-600 hover:text-red-800" title="Eliminar"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+        function openExpedienteModal() {
+            document.getElementById('expModalTitle').innerHTML = '<i class="fa-solid fa-folder-plus text-amber-600"></i> Registrar Expediente';
+            document.getElementById('expId').value = '';
+            document.getElementById('expFecha').value = new Date().toISOString().split('T')[0];
+            document.getElementById('expIniciador').value = '';
+            document.getElementById('expNro').value = '';
+            document.getElementById('expExtracto').value = '';
+            document.getElementById('expEstado').value = 'En revision DGSE';
+            document.getElementById('expPase').value = 'DGSE';
+            document.getElementById('expObservaciones').value = '';
+            document.getElementById('expModal').classList.remove('hidden');
+        }
+        function closeExpModal() {
+            document.getElementById('expModal').classList.add('hidden');
+        }
+        function saveExpediente(e) {
+            e.preventDefault();
+            const id = document.getElementById('expId').value;
+            const nro = document.getElementById('expNro').value;
+            const expObj = {
+                id: id ? parseInt(id) : Date.now(),
+                fecha: document.getElementById('expFecha').value,
+                iniciador: document.getElementById('expIniciador').value,
+                nroExpediente: nro,
+                extracto: document.getElementById('expExtracto').value,
+                estado: document.getElementById('expEstado').value,
+                pase: document.getElementById('expPase').value,
+                observaciones: document.getElementById('expObservaciones').value,
+                adjuntosIF: []
+            };
+            if (id) {
+                const idx = expedientesDB.findIndex(x => x.id === parseInt(id));
+                if (idx !== -1) expedientesDB[idx] = expObj;
+                registrarAuditoria('Modificó', 'Expedientes', `Expediente: ${nro}`);
+            } else {
+                expedientesDB.unshift(expObj);
+                registrarAuditoria('Creó', 'Expedientes', `Expediente: ${nro}`);
+            }
+            localStorage.setItem('expedientes_db', JSON.stringify(expedientesDB));
+            closeExpModal();
+            renderExpedientesTable();
+        }
+        function editExpediente(id) {
+            const exp = expedientesDB.find(x => x.id === id);
+            if (!exp) return;
+            document.getElementById('expModalTitle').innerHTML = '<i class="fa-solid fa-folder-pen text-amber-600"></i> Editar Expediente';
+            document.getElementById('expId').value = exp.id;
+            document.getElementById('expFecha').value = exp.fecha || '';
+            document.getElementById('expIniciador').value = exp.iniciador || '';
+            document.getElementById('expNro').value = exp.nroExpediente || '';
+            document.getElementById('expExtracto').value = exp.extracto || '';
+            document.getElementById('expEstado').value = exp.estado || 'En revision DGSE';
+            document.getElementById('expPase').value = exp.pase || '';
+            document.getElementById('expObservaciones').value = exp.observaciones || '';
+            document.getElementById('expModal').classList.remove('hidden');
+        }
+        function deleteExpediente(id) {
+            if (confirm('¿Desea eliminar este expediente?')) {
+                const exp = expedientesDB.find(x => x.id === id);
+                expedientesDB = expedientesDB.filter(x => x.id !== id);
+                localStorage.setItem('expedientes_db', JSON.stringify(expedientesDB));
+                if (exp) registrarAuditoria('Eliminó', 'Expedientes', `Expediente: ${exp.nroExpediente}`);
+                renderExpedientesTable();
+            }
+        }
+        function exportExpedientesCSV() {
+            let csv = 'Fecha,NroExpediente,Iniciador,Extracto,Estado,Pase,Observaciones\n';
+            expedientesDB.forEach(e => {
+                csv += `"${e.fecha}","${e.nroExpediente}","${e.iniciador}","${e.extracto.replace(/"/g, '""')}","${e.estado}","${e.pase}","${(e.observaciones || '').replace(/"/g, '""')}"\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'expedientes_gde_dgse.csv';
+            link.click();
+        }
+        function agregarFilaPersona(gradoVal = '', apellidoVal = '', destinoVal = '') {
+            const container = document.getElementById('personasContainer');
+            const rowId = Date.now() + Math.random();
+            const div = document.createElement('div');
+            div.className = 'grid grid-cols-1 md:grid-cols-3 gap-2 items-center bg-white p-2.5 rounded-lg border shadow-sm';
+            div.id = `personaRow_${rowId}`;
+            div.innerHTML = `
+                <div>
+                    <input type="text" placeholder="Grado (Ej. Prefecto)" value="${gradoVal}" class="input-grado w-full border p-1.5 rounded text-xs uppercase font-semibold">
+                </div>
+                <div>
+                    <input type="text" placeholder="Apellido y Nombre" value="${apellidoVal}" class="input-apellido w-full border p-1.5 rounded text-xs uppercase font-semibold">
+                </div>
+                <div class="flex items-center gap-1">
+                    <input type="text" placeholder="Destino específico" value="${destinoVal}" class="input-destino w-full border p-1.5 rounded text-xs">
+                    <button type="button" onclick="document.getElementById('personaRow_${rowId}').remove()" class="text-red-500 hover:text-red-700 px-2 py-1"><i class="fa-solid fa-trash"></i></button>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+        function renderViajesTable() {
+            const body = document.getElementById('viajesTableBody');
+            const search = document.getElementById('searchViajesInput').value.toLowerCase();
+            body.innerHTML = '';
+            let countExterior = 0;
+            let countPais = 0;
+            let countRealizados = 0;
+            let countRechazados = 0;
+            let countProximos = 0;
+            let personasExteriorSet = new Set();
+            const hoy = new Date();
+            viajesDB.forEach(v => {
+                const lugarStr = (v.lugar || '').toLowerCase();
+                const esExterior = !lugarStr.includes('argentina') && !lugarStr.includes('buenos aires') && !lugarStr.includes('caba') && !lugarStr.includes('cordoba') && !lugarStr.includes('mendoza');
+                
+                if (esExterior) {
+                    countExterior++;
+                    if (v.personas && Array.isArray(v.personas)) {
+                        v.personas.forEach(p => {
+                            if (p.apellido) personasExteriorSet.add(p.apellido.trim().toUpperCase());
+                        });
+                    }
+                } else {
+                    countPais++;
+                }
+                if (v.estado === 'Rechazado') {
+                    countRechazados++;
+                } else if (v.estado === 'Próximamente') {
+                    countProximos++;
+                } else {
+                    if (v.llegada) {
+                        const fechaLlegada = new Date(v.llegada + 'T00:00:00');
+                        if (fechaLlegada < hoy || v.estado === 'Finalizado' || v.estado === 'Continúa') {
+                            countRealizados++;
+                        }
+                    }
+                }
+            });
+            document.getElementById('viajesMetricExterior').innerText = countExterior;
+            document.getElementById('viajesMetricPais').innerText = countPais;
+            document.getElementById('viajesMetricRealizados').innerText = countRealizados;
+            document.getElementById('viajesMetricRechazados').innerText = countRechazados;
+            document.getElementById('viajesMetricProximos').innerText = countProximos;
+            document.getElementById('viajesMetricPersExterior').innerText = personasExteriorSet.size;
+            let filtered = viajesDB.filter(v => {
+                const matchLugar = (v.lugar && v.lugar.toLowerCase().includes(search));
+                const matchEvento = (v.evento && v.evento.toLowerCase().includes(search));
+                const matchInvita = (v.invita && v.invita.toLowerCase().includes(search));
+                const matchCalidad = (v.calidad && v.calidad.toLowerCase().includes(search));
+                
+                let matchPersona = false;
+                if (v.personas && Array.isArray(v.personas)) {
+                    matchPersona = v.personas.some(p => 
+                        (p.grado && p.grado.toLowerCase().includes(search)) || 
+                        (p.apellido && p.apellido.toLowerCase().includes(search)) ||
+                        (p.destino && p.destino.toLowerCase().includes(search))
+                    );
+                }
+                return matchLugar || matchEvento || matchInvita || matchCalidad || matchPersona;
+            });
+            if (filtered.length === 0) {
+                body.innerHTML = `<tr><td colspan="12" class="p-4 text-center text-slate-400">No se encontraron viajes registrados.</td></tr>`;
+                return;
+            }
+            filtered.forEach(v => {
+                let badgeClass = 'bg-emerald-100 text-emerald-800 border-emerald-300';
+                if (v.estado === 'Rechazado') badgeClass = 'bg-red-100 text-red-800 border-red-300';
+                if (v.estado === 'Próximamente') badgeClass = 'bg-amber-100 text-amber-800 border-amber-300';
+                if (v.estado === 'Continúa') badgeClass = 'bg-blue-100 text-blue-800 border-blue-300';
+                let personasGradoHtml = '';
+                let personasApellidoHtml = '';
+                let destinosHtml = '';
+                if (v.personas && v.personas.length > 0) {
+                    v.personas.forEach(p => {
+                        personasGradoHtml += `<div class="py-1 font-semibold text-slate-700">${p.grado || '-'}</div>`;
+                        personasApellidoHtml += `<div class="py-1 font-bold text-slate-900">${p.apellido || '-'}</div>`;
+                        destinosHtml += `<div class="py-1 text-slate-600">${p.destino || '-'}</div>`;
+                    });
+                } else {
+                    personasGradoHtml = '-';
+                    personasApellidoHtml = '-';
+                    destinosHtml = '-';
+                }
+                body.innerHTML += `
+                    <tr class="border-b hover:bg-slate-50 transition align-top">
+                        <td class="p-3">${personasGradoHtml}</td>
+                        <td class="p-3">${personasApellidoHtml}</td>
+                        <td class="p-3">${destinosHtml}</td>
+                        <td class="p-3 font-semibold text-slate-800">${v.evento || '-'}</td>
+                        <td class="p-3 whitespace-nowrap">${formatFechaLatina(v.salida)}</td>
+                        <td class="p-3 whitespace-nowrap">${formatFechaLatina(v.llegada)}</td>
+                        <td class="p-3 font-medium text-slate-700">${v.lugar || '-'}</td>
+                        <td class="p-3 text-slate-600">${v.invita || '-'}</td>
+                        <td class="p-3 text-slate-600">${v.calidad || '-'}</td>
+                        <td class="p-3 text-slate-600">${v.gastosCargo || '-'}</td>
+                        <td class="p-3 whitespace-nowrap"><span class="px-2 py-1 rounded-full text-[11px] font-bold border ${badgeClass}">${v.estado}</span></td>
+                        <td class="p-3 text-center whitespace-nowrap">
+                            <button onclick="editViaje(${v.id})" class="text-blue-600 hover:text-blue-800 mr-2" title="Editar"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button onclick="deleteViaje(${v.id})" class="text-red-600 hover:text-red-800" title="Eliminar"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+        function openViajeModal() {
+            document.getElementById('viajeModalTitle').innerHTML = '<i class="fa-solid fa-plane-circle-check text-emerald-600"></i> Registrar Comisión / Viaje';
+            document.getElementById('viajeId').value = '';
+            document.getElementById('personasContainer').innerHTML = '';
+            agregarFilaPersona();
+            document.getElementById('viajeLugar').value = '';
+            document.getElementById('viajeEvento').value = '';
+            document.getElementById('viajeSalida').value = new Date().toISOString().split('T')[0];
+            document.getElementById('viajeLlegada').value = new Date().toISOString().split('T')[0];
+            document.getElementById('viajeInvita').value = '';
+            document.getElementById('viajeCalidad').value = '';
+            document.getElementById('viajeGastosCargo').value = '';
+            document.getElementById('viajeEstado').value = 'Próximamente';
+            document.getElementById('viajeModal').classList.remove('hidden');
+        }
+        function closeViajeModal() {
+            document.getElementById('viajeModal').classList.add('hidden');
+        }
+        function saveViajeManual(e) {
+            e.preventDefault();
+            const id = document.getElementById('viajeId').value;
+            
+            const personaRows = document.querySelectorAll('#personasContainer > div');
+            let personasArray = [];
+            personaRows.forEach(row => {
+                const grado = row.querySelector('.input-grado').value;
+                const apellido = row.querySelector('.input-apellido').value;
+                const destino = row.querySelector('.input-destino').value;
+                if (apellido.trim() !== '') {
+                    personasArray.push({ grado, apellido, destino });
+                }
+            });
+            const viajeObj = {
+                id: id ? parseInt(id) : Date.now(),
+                personas: personasArray,
+                lugar: document.getElementById('viajeLugar').value,
+                evento: document.getElementById('viajeEvento').value,
+                salida: document.getElementById('viajeSalida').value,
+                llegada: document.getElementById('viajeLlegada').value,
+                invita: document.getElementById('viajeInvita').value,
+                calidad: document.getElementById('viajeCalidad').value,
+                gastosCargo: document.getElementById('viajeGastosCargo').value,
+                estado: document.getElementById('viajeEstado').value
+            };
+            if (id) {
+                const idx = viajesDB.findIndex(v => v.id === parseInt(id));
+                if (idx !== -1) viajesDB[idx] = viajeObj;
+                registrarAuditoria('Modificó', 'Viajes', `Evento: ${viajeObj.evento}`);
+            } else {
+                viajesDB.unshift(viajeObj);
+                registrarAuditoria('Creó', 'Viajes', `Evento: ${viajeObj.evento}`);
+            }
+            localStorage.setItem('viajes_db_v2', JSON.stringify(viajesDB));
+            closeViajeModal();
+            renderViajesTable();
+        }
+        function editViaje(id) {
+            const v = viajesDB.find(item => item.id === id);
+            if (!v) return;
+            document.getElementById('viajeModalTitle').innerHTML = '<i class="fa-solid fa-plane-up text-emerald-600"></i> Editar Comisión / Viaje';
+            document.getElementById('viajeId').value = v.id;
+            document.getElementById('personasContainer').innerHTML = '';
+            if (v.personas && v.personas.length > 0) {
+                v.personas.forEach(p => {
+                    agregarFilaPersona(p.grado || '', p.apellido || '', p.destino || '');
+                });
+            } else {
+                agregarFilaPersona();
+            }
+            document.getElementById('viajeLugar').value = v.lugar || '';
+            document.getElementById('viajeEvento').value = v.evento || '';
+            document.getElementById('viajeSalida').value = v.salida || '';
+            document.getElementById('viajeLlegada').value = v.llegada || '';
+            document.getElementById('viajeInvita').value = v.invita || '';
+            document.getElementById('viajeCalidad').value = v.calidad || '';
+            document.getElementById('viajeGastosCargo').value = v.gastosCargo || '';
+            document.getElementById('viajeEstado').value = v.estado || 'Próximamente';
+            document.getElementById('viajeModal').classList.remove('hidden');
+        }
+        function deleteViaje(id) {
+            if (confirm('¿Desea eliminar este registro de viaje?')) {
+                const v = viajesDB.find(item => item.id === id);
+                viajesDB = viajesDB.filter(item => item.id !== id);
+                localStorage.setItem('viajes_db_v2', JSON.stringify(viajesDB));
+                if (v) registrarAuditoria('Eliminó', 'Viajes', `Evento: ${v.evento}`);
+                renderViajesTable();
+            }
+        }
+        function exportViajesCSV() {
+            let csv = 'Grado,Apellido y Nombre,Destino,Evento,Salida,Llegada,Lugar,Invita,Calidad,GastosCargo,Estado\n';
+            viajesDB.forEach(v => {
+                if (v.personas && v.personas.length > 0) {
+                    v.personas.forEach(p => {
+                        csv += `"${p.grado}","${p.apellido}","${p.destino}","${v.evento}","${v.salida}","${v.llegada}","${v.lugar}","${v.invita}","${v.calidad}","${v.gastosCargo}","${v.estado}"\n`;
+                    });
+                }
+            });
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'control_viajes_dgse.csv';
+            link.click();
         }
     </script>
 </body>
