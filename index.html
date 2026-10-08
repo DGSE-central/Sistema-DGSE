@@ -18,6 +18,7 @@
         .row-contestado:hover { background-color: #dcfce7; }
         .row-archivado { background-color: #f3f4f6; }
         .row-archivado:hover { background-color: #e5e7eb; }
+
         .tab-active {
             border-bottom: 3px solid #2563eb;
             color: #2563eb;
@@ -26,13 +27,14 @@
     </style>
 </head>
 <body class="bg-slate-100 min-h-screen text-slate-800 font-sans pb-12" onload="checkAuth()">
+
     <!-- MODAL CONFIGURACIÓN GOOGLE DRIVE -->
-    <div id="driveConfigModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 hidden">
+    <div id="driveConfigModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
         <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl relative">
             <h2 class="text-lg font-bold mb-2 text-slate-800 flex items-center gap-2">
                 <i class="fa-brands fa-google-drive text-blue-600"></i> Configurar Google Drive
             </h2>
-            <p class="text-xs text-slate-500 mb-4">Ingresa la URL del Web App de Google Apps Script para guardar los PDFs directamente en tu Drive[cite: 5].</p>
+            <p class="text-xs text-slate-500 mb-4">Ingresa la URL del Web App de Google Apps Script para guardar los PDFs directamente en tu Drive.</p>
             <div class="space-y-3">
                 <div>
                     <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">URL de Google Apps Script</label>
@@ -45,15 +47,17 @@
             </div>
         </div>
     </div>
+
     <!-- PANTALLA DE LOGIN -->
     <div id="loginScreen" class="fixed inset-0 bg-slate-900 z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl p-6 md:p-8 max-w-md w-full shadow-2xl text-center border border-slate-700 relative">
+        <div class="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl text-center border border-slate-700 relative">
             <button onclick="openDriveConfigModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-xs" title="Configurar Google Drive">
                 <i class="fa-brands fa-google-drive text-lg"></i>
             </button>
-            <img src="HERLADICO_DGSE_ANTIGUO.png" id="loginLogo" class="h-24 md:h-32 mx-auto mb-4 object-contain" alt="Escudo Oficial DGSE" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'><text y=\'50%\' x=\'50%\' text-anchor=\'middle\' font-size=\'14\' fill=\'%231e293b\'>DGSE</text></svg>'">
-            <h2 class="text-lg md:text-xl font-bold text-slate-800">DIRECCIÓN GENERAL DE SEGURIDAD</h2>
+            <img src="HERLADICO_DGSE_ANTIGUO.png" id="loginLogo" class="h-32 mx-auto mb-4 object-contain" alt="Escudo Oficial DGSE" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'><text y=\'50%\' x=\'50%\' text-anchor=\'middle\' font-size=\'14\' fill=\'%231e293b\'>DGSE</text></svg>'">
+            <h2 class="text-xl font-bold text-slate-800">DIRECCIÓN GENERAL DE SEGURIDAD</h2>
             <p class="text-xs text-slate-500 mb-6 uppercase tracking-wider font-semibold">Sistema de Control</p>
+
             <form onsubmit="handleLogin(event)" class="space-y-4 text-left">
                 <div>
                     <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Usuario</label>
@@ -61,12 +65,7 @@
                 </div>
                 <div>
                     <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Contraseña</label>
-                    <div class="relative">
-                        <input type="password" id="loginPass" required placeholder="••••••••" class="w-full border p-2.5 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none pr-10">
-                        <button type="button" onclick="togglePasswordVisibility()" class="absolute right-3 top-3 text-slate-400 hover:text-slate-600 focus:outline-none">
-                            <i class="fa-solid fa-eye" id="passIcon"></i>
-                        </button>
-                    </div>
+                    <input type="password" id="loginPass" required placeholder="••••••••" class="w-full border p-2.5 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
                 <button type="submit" class="w-full bg-blue-700 hover:bg-blue-600 text-white font-bold py-2.5 rounded-lg transition shadow">
                     Ingresar al Sistema
@@ -74,116 +73,126 @@
             </form>
         </div>
     </div>
+
     <!-- APLICACIÓN PRINCIPAL -->
     <div id="appScreen" class="hidden">
         
         <header class="bg-slate-900 text-white shadow-lg sticky top-0 z-30">
-            <div class="max-w-7xl mx-auto px-3 md:px-4 py-3 flex flex-col md:flex-row justify-between items-center gap-3">
-                <div class="flex items-center space-x-3 w-full md:w-auto justify-between md:justify-start">
-                    <div class="flex items-center space-x-3">
-                        <img src="HERLADICO_DGSE_ANTIGUO.png" class="h-10 md:h-12 w-auto object-contain" alt="Escudo Oficial DGSE" onerror="this.style.display='none'">
-                        <div>
-                            <h1 class="text-sm md:text-lg font-bold tracking-wide leading-tight">DIRECCIÓN GENERAL DE SEGURIDAD</h1>
-                            <p class="text-[10px] md:text-xs text-blue-300 font-medium">Sistema de Control</p>
-                        </div>
+            <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <img src="HERLADICO_DGSE_ANTIGUO.png" class="h-12 w-auto object-contain" alt="Escudo Oficial DGSE" onerror="this.style.display='none'">
+                    <div>
+                        <h1 class="text-lg font-bold tracking-wide leading-tight">DIRECCIÓN GENERAL DE SEGURIDAD</h1>
+                        <p class="text-xs text-blue-300 font-medium">Sistema de Control</p>
                     </div>
                 </div>
-                <div class="flex items-center flex-wrap gap-2 w-full md:w-auto justify-end">
-                    <span id="userInfo" class="text-[11px] md:text-xs bg-slate-800 border border-slate-700 px-2.5 py-1.5 rounded-full text-slate-300"></span>
+                <div class="flex items-center space-x-3">
+                    <span id="userInfo" class="text-xs bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-full text-slate-300"></span>
                     
                     <!-- Botón Config Google Drive -->
-                    <button onclick="openDriveConfigModal()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-blue-300 font-medium px-2.5 py-1.5 rounded-lg text-xs transition flex items-center shadow" title="Configurar Google Drive">
-                        <i class="fa-brands fa-google-drive md:mr-1.5"></i> <span class="hidden sm:inline">Drive</span>
+                    <button onclick="openDriveConfigModal()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-blue-300 font-medium px-3 py-1.5 rounded-lg text-xs transition flex items-center shadow" title="Configurar Google Drive">
+                        <i class="fa-brands fa-google-drive mr-1.5"></i> Drive
                     </button>
+
                     <!-- Botón Auditoría (Solo Admin) -->
-                    <button onclick="openAuditModal()" id="btnAuditLog" class="bg-indigo-900 hover:bg-indigo-800 border border-indigo-700 text-indigo-200 font-medium px-2.5 py-1.5 rounded-lg text-xs transition flex items-center shadow hidden" title="Ver Historial de Modificaciones">
-                        <i class="fa-solid fa-clock-rotate-left md:mr-1.5 text-indigo-400"></i> <span class="hidden sm:inline">Auditoría</span>
+                    <button onclick="openAuditModal()" id="btnAuditLog" class="bg-indigo-900 hover:bg-indigo-800 border border-indigo-700 text-indigo-200 font-medium px-3 py-1.5 rounded-lg text-xs transition flex items-center shadow hidden" title="Ver Historial de Modificaciones">
+                        <i class="fa-solid fa-clock-rotate-left mr-1.5 text-indigo-400"></i> Auditoría
                     </button>
+
                     <!-- Botón Gestión de Personal (Solo Admin) -->
-                    <button onclick="openUsersModal()" id="btnGestionUsuarios" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-medium px-2.5 py-1.5 rounded-lg text-xs transition flex items-center shadow hidden" title="Configurar Acceso de Personal">
-                        <i class="fa-solid fa-users-gear md:mr-1.5"></i> <span class="hidden sm:inline">Personal</span>
+                    <button onclick="openUsersModal()" id="btnGestionUsuarios" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-medium px-3 py-1.5 rounded-lg text-xs transition flex items-center shadow hidden" title="Configurar Acceso de Personal">
+                        <i class="fa-solid fa-users-gear mr-1.5"></i> Personal
                     </button>
-                    <button onclick="handleLogout()" class="text-slate-400 hover:text-white text-xs px-2 py-1 ml-1" title="Cerrar Sesión">
+                    <button onclick="handleLogout()" class="text-slate-400 hover:text-white text-xs px-2 py-1 ml-2" title="Cerrar Sesión">
                         <i class="fa-solid fa-right-from-bracket text-base"></i>
                     </button>
                 </div>
             </div>
         </header>
-        <main class="max-w-7xl mx-auto px-3 md:px-4 mt-4 md:mt-6">
+
+        <main class="max-w-7xl mx-auto px-4 mt-6">
+
             <!-- NAVEGACIÓN POR SOLAPAS -->
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 mb-6 overflow-hidden">
-                <div class="flex border-b border-slate-200 overflow-x-auto scrollbar-thin">
-                    <button onclick="switchTab('registroTab')" id="tabBtnRegistro" class="tab-active px-4 md:px-6 py-3 md:py-4 text-xs md:text-sm font-semibold flex items-center gap-2 focus:outline-none transition whitespace-nowrap">
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 mb-6">
+                <div class="flex border-b border-slate-200 overflow-x-auto">
+                    <button onclick="switchTab('registroTab')" id="tabBtnRegistro" class="tab-active px-6 py-4 text-sm font-semibold flex items-center gap-2 focus:outline-none transition whitespace-nowrap">
                         <i class="fa-solid fa-list-check"></i> Registro de Notas
                     </button>
-                    <button onclick="switchTab('expedientesTab')" id="tabBtnExpedientes" class="px-4 md:px-6 py-3 md:py-4 text-xs md:text-sm font-semibold text-slate-500 flex items-center gap-2 hover:text-slate-700 focus:outline-none transition whitespace-nowrap">
+                    <button onclick="switchTab('expedientesTab')" id="tabBtnExpedientes" class="px-6 py-4 text-sm font-semibold text-slate-500 flex items-center gap-2 hover:text-slate-700 focus:outline-none transition whitespace-nowrap">
                         <i class="fa-solid fa-folder-tree text-amber-600"></i> Expedientes (GDE)
                     </button>
-                    <button onclick="switchTab('viajesTab')" id="tabBtnViajes" class="px-4 md:px-6 py-3 md:py-4 text-xs md:text-sm font-semibold text-slate-500 flex items-center gap-2 hover:text-slate-700 focus:outline-none transition whitespace-nowrap">
+                    <button onclick="switchTab('viajesTab')" id="tabBtnViajes" class="px-6 py-4 text-sm font-semibold text-slate-500 flex items-center gap-2 hover:text-slate-700 focus:outline-none transition whitespace-nowrap">
                         <i class="fa-solid fa-plane-departure text-emerald-600"></i> Control de Viajes
                     </button>
-                    <button onclick="switchTab('estadisticasTab')" id="tabBtnEstadisticas" class="px-4 md:px-6 py-3 md:py-4 text-xs md:text-sm font-semibold text-slate-500 flex items-center gap-2 hover:text-slate-700 focus:outline-none transition whitespace-nowrap">
+                    <button onclick="switchTab('estadisticasTab')" id="tabBtnEstadisticas" class="px-6 py-4 text-sm font-semibold text-slate-500 flex items-center gap-2 hover:text-slate-700 focus:outline-none transition whitespace-nowrap">
                         <i class="fa-solid fa-chart-pie text-indigo-600"></i> Estadísticas DGSE
                     </button>
                 </div>
             </div>
+
             <!-- SOLAPA 1: REGISTRO PRINCIPAL DE NOTAS -->
             <div id="registroTab" class="tab-content">
                 <!-- ALERTA DE NOTAS PRÓXIMAS A VENCER / VENCIDAS (SOLO AQUÍ) -->
                 <div id="alertBanner" class="hidden mb-6 p-4 rounded-xl border shadow-sm transition">
-                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                    <div class="flex items-center justify-between">
                         <div class="flex items-center gap-3" id="alertBannerContent">
                         </div>
-                        <button onclick="filtrarUrgentes()" class="text-xs font-bold px-3 py-1.5 bg-white border rounded-lg shadow-sm hover:bg-slate-50 transition w-full sm:w-auto text-center">
+                        <button onclick="filtrarUrgentes()" class="text-xs font-bold px-3 py-1.5 bg-white border rounded-lg shadow-sm hover:bg-slate-50 transition">
                             Ver Notas Afectadas
                         </button>
                     </div>
                 </div>
-                <div class="bg-white rounded-2xl p-4 md:p-6 shadow-sm border border-slate-200 mb-6">
-                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
+
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 mb-6">
+                    <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
                         <div>
-                            <h2 class="text-lg md:text-xl font-bold text-slate-800 flex items-center gap-2">
+                            <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
                                 <i class="fa-solid fa-envelope-open-text text-blue-600"></i> Registro General de Notas
                             </h2>
                         </div>
-                        <div class="flex flex-wrap items-center gap-2 w-full md:w-auto" id="accionesNotasArea">
-                            <button onclick="openModal()" id="btnNuevaNotaModal" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-3.5 py-2 rounded-lg transition shadow flex items-center gap-1.5 flex-1 md:flex-none justify-center">
-                                <i class="fa-solid fa-plus"></i> Carga Manual
+                        <div class="flex items-center gap-3" id="accionesNotasArea">
+                            <button onclick="openModal()" id="btnNuevaNotaModal" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-3.5 py-2 rounded-lg transition shadow flex items-center gap-1.5">
+                                <i class="fa-solid fa-plus"></i> Carga Manual Nota
                             </button>
-                            <button onclick="toggleAutoUploadSection()" id="btnAutoUpload" class="bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold px-3.5 py-2 rounded-lg transition shadow flex items-center gap-2 flex-1 md:flex-none justify-center">
-                                <i class="fa-solid fa-wand-magic-sparkles text-blue-400"></i> PDF Inteligente
+                            <button onclick="toggleAutoUploadSection()" id="btnAutoUpload" class="bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold px-3.5 py-2 rounded-lg transition shadow flex items-center gap-2">
+                                <i class="fa-solid fa-wand-magic-sparkles text-blue-400"></i> Cargar PDF Inteligente
                             </button>
-                            <button onclick="exportCSV()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-semibold px-3 py-2 rounded-lg transition flex items-center gap-1 justify-center">
+                            <button onclick="exportCSV()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-semibold px-3 py-2 rounded-lg transition flex items-center gap-1">
                                 <i class="fa-solid fa-file-csv"></i> Exportar
                             </button>
                         </div>
                     </div>
+
                     <!-- CARGA AUTOMÁTICA INTELIGENTE -->
-                    <div id="autoUploadSection" class="hidden my-6 p-4 md:p-6 bg-slate-50 border-2 border-blue-200 rounded-2xl transition">
+                    <div id="autoUploadSection" class="hidden my-6 p-6 bg-slate-50 border-2 border-blue-200 rounded-2xl transition">
                         <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-sm md:text-md font-bold text-slate-800 flex items-center gap-2">
+                            <h3 class="text-md font-bold text-slate-800 flex items-center gap-2">
                                 <i class="fa-solid fa-file-pdf text-blue-600"></i> Extracción Automática desde PDF (GDE) y Subida a Drive
                             </h3>
                             <button onclick="toggleAutoUploadSection()" class="text-slate-400 hover:text-slate-600 text-sm">
                                 <i class="fa-solid fa-xmark text-lg"></i>
                             </button>
                         </div>
-                        <div class="max-w-2xl mx-auto border-2 border-dashed border-blue-300 bg-white rounded-2xl p-4 md:p-6 text-center hover:border-blue-500 transition cursor-pointer relative" id="dropZone">
+
+                        <div class="max-w-2xl mx-auto border-2 border-dashed border-blue-300 bg-white rounded-2xl p-6 text-center hover:border-blue-500 transition cursor-pointer relative" id="dropZone">
                             <input type="file" id="pdfFileInput" accept="application/pdf" class="absolute inset-0 opacity-0 cursor-pointer" onchange="handleFileSelect(this.files[0])">
                             <div id="dropZoneContent">
                                 <i class="fa-solid fa-cloud-arrow-up text-3xl text-blue-500 mb-2"></i>
                                 <p class="font-bold text-slate-700 text-sm" id="dropText">Haz clic o arrastra aquí la nota en PDF</p>
                             </div>
                         </div>
+
                         <div id="pdfStatus" class="hidden max-w-2xl mx-auto mt-4 p-3 rounded-xl text-center text-xs font-semibold"></div>
+
                         <div id="parsedResultForm" class="hidden max-w-3xl mx-auto mt-6 border-t pt-4 space-y-4">
-                            <div class="flex justify-between items-center flex-wrap gap-2">
+                            <div class="flex justify-between items-center">
                                 <h4 class="font-bold text-sm text-slate-800 flex items-center gap-2">
                                     <i class="fa-solid fa-check-double text-green-500"></i> Datos Detectados del Documento
                                 </h4>
                                 <span class="text-xs bg-green-100 text-green-800 font-bold px-2 py-0.5 rounded-full">Verificar antes de guardar</span>
                             </div>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+                            <div class="grid grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-xs font-semibold text-slate-600 mb-1">Fecha</label>
                                     <input type="date" id="autoFecha" class="w-full border p-2 rounded-lg text-sm bg-white font-bold text-blue-900 focus:ring-2 focus:ring-blue-500" onchange="recalcularVencimientoManual()">
@@ -193,15 +202,18 @@
                                     <input type="text" id="autoPromotor" class="w-full border p-2 rounded-lg text-sm bg-white font-bold text-slate-700">
                                 </div>
                             </div>
+
                             <div>
                                 <label class="block text-xs font-semibold text-slate-600 mb-1">Número de Nota</label>
                                 <input type="text" id="autoNroNota" class="w-full border p-2 rounded-lg text-sm bg-white font-bold text-blue-800 focus:ring-2 focus:ring-blue-500 focus:outline-none">
                             </div>
+
                             <div>
                                 <label class="block text-xs font-semibold text-slate-600 mb-1">Referencia</label>
                                 <textarea id="autoReferencia" rows="2" class="w-full border p-2.5 rounded-lg text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none font-medium"></textarea>
                             </div>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+                            <div class="grid grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-xs font-semibold text-slate-600 mb-1">Destinatario</label>
                                     <input type="text" id="autoAccion" class="w-full border p-2 rounded-lg text-sm bg-white font-bold text-blue-700">
@@ -211,6 +223,7 @@
                                     <input type="date" id="autoLimite" class="w-full border p-2 rounded-lg text-sm bg-white font-bold text-red-600">
                                 </div>
                             </div>
+
                             <div class="flex justify-end gap-3 pt-2">
                                 <button onclick="clearAutoForm()" class="px-3 py-1.5 border rounded-lg text-xs hover:bg-slate-100">Descartar</button>
                                 <button onclick="confirmAutoSave()" class="px-4 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-semibold hover:bg-blue-500 shadow">
@@ -219,35 +232,38 @@
                             </div>
                         </div>
                     </div>
-                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 mb-6">
-                        <div class="bg-white p-3 md:p-4 rounded-xl shadow-sm border border-slate-200">
-                            <p class="text-[11px] md:text-xs text-slate-500 uppercase font-semibold">Total Registros</p>
-                            <p id="metricTotal" class="text-xl md:text-2xl font-bold text-slate-800 mt-1">0</p>
+
+                    <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                            <p class="text-xs text-slate-500 uppercase font-semibold">Total Registros</p>
+                            <p id="metricTotal" class="text-2xl font-bold text-slate-800 mt-1">0</p>
                         </div>
-                        <div class="bg-yellow-50 p-3 md:p-4 rounded-xl shadow-sm border border-yellow-200 cursor-pointer" onclick="filterByMetric('Pendiente')">
-                            <p class="text-[11px] md:text-xs text-yellow-700 uppercase font-semibold">Pendientes</p>
-                            <p id="metricPendientes" class="text-xl md:text-2xl font-bold text-yellow-800 mt-1">0</p>
+                        <div class="bg-yellow-50 p-4 rounded-xl shadow-sm border border-yellow-200 cursor-pointer" onclick="filterByMetric('Pendiente')">
+                            <p class="text-xs text-yellow-700 uppercase font-semibold">Pendientes</p>
+                            <p id="metricPendientes" class="text-2xl font-bold text-yellow-800 mt-1">0</p>
                         </div>
-                        <div class="bg-orange-50 p-3 md:p-4 rounded-xl shadow-sm border border-orange-200 cursor-pointer" onclick="filterByMetric('En espera')">
-                            <p class="text-[11px] md:text-xs text-orange-700 uppercase font-semibold">En Espera</p>
-                            <p id="metricEspera" class="text-xl md:text-2xl font-bold text-orange-800 mt-1">0</p>
+                        <div class="bg-orange-50 p-4 rounded-xl shadow-sm border border-orange-200 cursor-pointer" onclick="filterByMetric('En espera')">
+                            <p class="text-xs text-orange-700 uppercase font-semibold">En Espera</p>
+                            <p id="metricEspera" class="text-2xl font-bold text-orange-800 mt-1">0</p>
                         </div>
-                        <div class="bg-green-50 p-3 md:p-4 rounded-xl shadow-sm border border-green-200 cursor-pointer" onclick="filterByMetric('Contestado')">
-                            <p class="text-[11px] md:text-xs text-green-700 uppercase font-semibold">Contestados</p>
-                            <p id="metricContestados" class="text-xl md:text-2xl font-bold text-green-800 mt-1">0</p>
+                        <div class="bg-green-50 p-4 rounded-xl shadow-sm border border-green-200 cursor-pointer" onclick="filterByMetric('Contestado')">
+                            <p class="text-xs text-green-700 uppercase font-semibold">Contestados</p>
+                            <p id="metricContestados" class="text-2xl font-bold text-green-800 mt-1">0</p>
                         </div>
-                        <div class="bg-slate-100 p-3 md:p-4 rounded-xl shadow-sm border border-slate-300 cursor-pointer col-span-2 sm:col-span-1" onclick="filterByMetric('Archivado')">
-                            <p class="text-[11px] md:text-xs text-slate-600 uppercase font-semibold">Archivados</p>
-                            <p id="metricArchivados" class="text-xl md:text-2xl font-bold text-slate-700 mt-1">0</p>
+                        <div class="bg-slate-100 p-4 rounded-xl shadow-sm border border-slate-300 cursor-pointer" onclick="filterByMetric('Archivado')">
+                            <p class="text-xs text-slate-600 uppercase font-semibold">Archivados</p>
+                            <p id="metricArchivados" class="text-2xl font-bold text-slate-700 mt-1">0</p>
                         </div>
                     </div>
+
                     <!-- BUSCADOR Y FILTROS -->
-                    <div class="flex flex-col xl:flex-row justify-between items-stretch xl:items-center gap-3">
+                    <div class="flex flex-col xl:flex-row justify-between items-center gap-4">
                         <div class="flex flex-col md:flex-row items-center gap-3 w-full xl:w-auto">
                             <div class="relative w-full md:w-72">
                                 <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400"></i>
-                                <input type="text" id="searchInput" oninput="renderTable()" placeholder="Buscar nota, referencia..." class="w-full pl-9 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <input type="text" id="searchInput" oninput="renderTable()" placeholder="Buscar nro de nota, referencia, promotor..." class="w-full pl-9 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                             </div>
+
                             <div class="flex items-center gap-1.5 w-full md:w-auto">
                                 <select id="filterMes" onchange="renderTable()" class="border rounded-lg text-sm px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 w-full md:w-auto">
                                     <option value="TODOS">Todos</option>
@@ -268,6 +284,7 @@
                                     Recibidas: 0
                                 </span>
                             </div>
+
                             <div class="flex items-center gap-1.5 w-full md:w-auto">
                                 <select id="filterPromotor" onchange="renderTable()" class="border rounded-lg text-sm px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 w-full md:w-auto">
                                     <option value="TODOS">Promotores</option>
@@ -277,8 +294,9 @@
                                 </span>
                             </div>
                         </div>
+
                         <div class="flex items-center space-x-3 w-full xl:w-auto justify-end">
-                            <select id="filterEstado" onchange="renderTable()" class="border rounded-lg text-sm px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 w-full xl:w-auto">
+                            <select id="filterEstado" onchange="renderTable()" class="border rounded-lg text-sm px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 <option value="TODOS">Todos los Estados</option>
                                 <option value="URGENTES">🚨 Vencidos y Próximos</option>
                                 <option value="Pendiente">Pendientes</option>
@@ -289,8 +307,9 @@
                         </div>
                     </div>
                 </div>
+
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
-                    <table class="w-full text-left text-xs md:text-sm min-w-[800px]">
+                    <table class="w-full text-left text-xs md:text-sm">
                         <thead class="bg-slate-800 text-white uppercase text-xs">
                             <tr>
                                 <th class="p-3">Fecha Firma</th>
@@ -310,48 +329,51 @@
                     </table>
                 </div>
             </div>
+
             <!-- SOLAPA 2: REGISTRO DE EXPEDIENTES (GDE) -->
             <div id="expedientesTab" class="tab-content hidden">
-                <div class="bg-white rounded-2xl p-4 md:p-6 shadow-sm border border-slate-200 mb-6">
-                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 mb-6">
+                    <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
                         <div>
-                            <h2 class="text-lg md:text-xl font-bold text-slate-800 flex items-center gap-2">
+                            <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
                                 <i class="fa-solid fa-folder-tree text-amber-600"></i>Expedientes (GDE)
                             </h2>
                         </div>
-                        <div class="flex items-center gap-3 w-full md:w-auto">
-                            <button onclick="openExpedienteModal()" id="btnNuevoExpediente" class="bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold px-3.5 py-2 rounded-lg transition shadow flex items-center gap-1.5 flex-1 md:flex-none justify-center">
+                        <div class="flex items-center gap-3">
+                            <button onclick="openExpedienteModal()" id="btnNuevoExpediente" class="bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold px-3.5 py-2 rounded-lg transition shadow flex items-center gap-1.5">
                                 <i class="fa-solid fa-plus"></i> Carga Expediente
                             </button>
-                            <button onclick="exportExpedientesCSV()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-semibold px-3 py-2 rounded-lg transition flex items-center gap-1 justify-center">
+                            <button onclick="exportExpedientesCSV()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-semibold px-3 py-2 rounded-lg transition flex items-center gap-1">
                                 <i class="fa-solid fa-download"></i> Exportar
                             </button>
                         </div>
                     </div>
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+
+                    <div class="grid grid-cols-2 md:grid-cols-6 gap-3 mb-6">
                         <div class="bg-blue-50 p-3 rounded-xl shadow-sm border border-blue-200 cursor-pointer hover:bg-blue-100 transition" onclick="filterExpByMetric('En revision DGSE')">
                             <p class="text-[11px] text-blue-800 uppercase font-bold">En Revisión DGSE</p>
-                            <p id="expMetricRevision" class="text-xl md:text-2xl font-bold text-blue-900 mt-1">0</p>
+                            <p id="expMetricRevision" class="text-2xl font-bold text-blue-900 mt-1">0</p>
                         </div>
                         <div class="bg-red-50 p-3 rounded-xl shadow-sm border border-red-200 cursor-pointer hover:bg-red-100 transition" onclick="filterExpByMetric('Devuelto')">
                             <p class="text-[11px] text-red-800 uppercase font-bold">Devueltos</p>
-                            <p id="expMetricDevueltos" class="text-xl md:text-2xl font-bold text-red-900 mt-1">0</p>
+                            <p id="expMetricDevueltos" class="text-2xl font-bold text-red-900 mt-1">0</p>
                         </div>
                         <div class="bg-slate-100 p-3 rounded-xl shadow-sm border border-slate-300 cursor-pointer hover:bg-slate-200 transition" onclick="filterExpByMetric('Finalizado')">
                             <p class="text-[11px] text-slate-700 uppercase font-bold">Finalizados</p>
-                            <p id="expMetricFinalizados" class="text-xl md:text-2xl font-bold text-slate-800 mt-1">0</p>
+                            <p id="expMetricFinalizados" class="text-2xl font-bold text-slate-800 mt-1">0</p>
                         </div>
                         <div class="bg-rose-100 p-3 rounded-xl shadow-sm border border-rose-300 cursor-pointer hover:bg-rose-200 transition" onclick="filterExpByMetric('ANTIGUOS')" title="Expedientes con más de 30 días en la DGSE sin finalizar">
                             <p class="text-[11px] text-rose-900 uppercase font-bold flex items-center gap-1">
                                 <i class="fa-solid fa-clock-rotate-left text-rose-600"></i> +30 Días DGSE
                             </p>
-                            <p id="expMetricAntiguos" class="text-xl md:text-2xl font-bold text-rose-900 mt-1">0</p>
+                            <p id="expMetricAntiguos" class="text-2xl font-bold text-rose-900 mt-1">0</p>
                         </div>
                     </div>
+
                     <div class="flex flex-col md:flex-row justify-between items-center gap-3 mb-4">
                         <div class="relative w-full md:w-96">
                             <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400"></i>
-                            <input type="text" id="searchExpInput" oninput="renderExpedientesTable()" placeholder="Buscar por Nro Expediente, Tema..." class="w-full pl-9 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
+                            <input type="text" id="searchExpInput" oninput="renderExpedientesTable()" placeholder="Buscar por Nro Expediente, Tema / Trámite, Proveniente..." class="w-full pl-9 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
                         </div>
                         <div class="flex items-center gap-2 w-full md:w-auto">
                             <select id="filterExpEstado" onchange="renderExpedientesTable()" class="border rounded-lg text-sm px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 w-full md:w-auto">
@@ -363,8 +385,9 @@
                             </select>
                         </div>
                     </div>
+
                     <div class="overflow-x-auto border rounded-xl">
-                        <table class="w-full text-left text-xs md:text-sm min-w-[700px]">
+                        <table class="w-full text-left text-xs md:text-sm">
                             <thead class="bg-slate-800 text-white uppercase text-xs">
                                 <tr>
                                     <th class="p-3">Fecha</th>
@@ -384,70 +407,74 @@
                     </div>
                 </div>
             </div>
+
             <!-- SOLAPA 3: CONTROL DE VIAJES -->
             <div id="viajesTab" class="tab-content hidden">
-                <div class="bg-white rounded-2xl p-4 md:p-6 shadow-sm border border-slate-200 mb-6">
-                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 mb-6">
+                    <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
                         <div>
-                            <h2 class="text-lg md:text-xl font-bold text-slate-800 flex items-center gap-2">
+                            <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
                                 <i class="fa-solid fa-plane-departure text-emerald-600"></i> Control de Viajes y Comisiones DGSE
                             </h2>
                             <p class="text-xs text-slate-500">Planilla de viajes con intervención de la Dirección General de Seguridad.</p>
                         </div>
-                        <div class="flex items-center gap-3 w-full md:w-auto">
-                            <button onclick="openViajeModal()" id="btnNuevoViaje" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-3.5 py-2 rounded-lg transition shadow flex items-center gap-1.5 flex-1 md:flex-none justify-center">
-                                <i class="fa-solid fa-plus"></i> Carga Viaje
+                        <div class="flex items-center gap-3">
+                            <button onclick="openViajeModal()" id="btnNuevoViaje" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-3.5 py-2 rounded-lg transition shadow flex items-center gap-1.5">
+                                <i class="fa-solid fa-plus"></i> Carga Manual Viaje
                             </button>
-                            <button onclick="exportViajesCSV()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-semibold px-3 py-2 rounded-lg transition flex items-center gap-1 justify-center">
+                            <button onclick="exportViajesCSV()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-semibold px-3 py-2 rounded-lg transition flex items-center gap-1">
                                 <i class="fa-solid fa-download"></i> Exportar
                             </button>
                         </div>
                     </div>
+
                     <!-- NUEVOS AVISOS / MÉTRICAS DE VIAJES -->
-                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 mb-6">
+                    <div class="grid grid-cols-2 md:grid-cols-6 gap-3 mb-6">
                         <div class="bg-sky-50 p-3 rounded-xl shadow-sm border border-sky-200">
                             <p class="text-[11px] text-sky-800 uppercase font-bold flex items-center gap-1">
                                 <i class="fa-solid fa-earth-americas text-sky-600"></i> Al Exterior
                             </p>
-                            <p id="viajesMetricExterior" class="text-xl md:text-2xl font-bold text-sky-900 mt-1">0</p>
+                            <p id="viajesMetricExterior" class="text-2xl font-bold text-sky-900 mt-1">0</p>
                         </div>
                         <div class="bg-emerald-50 p-3 rounded-xl shadow-sm border border-emerald-200">
                             <p class="text-[11px] text-emerald-800 uppercase font-bold flex items-center gap-1">
                                 <i class="fa-solid fa-map-location-dot text-emerald-600"></i> En Argentina
                             </p>
-                            <p id="viajesMetricPais" class="text-xl md:text-2xl font-bold text-emerald-900 mt-1">0</p>
+                            <p id="viajesMetricPais" class="text-2xl font-bold text-emerald-900 mt-1">0</p>
                         </div>
                         <div class="bg-indigo-50 p-3 rounded-xl shadow-sm border border-indigo-200">
                             <p class="text-[11px] text-indigo-800 uppercase font-bold flex items-center gap-1">
                                 <i class="fa-solid fa-circle-check text-indigo-600"></i> Realizados
                             </p>
-                            <p id="viajesMetricRealizados" class="text-xl md:text-2xl font-bold text-indigo-900 mt-1">0</p>
+                            <p id="viajesMetricRealizados" class="text-2xl font-bold text-indigo-900 mt-1">0</p>
                         </div>
                         <div class="bg-red-50 p-3 rounded-xl shadow-sm border border-red-200">
                             <p class="text-[11px] text-red-800 uppercase font-bold flex items-center gap-1">
                                 <i class="fa-solid fa-ban text-red-600"></i> Rechazados
                             </p>
-                            <p id="viajesMetricRechazados" class="text-xl md:text-2xl font-bold text-red-900 mt-1">0</p>
+                            <p id="viajesMetricRechazados" class="text-2xl font-bold text-red-900 mt-1">0</p>
                         </div>
                         <div class="bg-amber-50 p-3 rounded-xl shadow-sm border border-amber-200">
                             <p class="text-[11px] text-amber-800 uppercase font-bold flex items-center gap-1">
                                 <i class="fa-solid fa-clock text-amber-600"></i> Próximos
                             </p>
-                            <p id="viajesMetricProximos" class="text-xl md:text-2xl font-bold text-amber-900 mt-1">0</p>
+                            <p id="viajesMetricProximos" class="text-2xl font-bold text-amber-900 mt-1">0</p>
                         </div>
                         <div class="bg-purple-50 p-3 rounded-xl shadow-sm border border-purple-200" title="Personas únicas en el exterior que han hecho viajes">
                             <p class="text-[11px] text-purple-800 uppercase font-bold flex items-center gap-1">
                                 <i class="fa-solid fa-user-shield text-purple-600"></i> Pers. Exterior
                             </p>
-                            <p id="viajesMetricPersExterior" class="text-xl md:text-2xl font-bold text-purple-900 mt-1">0</p>
+                            <p id="viajesMetricPersExterior" class="text-2xl font-bold text-purple-900 mt-1">0</p>
                         </div>
                     </div>
+
                     <div class="relative mb-4">
                         <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400"></i>
-                        <input type="text" id="searchViajesInput" oninput="renderViajesTable()" placeholder="Buscar por Grado, Apellido, Destino, Evento..." class="w-full pl-9 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                        <input type="text" id="searchViajesInput" oninput="renderViajesTable()" placeholder="Buscar por Grado, Apellido, Destino, Evento, Lugar, Invita, Calidad..." class="w-full pl-9 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
                     </div>
+
                     <div class="overflow-x-auto border rounded-xl">
-                        <table class="w-full text-left text-xs md:text-sm min-w-[900px]">
+                        <table class="w-full text-left text-xs md:text-sm">
                             <thead class="bg-slate-800 text-white uppercase text-xs">
                                 <tr>
                                     <th class="p-3">Grado</th>
@@ -470,12 +497,13 @@
                     </div>
                 </div>
             </div>
+
             <!-- SOLAPA 4: ESTADÍSTICAS DGSE -->
             <div id="estadisticasTab" class="tab-content hidden">
-                <div class="bg-white rounded-2xl p-4 md:p-6 shadow-sm border border-slate-200 mb-6">
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 mb-6">
                     <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
                         <div>
-                            <h2 class="text-lg md:text-xl font-bold text-slate-800 flex items-center gap-2">
+                            <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
                                 <i class="fa-solid fa-chart-pie text-indigo-600"></i> Estadísticas DGSE
                             </h2>
                             <p class="text-xs text-slate-500"></p>
@@ -488,21 +516,24 @@
                     </div>
                 </div>
             </div>
+
         </main>
     </div>
+
     <!-- MODAL HISTORIAL DE AUDITORÍA (SOLO ADMIN) -->
-    <div id="auditModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-2xl w-full max-w-3xl p-4 md:p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+    <div id="auditModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-2xl w-full max-w-3xl p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-base md:text-lg font-bold text-slate-800 flex items-center gap-2">
-                    <i class="fa-solid fa-clock-rotate-left text-indigo-600"></i> Historial de Auditoría
+                <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-clock-rotate-left text-indigo-600"></i> Historial de Auditoría (Modificaciones y Eliminaciones)
                 </h2>
                 <button onclick="closeAuditModal()" class="text-slate-400 hover:text-slate-600 text-sm">
                     <i class="fa-solid fa-xmark text-lg"></i>
                 </button>
             </div>
-            <div class="border rounded-xl overflow-hidden mb-4 overflow-x-auto">
-                <table class="w-full text-left text-xs min-w-[500px]">
+
+            <div class="border rounded-xl overflow-hidden mb-4">
+                <table class="w-full text-left text-xs">
                     <thead class="bg-slate-800 text-white uppercase text-[10px]">
                         <tr>
                             <th class="p-2.5">Fecha y Hora</th>
@@ -516,23 +547,26 @@
                     </tbody>
                 </table>
             </div>
-            <div class="flex flex-col sm:flex-row justify-between items-center gap-2">
-                <button onclick="clearAuditLog()" class="bg-red-50 hover:bg-red-100 text-red-700 text-xs font-semibold px-3 py-2 rounded-lg border border-red-200 transition w-full sm:w-auto">
+
+            <div class="flex justify-between items-center">
+                <button onclick="clearAuditLog()" class="bg-red-50 hover:bg-red-100 text-red-700 text-xs font-semibold px-3 py-2 rounded-lg border border-red-200 transition">
                     <i class="fa-solid fa-trash mr-1"></i> Limpiar Historial
                 </button>
-                <button type="button" onclick="closeAuditModal()" class="px-4 py-2 border rounded-lg text-xs font-semibold hover:bg-slate-100 w-full sm:w-auto">Cerrar</button>
+                <button type="button" onclick="closeAuditModal()" class="px-4 py-2 border rounded-lg text-xs font-semibold hover:bg-slate-100">Cerrar</button>
             </div>
         </div>
     </div>
+
     <!-- MODAL GESTIÓN DE ACCESOS / PERSONAL (SOLO ADMINISTRADOR) -->
-    <div id="usersModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-2xl w-full max-w-xl p-4 md:p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
-            <h2 class="text-base md:text-lg font-bold mb-4 text-slate-800 flex items-center gap-2">
+    <div id="usersModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-2xl w-full max-w-xl p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <h2 class="text-lg font-bold mb-4 text-slate-800 flex items-center gap-2">
                 <i class="fa-solid fa-users-gear text-blue-600"></i> Configuración de Acceso de Personal
             </h2>
+
             <form onsubmit="saveUser(event)" class="bg-slate-50 p-4 rounded-xl border mb-6 space-y-3">
                 <h3 class="text-xs font-bold uppercase text-slate-700">Agregar o Modificar Usuario</h3>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div class="grid grid-cols-3 gap-3">
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 mb-1">Usuario</label>
                         <input type="text" id="newUser" required placeholder="Ej. jperez" class="w-full border p-2 rounded-lg text-xs">
@@ -556,9 +590,10 @@
                     </button>
                 </div>
             </form>
+
             <h3 class="text-xs font-bold uppercase text-slate-700 mb-2">Personal Autorizado</h3>
-            <div class="border rounded-xl overflow-hidden mb-4 overflow-x-auto">
-                <table class="w-full text-left text-xs min-w-[350px]">
+            <div class="border rounded-xl overflow-hidden mb-4">
+                <table class="w-full text-left text-xs">
                     <thead class="bg-slate-800 text-white uppercase text-[10px]">
                         <tr>
                             <th class="p-2.5">Usuario</th>
@@ -571,19 +606,21 @@
                     </tbody>
                 </table>
             </div>
+
             <div class="flex justify-end">
                 <button type="button" onclick="closeUsersModal()" class="px-4 py-2 border rounded-lg text-xs font-semibold hover:bg-slate-100">Cerrar</button>
             </div>
         </div>
     </div>
+
     <!-- MODAL CARGA MANUAL DE NOTA -->
-    <div id="itemModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-2xl w-full max-w-2xl p-4 md:p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
-            <h2 id="modalTitle" class="text-lg md:text-xl font-bold mb-4 text-slate-800">Nueva Nota</h2>
+    <div id="itemModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-2xl w-full max-w-2xl p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <h2 id="modalTitle" class="text-xl font-bold mb-4 text-slate-800">Nueva Nota</h2>
             
             <form id="notaForm" onsubmit="saveNota(event)" class="space-y-4">
                 <input type="hidden" id="notaId">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Fecha</label>
                         <input type="date" id="fecha" required class="w-full border p-2 rounded-lg text-sm">
@@ -593,15 +630,18 @@
                         <input type="text" id="promotor" required placeholder="Ej. DIOP, SBGC" class="w-full border p-2 rounded-lg text-sm">
                     </div>
                 </div>
+
                 <div>
                     <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Número de Nota</label>
                     <input type="text" id="nroNota" required placeholder="Ej. NO-2026-93527297-APN-PNAR#PNA" class="w-full border p-2 rounded-lg text-sm font-bold text-blue-800">
                 </div>
+
                 <div>
                     <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Referencia</label>
                     <textarea id="referencia" required rows="2" placeholder="Detalle del expediente o nota..." class="w-full border p-2 rounded-lg text-sm"></textarea>
                 </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+                <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Destinatario</label>
                         <input type="text" id="accion" placeholder="Ej. AGAL, MSG, DEDU" class="w-full border p-2 rounded-lg text-sm">
@@ -611,7 +651,8 @@
                         <input type="date" id="limite" class="w-full border p-2 rounded-lg text-sm">
                     </div>
                 </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+                <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Estado</label>
                         <select id="estado" class="w-full border p-2 rounded-lg text-sm bg-white">
@@ -626,6 +667,7 @@
                         <input type="text" id="destino" placeholder="Ej. ARCH" class="w-full border p-2 rounded-lg text-sm">
                     </div>
                 </div>
+
                 <div>
                     <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Observaciones</label>
                     <input type="text" id="respuesta" placeholder="Detalle de contestación u observaciones..." class="w-full border p-2 rounded-lg text-sm mb-2">
@@ -633,6 +675,7 @@
                     <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Adjuntar Respuesta (PDFs Múltiples)</label>
                     <input type="file" id="respuestaArchivos" multiple accept="application/pdf" class="w-full border p-2 rounded-lg text-xs bg-slate-50">
                 </div>
+
                 <div class="flex justify-end space-x-3 pt-4">
                     <button type="button" onclick="closeModal()" class="px-4 py-2 border rounded-lg text-sm hover:bg-slate-100">Cancelar</button>
                     <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-500 font-medium">Guardar Nota</button>
@@ -640,15 +683,16 @@
             </form>
         </div>
     </div>
+
     <!-- MODAL CARGA MANUAL / EDICIÓN DE EXPEDIENTE -->
-    <div id="expModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-2xl w-full max-w-xl p-4 md:p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
-            <h2 id="expModalTitle" class="text-lg md:text-xl font-bold mb-4 text-slate-800 flex items-center gap-2">
+    <div id="expModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-2xl w-full max-w-xl p-6 shadow-2xl relative">
+            <h2 id="expModalTitle" class="text-xl font-bold mb-4 text-slate-800 flex items-center gap-2">
                 <i class="fa-solid fa-folder-plus text-amber-600"></i> Registrar / Editar Expediente
             </h2>
             <form onsubmit="saveExpediente(event)" class="space-y-4">
                 <input type="hidden" id="expId">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Fecha de Ingreso</label>
                         <input type="date" id="expFecha" required class="w-full border p-2 rounded-lg text-sm">
@@ -670,7 +714,7 @@
                     <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">IF Intervención DGSE (Documentos PDF/GDE)</label>
                     <input type="file" id="expAdjuntoIF" multiple accept="application/pdf" class="w-full border p-2 rounded-lg text-xs bg-slate-50">
                 </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Estado</label>
                         <select id="expEstado" class="w-full border p-2 rounded-lg text-sm bg-white font-semibold">
@@ -697,10 +741,11 @@
             </form>
         </div>
     </div>
+
     <!-- MODAL CARGA MANUAL / EDICIÓN DE VIAJE -->
-    <div id="viajeModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-2xl w-full max-w-3xl p-4 md:p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
-            <h2 id="viajeModalTitle" class="text-lg md:text-xl font-bold mb-4 text-slate-800 flex items-center gap-2">
+    <div id="viajeModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-2xl w-full max-w-3xl p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <h2 id="viajeModalTitle" class="text-xl font-bold mb-4 text-slate-800 flex items-center gap-2">
                 <i class="fa-solid fa-plane-circle-check text-emerald-600"></i> Registrar Comisión / Viaje
             </h2>
             <form onsubmit="saveViajeManual(event)" class="space-y-4">
@@ -718,7 +763,8 @@
                         <!-- Las filas de personas se cargarán dinámicamente aquí con Grado y Apellido separados -->
                     </div>
                 </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+                <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Lugar general / País / Ciudad</label>
                         <input type="text" id="viajeLugar" placeholder="Ej. YORKTOWN, EEUU o BUENOS AIRES, ARGENTINA" class="w-full border p-2 rounded-lg text-sm">
@@ -728,7 +774,7 @@
                         <input type="text" id="viajeEvento" required placeholder="Ej. CURSO INTERNACIONAL DE OFICIALES" class="w-full border p-2 rounded-lg text-sm">
                     </div>
                 </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Fecha Partida</label>
                         <input type="date" id="viajeSalida" required class="w-full border p-2 rounded-lg text-sm font-semibold text-emerald-800">
@@ -738,7 +784,7 @@
                         <input type="date" id="viajeLlegada" required class="w-full border p-2 rounded-lg text-sm font-semibold text-red-800">
                     </div>
                 </div>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div class="grid grid-cols-3 gap-3">
                     <div>
                         <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Invita</label>
                         <input type="text" id="viajeInvita" placeholder="Ej. GUARDIA COSTERA EE.UU." class="w-full border p-2 rounded-lg text-sm">
@@ -768,34 +814,28 @@
             </form>
         </div>
     </div>
+
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
         let GOOGLE_SCRIPT_URL = localStorage.getItem('dgse_script_url') || '';
+
         function openDriveConfigModal() {
             document.getElementById('inputScriptUrl').value = GOOGLE_SCRIPT_URL;
             document.getElementById('driveConfigModal').classList.remove('hidden');
         }
+
         function closeDriveConfigModal() {
             document.getElementById('driveConfigModal').classList.add('hidden');
         }
+
         function saveDriveConfig() {
             GOOGLE_SCRIPT_URL = document.getElementById('inputScriptUrl').value.trim();
             localStorage.setItem('dgse_script_url', GOOGLE_SCRIPT_URL);
             closeDriveConfigModal();
             alert('Configuración de Google Drive guardada correctamente.');
         }
-        // Función para alternar visibilidad de contraseña (incorporada de prueba 2.0)
-        function togglePasswordVisibility() {
-            const passInput = document.getElementById('loginPass');
-            const passIcon = document.getElementById('passIcon');
-            if (passInput.type === 'password') {
-                passInput.type = 'text';
-                passIcon.className = 'fa-solid fa-eye-slash';
-            } else {
-                passInput.type = 'password';
-                passIcon.className = 'fa-solid fa-eye';
-            }
-        }
+
         async function subirPDFAGoogleDrive(base64Completo, nombreArchivo) {
             if (!GOOGLE_SCRIPT_URL) {
                 return null;
@@ -820,28 +860,36 @@
             }
             return null;
         }
+
         let usersDB = JSON.parse(localStorage.getItem('users_db')) || {
             'admin': { pass: 'admin123', role: 'Administrador' },
             'operador': { pass: 'operador123', role: 'Operador' },
             'consulta': { pass: '1234', role: 'Consulta' }
         };
+
         let auditLogDB = JSON.parse(localStorage.getItem('audit_log_db')) || [];
+
         let currentUser = JSON.parse(sessionStorage.getItem('activeUser')) || null;
+
         let notas = JSON.parse(localStorage.getItem('notas_db')) || [
             { id: 1, fecha: '2026-05-18', promotor: 'DIOP', nroNota: 'NO-2026-1029381-APN-DIOP#PNA', referencia: 'Plan anual de navegación.', accion: 'DEDU', limite: '', estado: 'Contestado', respuesta: 'CON CONOCIMIENTO Sr DGSE', destino: 'ARCH', adjuntosRespuesta: [] },
             { id: 2, fecha: '2026-08-20', promotor: 'DIGE', nroNota: 'NO-2026-2049182-APN-DIGE#PNA', referencia: 'REVISIÓN DE LA PUBLICACIÓN R.I. PNA 3-14 "C"', accion: 'DIOP', limite: '2026-10-05', estado: 'Pendiente', respuesta: '', destino: 'ARCH', adjuntosRespuesta: [] }
         ];
+
         let expedientesDB = JSON.parse(localStorage.getItem('expedientes_db')) || [
             { id: 1, fecha: '2026-08-15', nroExpediente: 'EX-2026-88392019--APN-DGSE#PNA', iniciador: 'DIOP', extracto: 'Adquisición de equipamiento informático para la Dirección General.', estado: 'En revision DGSE', pase: 'DGSE', observaciones: 'Pendiente de firma del Director.', adjuntosIF: [] }
         ];
+
         let viajesDB = JSON.parse(localStorage.getItem('viajes_db_v2'));
         if (!viajesDB) {
             viajesDB = [];
             localStorage.setItem('viajes_db_v2', JSON.stringify(viajesDB));
         }
+
         let autoPdfFileBase64 = null;
         let currentFileName = '';
         let globalExtractedText = '';
+
         function registrarAuditoria(accion, modulo, detalle) {
             if (!currentUser) return;
             const ahora = new Date();
@@ -855,30 +903,37 @@
                 modulo: modulo, 
                 detalle: detalle
             };
+
             auditLogDB.unshift(registro);
             if (auditLogDB.length > 100) auditLogDB.pop();
             localStorage.setItem('audit_log_db', JSON.stringify(auditLogDB));
         }
+
         function openAuditModal() {
             if (currentUser && currentUser.role !== 'Administrador') return;
             renderAuditTable();
             document.getElementById('auditModal').classList.remove('hidden');
         }
+
         function closeAuditModal() {
             document.getElementById('auditModal').classList.add('hidden');
         }
+
         function renderAuditTable() {
             const body = document.getElementById('auditTableBody');
             body.innerHTML = '';
+
             if (auditLogDB.length === 0) {
                 body.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-400">No hay registros de auditoría aún.</td></tr>`;
                 return;
             }
+
             auditLogDB.forEach(log => {
                 let badgeColor = 'bg-blue-50 text-blue-700 border-blue-200';
                 if (log.accion === 'Eliminó') badgeColor = 'bg-red-50 text-red-700 border-red-200';
                 if (log.accion === 'Modificó') badgeColor = 'bg-amber-50 text-amber-700 border-amber-200';
                 if (log.accion === 'Creó') badgeColor = 'bg-emerald-50 text-emerald-700 border-emerald-200';
+
                 body.innerHTML += `
                     <tr class="border-b hover:bg-slate-50">
                         <td class="p-2.5 whitespace-nowrap text-slate-600">${log.fechaHora}</td>
@@ -890,6 +945,7 @@
                 `;
             });
         }
+
         function clearAuditLog() {
             if (confirm('¿Desea limpiar todo el historial de auditoría?')) {
                 auditLogDB = [];
@@ -897,6 +953,7 @@
                 renderAuditTable();
             }
         }
+
         function formatFechaLatina(fechaStr) {
             if (!fechaStr) return '-';
             const partes = fechaStr.split('-');
@@ -905,27 +962,35 @@
             }
             return fechaStr;
         }
+
         function toggleAutoUploadSection() {
             const section = document.getElementById('autoUploadSection');
             section.classList.toggle('hidden');
         }
+
         function populatePromotoresOptions() {
             const selectPromotor = document.getElementById('filterPromotor');
             if (!selectPromotor) return;
+
             const selectedActual = selectPromotor.value || 'TODOS';
             const promotoresUnicos = [...new Set(notas.map(n => n.promotor ? n.promotor.trim().toUpperCase() : '').filter(p => p !== ''))].sort();
+
             selectPromotor.innerHTML = '<option value="TODOS">Todos los Promotores</option>';
             promotoresUnicos.forEach(p => {
                 selectPromotor.innerHTML += `<option value="${p}">${p}</option>`;
             });
+
             selectPromotor.value = selectedActual;
         }
+
         function checkAuth() {
             if (currentUser) {
                 document.getElementById('loginScreen').classList.add('hidden');
                 document.getElementById('appScreen').classList.remove('hidden');
                 document.getElementById('userInfo').innerHTML = `<i class="fa-solid fa-user-shield mr-1.5 text-blue-400"></i> ${currentUser.name} (${currentUser.role})`;
+
                 const esConsulta = (currentUser.role === 'Consulta');
+
                 if (document.getElementById('btnNuevaNotaModal')) {
                     document.getElementById('btnNuevaNotaModal').classList.toggle('hidden', esConsulta);
                 }
@@ -938,6 +1003,7 @@
                 if (document.getElementById('btnNuevoViaje')) {
                     document.getElementById('btnNuevoViaje').classList.toggle('hidden', esConsulta);
                 }
+
                 if (currentUser.role === 'Administrador') {
                     document.getElementById('btnGestionUsuarios').classList.remove('hidden');
                     document.getElementById('btnAuditLog').classList.remove('hidden');
@@ -945,6 +1011,7 @@
                     document.getElementById('btnGestionUsuarios').classList.add('hidden');
                     document.getElementById('btnAuditLog').classList.add('hidden');
                 }
+
                 populatePromotoresOptions();
                 renderTable();
                 renderExpedientesTable();
@@ -954,10 +1021,12 @@
                 document.getElementById('appScreen').classList.add('hidden');
             }
         }
+
         function handleLogin(e) {
             e.preventDefault();
             const u = document.getElementById('loginUser').value.toLowerCase().trim();
             const p = document.getElementById('loginPass').value;
+
             if (usersDB[u] && usersDB[u].pass === p) {
                 currentUser = { name: u.toUpperCase(), role: usersDB[u].role };
                 sessionStorage.setItem('activeUser', JSON.stringify(currentUser));
@@ -966,19 +1035,23 @@
                 alert('Usuario o contraseña incorrectos.');
             }
         }
+
         function handleLogout() {
             sessionStorage.removeItem('activeUser');
             currentUser = null;
             checkAuth();
         }
+
         function openUsersModal() {
             if (currentUser && currentUser.role !== 'Administrador') return;
             renderUsersTable();
             document.getElementById('usersModal').classList.remove('hidden');
         }
+
         function closeUsersModal() {
             document.getElementById('usersModal').classList.add('hidden');
         }
+
         function renderUsersTable() {
             const body = document.getElementById('usersTableBody');
             body.innerHTML = '';
@@ -995,20 +1068,26 @@
                 `;
             }
         }
+
         function saveUser(e) {
             e.preventDefault();
             if (currentUser && currentUser.role !== 'Administrador') return;
+
             const u = document.getElementById('newUser').value.toLowerCase().trim();
             const p = document.getElementById('newPass').value;
             const r = document.getElementById('newRole').value;
+
             usersDB[u] = { pass: p, role: r };
             localStorage.setItem('users_db', JSON.stringify(usersDB));
+
             document.getElementById('newUser').value = '';
             document.getElementById('newPass').value = '';
             renderUsersTable();
         }
+
         function deleteUser(u) {
             if (currentUser && currentUser.role !== 'Administrador') return;
+
             if (Object.keys(usersDB).length <= 1) {
                 alert('Debe quedar al menos un usuario registrado en el sistema.');
                 return;
@@ -1019,30 +1098,38 @@
                 renderUsersTable();
             }
         }
+
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.getElementById(tabId).classList.remove('hidden');
-            document.getElementById('tabBtnRegistro').className = tabId === 'registroTab' ? 'tab-active px-4 md:px-6 py-3 md:py-4 text-xs md:text-sm font-semibold flex items-center gap-2 focus:outline-none transition whitespace-nowrap' : 'px-4 md:px-6 py-3 md:py-4 text-xs md:text-sm font-semibold text-slate-500 flex items-center gap-2 hover:text-slate-700 focus:outline-none transition whitespace-nowrap';
-            document.getElementById('tabBtnExpedientes').className = tabId === 'expedientesTab' ? 'tab-active px-4 md:px-6 py-3 md:py-4 text-xs md:text-sm font-semibold flex items-center gap-2 focus:outline-none transition whitespace-nowrap' : 'px-4 md:px-6 py-3 md:py-4 text-xs md:text-sm font-semibold text-slate-500 flex items-center gap-2 hover:text-slate-700 focus:outline-none transition whitespace-nowrap';
-            document.getElementById('tabBtnViajes').className = tabId === 'viajesTab' ? 'tab-active px-4 md:px-6 py-3 md:py-4 text-xs md:text-sm font-semibold flex items-center gap-2 focus:outline-none transition whitespace-nowrap' : 'px-4 md:px-6 py-3 md:py-4 text-xs md:text-sm font-semibold text-slate-500 flex items-center gap-2 hover:text-slate-700 focus:outline-none transition whitespace-nowrap';
-            document.getElementById('tabBtnEstadisticas').className = tabId === 'estadisticasTab' ? 'tab-active px-4 md:px-6 py-3 md:py-4 text-xs md:text-sm font-semibold flex items-center gap-2 focus:outline-none transition whitespace-nowrap' : 'px-4 md:px-6 py-3 md:py-4 text-xs md:text-sm font-semibold text-slate-500 flex items-center gap-2 hover:text-slate-700 focus:outline-none transition whitespace-nowrap';
+
+            document.getElementById('tabBtnRegistro').className = tabId === 'registroTab' ? 'tab-active px-6 py-4 text-sm font-semibold flex items-center gap-2 focus:outline-none transition whitespace-nowrap' : 'px-6 py-4 text-sm font-semibold text-slate-500 flex items-center gap-2 hover:text-slate-700 focus:outline-none transition whitespace-nowrap';
+            document.getElementById('tabBtnExpedientes').className = tabId === 'expedientesTab' ? 'tab-active px-6 py-4 text-sm font-semibold flex items-center gap-2 focus:outline-none transition whitespace-nowrap' : 'px-6 py-4 text-sm font-semibold text-slate-500 flex items-center gap-2 hover:text-slate-700 focus:outline-none transition whitespace-nowrap';
+            document.getElementById('tabBtnViajes').className = tabId === 'viajesTab' ? 'tab-active px-6 py-4 text-sm font-semibold flex items-center gap-2 focus:outline-none transition whitespace-nowrap' : 'px-6 py-4 text-sm font-semibold text-slate-500 flex items-center gap-2 hover:text-slate-700 focus:outline-none transition whitespace-nowrap';
+            document.getElementById('tabBtnEstadisticas').className = tabId === 'estadisticasTab' ? 'tab-active px-6 py-4 text-sm font-semibold flex items-center gap-2 focus:outline-none transition whitespace-nowrap' : 'px-6 py-4 text-sm font-semibold text-slate-500 flex items-center gap-2 hover:text-slate-700 focus:outline-none transition whitespace-nowrap';
         }
+
         function handleFileSelect(file) {
             if (!file || file.type !== 'application/pdf') return;
+
             currentFileName = file.name;
+
             const dropContent = document.getElementById('dropZoneContent');
             dropContent.innerHTML = `
                 <i class="fa-solid fa-file-pdf text-3xl text-green-600 mb-1"></i>
                 <p class="font-bold text-slate-800 text-xs">PDF Adjuntado:</p>
                 <p class="text-xs text-blue-700 font-semibold mt-0.5 bg-slate-50 py-0.5 px-2.5 rounded-full border border-blue-200 inline-block shadow-sm">${file.name}</p>
             `;
+
             processPDF(file);
         }
+
         async function processPDF(file) {
             const statusEl = document.getElementById('pdfStatus');
             statusEl.classList.remove('hidden', 'bg-red-100', 'text-red-800', 'bg-green-100', 'text-green-800');
             statusEl.classList.add('bg-blue-100', 'text-blue-800');
             statusEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Leyendo datos y firma electrónica del PDF...';
+
             const reader = new FileReader();
             reader.onload = async function(e) {
                 autoPdfFileBase64 = e.target.result; 
@@ -1054,25 +1141,32 @@
                 for (let i = 0; i < len; i++) {
                     bytes[i] = binaryString.charCodeAt(i);
                 }
+
                 try {
                     const pdf = await pdfjsLib.getDocument(bytes).promise;
                     globalExtractedText = '';
+
                     for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
                         const page = await pdf.getPage(pageNum);
                         const content = await page.getTextContent();
+
                         let items = content.items.map(item => ({
                             text: item.str,
                             x: item.transform[4],
                             y: item.transform[5]
                         }));
+
                         items.sort((a, b) => b.y - a.y);
                         globalExtractedText += ' ' + items.map(i => i.text).join(' ');
                     }
+
                     parseAllFieldsSmart(globalExtractedText, currentFileName);
+
                     statusEl.classList.replace('bg-blue-100', 'bg-green-100');
                     statusEl.classList.replace('text-blue-800', 'text-green-800');
                     statusEl.innerHTML = '<i class="fa-solid fa-circle-check mr-2"></i> Firma electrónica y campos extraídos del documento.';
                     document.getElementById('parsedResultForm').classList.remove('hidden');
+
                 } catch (err) {
                     statusEl.classList.replace('bg-blue-100', 'bg-red-100');
                     statusEl.classList.replace('text-blue-800', 'text-red-800');
@@ -1081,38 +1175,49 @@
             };
             reader.readAsDataURL(file);
         }
+
         function parsePlazoSmart(text, fechaBaseStr) {
             const regexFechaDirecta = /(?:antes\s+del|para\s+el|hasta\s+el|el)\s+(\d{1,2})[\/\-](\d{1,2})(?:[\/\-](\d{2,4}))?/i;
             const matchFecha = text.match(regexFechaDirecta);
+
             if (matchFecha) {
                 let dia = matchFecha[1].padStart(2, '0');
                 let mes = matchFecha[2].padStart(2, '0');
                 let anio = matchFecha[3];
+
                 if (!anio) {
                     anio = fechaBaseStr ? fechaBaseStr.split('-')[0] : '2026';
                 } else if (anio.length === 2) {
                     anio = '20' + anio;
                 }
+
                 return `${anio}-${mes}-${dia}`;
             }
+
             const numerosEnLetras = {
                 'un': 1, 'uno': 1, 'una': 1, 'dos': 2, 'tres': 3, 'cuatro': 4, 'cinco': 5,
                 'seis': 6, 'siete': 7, 'ocho': 8, 'nueve': 9, 'diez': 10, 'once': 11,
                 'doce': 12, 'trece': 13, 'catorce': 14, 'quince': 15, 'veinte': 20,
                 'treinta': 30, 'sesenta': 60, 'noventa': 90
             };
+
             const regexPlazo = /(?:plazo|término|lapso|dentro\s+de\s+los|por\s+el\s+término\s+de)\s*(?:de)?\s*(\d+|un[o]?|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez|once|doce|trece|catorce|quince|veinte|treinta|sesenta|noventa)\s*(?:días)?\s*(hábiles|corridos)?/i;
             const match = text.match(regexPlazo) || text.match(/(?:a\s+los|vencido\s+el\s+plazo\s+de)\s*(\d+|un[o]?|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez|once|doce|trece|catorce|quince|veinte|treinta)\s*(días)?\s*(hábiles|corridos)?/i);
+
             if (match) {
                 let valorStr = match[1].toLowerCase();
                 let dias = parseInt(valorStr, 10);
+
                 if (isNaN(dias)) {
                     dias = numerosEnLetras[valorStr] || 0;
                 }
+
                 if (dias > 0) {
                     const textoCapturado = match[0].toLowerCase();
                     const esHabil = textoCapturado.includes('hábil') || textoCapturado.includes('hábiles');
+
                     let fechaObj = fechaBaseStr ? new Date(fechaBaseStr + 'T00:00:00') : new Date();
+
                     if (esHabil) {
                         let diasAgregados = 0;
                         while (diasAgregados < dias) {
@@ -1125,11 +1230,13 @@
                     } else {
                         fechaObj.setDate(fechaObj.getDate() + dias);
                     }
+
                     return fechaObj.toISOString().split('T')[0];
                 }
             }
             return '';
         }
+
         function recalcularVencimientoManual() {
             const fechaNota = document.getElementById('autoFecha').value;
             if (globalExtractedText && fechaNota) {
@@ -1137,29 +1244,36 @@
                 document.getElementById('autoLimite').value = nuevoLimite;
             }
         }
+
         function parseAllFieldsSmart(text, fileName) {
             let limpioText = text.replace(/\s+/g, ' ').trim();
+
             let numeroNota = fileName.replace(/\.[^/.]+$/, "")
                                     .replace(/%23/g, '#')
                                     .replace(/%/g, '#')
                                     .trim()
                                     .toUpperCase();
+
             let promotor = 'S/D';
             const matchPromotor1 = numeroNota.match(/-([A-Z0-9]+)(?:#|$)/);
             if (matchPromotor1 && matchPromotor1[1]) {
                 promotor = matchPromotor1[1].toUpperCase();
             }
+
             if (promotor === 'S/D' || promotor === 'APN' || promotor === 'PNA') {
                 const matchPromotor2 = numeroNota.match(/-APN-([A-Z0-9]+)/);
                 if (matchPromotor2 && matchPromotor2[1]) {
                     promotor = matchPromotor2[1].toUpperCase();
                 }
             }
+
             let reparticionDestino = 'S/D';
             const matchBloqueA = limpioText.match(/\bA:\s*([\s\S]*?)(?=\bCon Copia A:|\bDe mi mayor consideración|\bDe nossa consideración|$)/i);
+
             if (matchBloqueA && matchBloqueA[1]) {
                 const textoBloque = matchBloqueA[1];
                 const coincidenciasParentesis = [...textoBloque.matchAll(/\(([^)]+)\)/g)];
+
                 if (coincidenciasParentesis.length > 0) {
                     let siglasEncontradas = [];
                     for (let match of coincidenciasParentesis) {
@@ -1171,6 +1285,7 @@
                     reparticionDestino = siglasEncontradas.join(', ');
                 }
             }
+
             let refExtraida = '';
             const matchRef = limpioText.match(/(?:Referencia|Clave PC):\s*([\s\S]*)/i);
             if (matchRef && matchRef[1]) {
@@ -1178,21 +1293,25 @@
             } else {
                 refExtraida = limpioText.substring(0, 150);
             }
+
             const delimitadoresCorte = [
                 /\s+A:\s+/i, /\s+Con Copia A:\s+/i, /\s+De mi mayor consideración/i,
                 /\s+ORIGEN:/i, /\s+En relación al/i, /\s+Del registro del/i,
                 /\s+SOLICITA/i, /\s+Sin otro particular/i
             ];
+
             for (let regex of delimitadoresCorte) {
                 const pos = refExtraida.search(regex);
                 if (pos !== -1) {
                     refExtraida = refExtraida.substring(0, pos);
                 }
             }
+
             refExtraida = refExtraida.trim();
             if (refExtraida.length > 180) {
                 refExtraida = refExtraida.substring(0, 180) + '...';
             }
+
             document.getElementById('autoFecha').value = new Date().toISOString().split('T')[0];
             document.getElementById('autoPromotor').value = promotor;
             document.getElementById('autoNroNota').value = numeroNota;
@@ -1200,20 +1319,34 @@
             document.getElementById('autoAccion').value = reparticionDestino;
             document.getElementById('autoLimite').value = '';
         }
+
         async function confirmAutoSave() {
+            if (!GOOGLE_SCRIPT_URL) {
+                alert('Por favor, configure la URL de Google Drive antes de subir notas con PDF.');
+                openDriveConfigModal();
+                return;
+            }
+
             let driveUrl = null;
-            if (autoPdfFileBase64 && GOOGLE_SCRIPT_URL) {
+            if (autoPdfFileBase64) {
                 const statusEl = document.getElementById('pdfStatus');
                 statusEl.classList.remove('hidden');
                 statusEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Subiendo archivo PDF a Google Drive...';
                 driveUrl = await subirPDFAGoogleDrive(autoPdfFileBase64, currentFileName);
+
+                if (!driveUrl) {
+                    alert('Error al subir el archivo a Google Drive. Verifique la URL del Web App.');
+                    return;
+                }
             }
+
             const nro = document.getElementById('autoNroNota').value || 'S/D';
             const fecha = document.getElementById('autoFecha').value || new Date().toISOString().split('T')[0];
             const promotor = document.getElementById('autoPromotor').value || 'S/D';
             const referencia = document.getElementById('autoReferencia').value || 'Sin referencia';
             const accion = document.getElementById('autoAccion').value || 'S/D';
             const limite = document.getElementById('autoLimite').value || '';
+
             const newNota = {
                 id: Date.now(),
                 fecha: fecha,
@@ -1225,42 +1358,51 @@
                 estado: 'Pendiente',
                 respuesta: '',
                 destino: 'ARCH',
-                adjuntoNota: driveUrl || autoPdfFileBase64,
+                adjuntoNota: driveUrl,
                 adjuntosRespuesta: []
             };
+
             notas.unshift(newNota);
             localStorage.setItem('notas_db', JSON.stringify(notas));
             registrarAuditoria('Creó', 'Notas', `Nota Nro: ${nro}`);
+
             document.getElementById('filterEstado').value = 'TODOS';
             document.getElementById('filterMes').value = 'TODOS';
             document.getElementById('filterPromotor').value = 'TODOS';
             document.getElementById('searchInput').value = '';
+
             populatePromotoresOptions();
             clearAutoForm();
             toggleAutoUploadSection();
             renderTable();
         }
+
         function clearAutoForm() {
             document.getElementById('parsedResultForm').classList.add('hidden');
             document.getElementById('pdfStatus').classList.add('hidden');
             document.getElementById('pdfFileInput').value = '';
             globalExtractedText = '';
+
             document.getElementById('dropZoneContent').innerHTML = `
                 <i class="fa-solid fa-cloud-arrow-up text-3xl text-blue-500 mb-2"></i>
                 <p class="font-bold text-slate-700 text-sm" id="dropText">Haz clic o arrastra aquí la nota en PDF</p>
                 <p class="text-xs text-slate-400 mt-1">Lectura automática de firma electrónica GDE y datos clave</p>
             `;
+
             autoPdfFileBase64 = null;
             currentFileName = '';
         }
+
         function checkUrgentAlerts() {
             const hoy = new Date();
             let vencidas = 0;
             let proximas = 0;
+
             notas.forEach(n => {
                 if (n.limite && n.estado !== 'Contestado' && n.estado !== 'Archivado') {
                     const limiteFecha = new Date(n.limite + 'T00:00:00');
                     const diffDays = Math.ceil((limiteFecha - hoy) / (1000 * 60 * 60 * 24));
+
                     if (diffDays < 0) {
                         vencidas++;
                     } else if (diffDays <= 5) {
@@ -1268,10 +1410,13 @@
                     }
                 }
             });
+
             const banner = document.getElementById('alertBanner');
             const content = document.getElementById('alertBannerContent');
+
             if (vencidas > 0 || proximas > 0) {
                 banner.classList.remove('hidden', 'bg-red-50', 'border-red-200', 'bg-yellow-50', 'border-yellow-200');
+
                 if (vencidas > 0) {
                     banner.classList.add('bg-red-50', 'border-red-200');
                     content.innerHTML = `
@@ -1295,18 +1440,22 @@
                 banner.classList.add('hidden');
             }
         }
+
         function filtrarUrgentes() {
             document.getElementById('filterEstado').value = 'URGENTES';
             renderTable();
         }
+
         function filterByMetric(estado) {
             document.getElementById('filterEstado').value = estado;
             renderTable();
         }
+
         function filterExpByMetric(estado) {
             document.getElementById('filterExpEstado').value = estado;
             renderExpedientesTable();
         }
+
         function updateMetrics() {
             document.getElementById('metricTotal').innerText = notas.length;
             document.getElementById('metricPendientes').innerText = notas.filter(n => n.estado === 'Pendiente').length;
@@ -1314,6 +1463,7 @@
             document.getElementById('metricContestados').innerText = notas.filter(n => n.estado === 'Contestado').length;
             document.getElementById('metricArchivados').innerText = notas.filter(n => n.estado === 'Archivado').length;
         }
+
         function renderTable() {
             const body = document.getElementById('tableBody');
             const search = document.getElementById('searchInput').value.toLowerCase();
@@ -1321,22 +1471,28 @@
             const filterMes = document.getElementById('filterMes').value;
             const filterPromotor = document.getElementById('filterPromotor').value;
             body.innerHTML = '';
+
             const hoy = new Date();
+
             let countMes = notas.filter(n => {
                 if (filterMes === 'TODOS') return true;
                 return n.fecha && n.fecha.split('-')[1] === filterMes;
             }).length;
+
             let countPromotor = notas.filter(n => {
                 if (filterPromotor === 'TODOS') return true;
                 return n.promotor && n.promotor.trim().toUpperCase() === filterPromotor.toUpperCase();
             }).length;
+
             document.getElementById('mesCountBadge').innerText = `Recibidas: ${countMes}`;
             document.getElementById('promotorCountBadge').innerText = `Por cantidad: ${countPromotor}`;
+
             let filtered = notas.filter(n => {
                 const matchSearch = (n.nroNota && n.nroNota.toLowerCase().includes(search)) || 
                                     (n.referencia && n.referencia.toLowerCase().includes(search)) || 
                                     (n.promotor && n.promotor.toLowerCase().includes(search)) || 
                                     (n.accion && n.accion.toLowerCase().includes(search));
+
                 let matchEstado = true;
                 if (filterEstado === 'URGENTES') {
                     if (n.limite && n.estado !== 'Contestado' && n.estado !== 'Archivado') {
@@ -1349,51 +1505,59 @@
                 } else if (filterEstado !== 'TODOS') {
                     matchEstado = (n.estado === filterEstado);
                 }
+
                 let matchMes = true;
                 if (filterMes !== 'TODOS') {
                     matchMes = (n.fecha && n.fecha.split('-')[1] === filterMes);
                 }
+
                 let matchPromotor = true;
                 if (filterPromotor !== 'TODOS') {
                     matchPromotor = (n.promotor && n.promotor.trim().toUpperCase() === filterPromotor.toUpperCase());
                 }
+
                 return matchSearch && matchEstado && matchMes && matchPromotor;
             });
+
             if (filtered.length === 0) {
                 body.innerHTML = `<tr><td colspan="10" class="p-4 text-center text-slate-400">No se encontraron notas registradas.</td></tr>`;
                 updateMetrics();
                 checkUrgentAlerts();
                 return;
             }
+
             filtered.forEach(n => {
                 let badgeClass = 'bg-yellow-100 text-yellow-800 border-yellow-300';
                 if (n.estado === 'En espera') badgeClass = 'bg-orange-100 text-orange-800 border-orange-300';
                 if (n.estado === 'Contestado') badgeClass = 'bg-green-100 text-green-800 border-green-300';
                 if (n.estado === 'Archivado') badgeClass = 'bg-slate-200 text-slate-700 border-slate-300';
+
                 let alertaBadge = '';
                 if (n.limite && n.estado !== 'Contestado' && n.estado !== 'Archivado') {
                     const limiteFecha = new Date(n.limite + 'T00:00:00');
                     const diffDays = Math.ceil((limiteFecha - hoy) / (1000 * 60 * 60 * 24));
+
                     if (diffDays < 0) {
                         alertaBadge = `<span class="block text-[10px] bg-red-600 text-white font-bold px-1.5 py-0.5 rounded mt-0.5 text-center shadow animate-pulse">VENCIDO (${Math.abs(diffDays)}d)</span>`;
                     } else if (diffDays <= 5) {
                         alertaBadge = `<span class="block text-[10px] bg-amber-500 text-white font-bold px-1.5 py-0.5 rounded mt-0.5 text-center shadow">Vence en ${diffDays}d</span>`;
                     }
                 }
+
                 let rowClass = 'row-pendiente';
                 if (n.estado === 'En espera') rowClass = 'row-espera';
                 if (n.estado === 'Contestado') rowClass = 'row-contestado';
                 if (n.estado === 'Archivado') rowClass = 'row-archivado';
+
                 let adjuntosHtml = '-';
                 if (n.adjuntoNota) {
-                    if (typeof n.adjuntoNota === 'string' && n.adjuntoNota.startsWith('http')) {
-                        adjuntosHtml = `<a href="${n.adjuntoNota}" target="_blank" class="text-blue-600 hover:text-blue-800 font-bold flex items-center gap-1"><i class="fa-brands fa-google-drive"></i> Ver Drive</a>`;
-                    } else if (typeof n.adjuntoNota === 'string' && n.adjuntoNota.startsWith('data:')) {
-                        adjuntosHtml = `<a href="${n.adjuntoNota}" download="${n.nroNota}.pdf" class="text-blue-600 hover:text-blue-800 font-bold flex items-center gap-1"><i class="fa-solid fa-file-pdf"></i> Nota</a>`;
+                    if (typeof n.adjuntoNota === 'string' && (n.adjuntoNota.startsWith('http') || n.adjuntoNota.startsWith('data:'))) {
+                        adjuntosHtml = `<a href="${n.adjuntoNota}" download="${n.nroNota}.pdf" target="_blank" class="text-blue-600 hover:text-blue-800 font-bold flex items-center gap-1"><i class="fa-solid fa-file-arrow-down"></i> Original</a>`;
                     } else {
                         adjuntosHtml = `<span class="text-slate-500">Adjunto</span>`;
                     }
                 }
+
                 body.innerHTML += `
                     <tr class="${rowClass} border-b transition">
                         <td class="p-3 whitespace-nowrap font-medium">${formatFechaLatina(n.fecha)}</td>
@@ -1415,9 +1579,11 @@
                     </tr>
                 `;
             });
+
             updateMetrics();
             checkUrgentAlerts();
         }
+
         function openModal() {
             document.getElementById('modalTitle').innerText = 'Nueva Nota';
             document.getElementById('notaId').value = '';
@@ -1433,13 +1599,16 @@
             document.getElementById('respuestaArchivos').value = '';
             document.getElementById('itemModal').classList.remove('hidden');
         }
+
         function closeModal() {
             document.getElementById('itemModal').classList.add('hidden');
         }
+
         function saveNota(e) {
             e.preventDefault();
             const id = document.getElementById('notaId').value;
             const nro = document.getElementById('nroNota').value;
+
             const notaObj = {
                 id: id ? parseInt(id) : Date.now(),
                 fecha: document.getElementById('fecha').value,
@@ -1453,6 +1622,7 @@
                 respuesta: document.getElementById('respuesta').value,
                 adjuntosRespuesta: []
             };
+
             if (id) {
                 const idx = notas.findIndex(n => n.id === parseInt(id));
                 if (idx !== -1) {
@@ -1464,14 +1634,17 @@
                 notas.unshift(notaObj);
                 registrarAuditoria('Creó', 'Notas', `Nota Nro: ${nro}`);
             }
+
             localStorage.setItem('notas_db', JSON.stringify(notas));
             populatePromotoresOptions();
             closeModal();
             renderTable();
         }
+
         function editNota(id) {
             const n = notas.find(item => item.id === id);
             if (!n) return;
+
             document.getElementById('modalTitle').innerText = 'Editar Nota';
             document.getElementById('notaId').value = n.id;
             document.getElementById('fecha').value = n.fecha || '';
@@ -1485,6 +1658,7 @@
             document.getElementById('respuesta').value = n.respuesta || '';
             document.getElementById('itemModal').classList.remove('hidden');
         }
+
         function deleteNota(id) {
             if (confirm('¿Desea eliminar este registro de nota?')) {
                 const n = notas.find(item => item.id === id);
@@ -1495,6 +1669,7 @@
                 renderTable();
             }
         }
+
         function exportCSV() {
             let csv = 'Fecha,Promotor,NroNota,Referencia,Destinatario,Limite,Estado,Observaciones\n';
             notas.forEach(n => {
@@ -1506,21 +1681,25 @@
             link.download = 'registro_notas_dgse.csv';
             link.click();
         }
-        // FUNCIONES DE EXPEDIENTES (GDE)
+
         function renderExpedientesTable() {
             const body = document.getElementById('expTableBody');
             const search = document.getElementById('searchExpInput').value.toLowerCase();
             const filterEstado = document.getElementById('filterExpEstado').value;
             body.innerHTML = '';
+
             let countRevision = 0;
             let countDevueltos = 0;
             let countFinalizados = 0;
             let countAntiguos = 0;
+
             const hoy = new Date();
+
             expedientesDB.forEach(exp => {
                 if (exp.estado === 'En revision DGSE') countRevision++;
                 if (exp.estado === 'Devuelto') countDevueltos++;
                 if (exp.estado === 'Finalizado') countFinalizados++;
+
                 if (exp.fecha && exp.estado !== 'Finalizado') {
                     const fechaIngreso = new Date(exp.fecha + 'T00:00:00');
                     const diffTime = Math.abs(hoy - fechaIngreso);
@@ -1528,14 +1707,17 @@
                     if (diffDays > 30) countAntiguos++;
                 }
             });
+
             document.getElementById('expMetricRevision').innerText = countRevision;
             document.getElementById('expMetricDevueltos').innerText = countDevueltos;
             document.getElementById('expMetricFinalizados').innerText = countFinalizados;
             document.getElementById('expMetricAntiguos').innerText = countAntiguos;
+
             let filtered = expedientesDB.filter(exp => {
                 const matchSearch = (exp.nroExpediente && exp.nroExpediente.toLowerCase().includes(search)) ||
                                     (exp.extracto && exp.extracto.toLowerCase().includes(search)) ||
                                     (exp.iniciador && exp.iniciador.toLowerCase().includes(search));
+
                 let matchEstado = true;
                 if (filterEstado === 'ANTIGUOS') {
                     if (exp.fecha && exp.estado !== 'Finalizado') {
@@ -1548,17 +1730,21 @@
                 } else if (filterEstado !== 'TODOS') {
                     matchEstado = (exp.estado === filterEstado);
                 }
+
                 return matchSearch && matchEstado;
             });
+
             if (filtered.length === 0) {
                 body.innerHTML = `<tr><td colspan="9" class="p-4 text-center text-slate-400">No se encontraron expedientes.</td></tr>`;
                 return;
             }
+
             filtered.forEach(exp => {
                 let badgeClass = 'bg-blue-100 text-blue-800 border-blue-300';
                 if (exp.estado === 'Devuelto') badgeClass = 'bg-red-100 text-red-800 border-red-300';
                 if (exp.estado === 'Finalizado') badgeClass = 'bg-green-100 text-green-800 border-green-300';
                 if (exp.estado === 'Guarda temporal') badgeClass = 'bg-yellow-100 text-yellow-800 border-yellow-300';
+
                 let alertaAntiguedad = '';
                 if (exp.fecha && exp.estado !== 'Finalizado') {
                     const fechaIngreso = new Date(exp.fecha + 'T00:00:00');
@@ -1567,6 +1753,7 @@
                         alertaAntiguedad = `<span class="block text-[10px] bg-rose-600 text-white font-bold px-1.5 py-0.5 rounded mt-0.5 text-center shadow">+30 días en DGSE</span>`;
                     }
                 }
+
                 body.innerHTML += `
                     <tr class="border-b hover:bg-slate-50 transition">
                         <td class="p-3 whitespace-nowrap font-medium">${formatFechaLatina(exp.fecha)}</td>
@@ -1585,6 +1772,7 @@
                 `;
             });
         }
+
         function openExpedienteModal() {
             document.getElementById('expModalTitle').innerHTML = '<i class="fa-solid fa-folder-plus text-amber-600"></i> Registrar Expediente';
             document.getElementById('expId').value = '';
@@ -1597,13 +1785,16 @@
             document.getElementById('expObservaciones').value = '';
             document.getElementById('expModal').classList.remove('hidden');
         }
+
         function closeExpModal() {
             document.getElementById('expModal').classList.add('hidden');
         }
+
         function saveExpediente(e) {
             e.preventDefault();
             const id = document.getElementById('expId').value;
             const nro = document.getElementById('expNro').value;
+
             const expObj = {
                 id: id ? parseInt(id) : Date.now(),
                 fecha: document.getElementById('expFecha').value,
@@ -1615,6 +1806,7 @@
                 observaciones: document.getElementById('expObservaciones').value,
                 adjuntosIF: []
             };
+
             if (id) {
                 const idx = expedientesDB.findIndex(x => x.id === parseInt(id));
                 if (idx !== -1) expedientesDB[idx] = expObj;
@@ -1623,13 +1815,16 @@
                 expedientesDB.unshift(expObj);
                 registrarAuditoria('Creó', 'Expedientes', `Expediente: ${nro}`);
             }
+
             localStorage.setItem('expedientes_db', JSON.stringify(expedientesDB));
             closeExpModal();
             renderExpedientesTable();
         }
+
         function editExpediente(id) {
             const exp = expedientesDB.find(x => x.id === id);
             if (!exp) return;
+
             document.getElementById('expModalTitle').innerHTML = '<i class="fa-solid fa-folder-pen text-amber-600"></i> Editar Expediente';
             document.getElementById('expId').value = exp.id;
             document.getElementById('expFecha').value = exp.fecha || '';
@@ -1641,6 +1836,7 @@
             document.getElementById('expObservaciones').value = exp.observaciones || '';
             document.getElementById('expModal').classList.remove('hidden');
         }
+
         function deleteExpediente(id) {
             if (confirm('¿Desea eliminar este expediente?')) {
                 const exp = expedientesDB.find(x => x.id === id);
@@ -1650,6 +1846,7 @@
                 renderExpedientesTable();
             }
         }
+
         function exportExpedientesCSV() {
             let csv = 'Fecha,NroExpediente,Iniciador,Extracto,Estado,Pase,Observaciones\n';
             expedientesDB.forEach(e => {
@@ -1661,7 +1858,7 @@
             link.download = 'expedientes_gde_dgse.csv';
             link.click();
         }
-        // CONTROL DE VIAJES Y COMISIONES (CON GRADO Y APELLIDO SEPARADOS)
+
         function agregarFilaPersona(gradoVal = '', apellidoVal = '', destinoVal = '') {
             const container = document.getElementById('personasContainer');
             const rowId = Date.now() + Math.random();
@@ -1682,17 +1879,21 @@
             `;
             container.appendChild(div);
         }
+
         function renderViajesTable() {
             const body = document.getElementById('viajesTableBody');
             const search = document.getElementById('searchViajesInput').value.toLowerCase();
             body.innerHTML = '';
+
             let countExterior = 0;
             let countPais = 0;
             let countRealizados = 0;
             let countRechazados = 0;
             let countProximos = 0;
             let personasExteriorSet = new Set();
+
             const hoy = new Date();
+
             viajesDB.forEach(v => {
                 const lugarStr = (v.lugar || '').toLowerCase();
                 const esExterior = !lugarStr.includes('argentina') && !lugarStr.includes('buenos aires') && !lugarStr.includes('caba') && !lugarStr.includes('cordoba') && !lugarStr.includes('mendoza');
@@ -1707,6 +1908,7 @@
                 } else {
                     countPais++;
                 }
+
                 if (v.estado === 'Rechazado') {
                     countRechazados++;
                 } else if (v.estado === 'Próximamente') {
@@ -1720,12 +1922,14 @@
                     }
                 }
             });
+
             document.getElementById('viajesMetricExterior').innerText = countExterior;
             document.getElementById('viajesMetricPais').innerText = countPais;
             document.getElementById('viajesMetricRealizados').innerText = countRealizados;
             document.getElementById('viajesMetricRechazados').innerText = countRechazados;
             document.getElementById('viajesMetricProximos').innerText = countProximos;
             document.getElementById('viajesMetricPersExterior').innerText = personasExteriorSet.size;
+
             let filtered = viajesDB.filter(v => {
                 const matchLugar = (v.lugar && v.lugar.toLowerCase().includes(search));
                 const matchEvento = (v.evento && v.evento.toLowerCase().includes(search));
@@ -1740,20 +1944,25 @@
                         (p.destino && p.destino.toLowerCase().includes(search))
                     );
                 }
+
                 return matchLugar || matchEvento || matchInvita || matchCalidad || matchPersona;
             });
+
             if (filtered.length === 0) {
                 body.innerHTML = `<tr><td colspan="12" class="p-4 text-center text-slate-400">No se encontraron viajes registrados.</td></tr>`;
                 return;
             }
+
             filtered.forEach(v => {
                 let badgeClass = 'bg-emerald-100 text-emerald-800 border-emerald-300';
                 if (v.estado === 'Rechazado') badgeClass = 'bg-red-100 text-red-800 border-red-300';
                 if (v.estado === 'Próximamente') badgeClass = 'bg-amber-100 text-amber-800 border-amber-300';
                 if (v.estado === 'Continúa') badgeClass = 'bg-blue-100 text-blue-800 border-blue-300';
+
                 let personasGradoHtml = '';
                 let personasApellidoHtml = '';
                 let destinosHtml = '';
+
                 if (v.personas && v.personas.length > 0) {
                     v.personas.forEach(p => {
                         personasGradoHtml += `<div class="py-1 font-semibold text-slate-700">${p.grado || '-'}</div>`;
@@ -1765,6 +1974,7 @@
                     personasApellidoHtml = '-';
                     destinosHtml = '-';
                 }
+
                 body.innerHTML += `
                     <tr class="border-b hover:bg-slate-50 transition align-top">
                         <td class="p-3">${personasGradoHtml}</td>
@@ -1786,6 +1996,7 @@
                 `;
             });
         }
+
         function openViajeModal() {
             document.getElementById('viajeModalTitle').innerHTML = '<i class="fa-solid fa-plane-circle-check text-emerald-600"></i> Registrar Comisión / Viaje';
             document.getElementById('viajeId').value = '';
@@ -1801,9 +2012,11 @@
             document.getElementById('viajeEstado').value = 'Próximamente';
             document.getElementById('viajeModal').classList.remove('hidden');
         }
+
         function closeViajeModal() {
             document.getElementById('viajeModal').classList.add('hidden');
         }
+
         function saveViajeManual(e) {
             e.preventDefault();
             const id = document.getElementById('viajeId').value;
@@ -1818,6 +2031,7 @@
                     personasArray.push({ grado, apellido, destino });
                 }
             });
+
             const viajeObj = {
                 id: id ? parseInt(id) : Date.now(),
                 personas: personasArray,
@@ -1830,6 +2044,7 @@
                 gastosCargo: document.getElementById('viajeGastosCargo').value,
                 estado: document.getElementById('viajeEstado').value
             };
+
             if (id) {
                 const idx = viajesDB.findIndex(v => v.id === parseInt(id));
                 if (idx !== -1) viajesDB[idx] = viajeObj;
@@ -1838,16 +2053,20 @@
                 viajesDB.unshift(viajeObj);
                 registrarAuditoria('Creó', 'Viajes', `Evento: ${viajeObj.evento}`);
             }
+
             localStorage.setItem('viajes_db_v2', JSON.stringify(viajesDB));
             closeViajeModal();
             renderViajesTable();
         }
+
         function editViaje(id) {
             const v = viajesDB.find(item => item.id === id);
             if (!v) return;
+
             document.getElementById('viajeModalTitle').innerHTML = '<i class="fa-solid fa-plane-up text-emerald-600"></i> Editar Comisión / Viaje';
             document.getElementById('viajeId').value = v.id;
             document.getElementById('personasContainer').innerHTML = '';
+
             if (v.personas && v.personas.length > 0) {
                 v.personas.forEach(p => {
                     agregarFilaPersona(p.grado || '', p.apellido || '', p.destino || '');
@@ -1855,6 +2074,7 @@
             } else {
                 agregarFilaPersona();
             }
+
             document.getElementById('viajeLugar').value = v.lugar || '';
             document.getElementById('viajeEvento').value = v.evento || '';
             document.getElementById('viajeSalida').value = v.salida || '';
@@ -1865,6 +2085,7 @@
             document.getElementById('viajeEstado').value = v.estado || 'Próximamente';
             document.getElementById('viajeModal').classList.remove('hidden');
         }
+
         function deleteViaje(id) {
             if (confirm('¿Desea eliminar este registro de viaje?')) {
                 const v = viajesDB.find(item => item.id === id);
@@ -1874,6 +2095,7 @@
                 renderViajesTable();
             }
         }
+
         function exportViajesCSV() {
             let csv = 'Grado,Apellido y Nombre,Destino,Evento,Salida,Llegada,Lugar,Invita,Calidad,GastosCargo,Estado\n';
             viajesDB.forEach(v => {
@@ -1892,4 +2114,3 @@
     </script>
 </body>
 </html>
-
