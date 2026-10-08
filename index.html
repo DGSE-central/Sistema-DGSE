@@ -779,7 +779,7 @@
         }
 
         /* ==========================================================
-           FUNCIÓN ACTUALIZADA DE SUBIDA CON POSTMESSAGE (CAPTURA URL)
+           FUNCIÓN ACTUALIZADA DE SUBIDA CON FETCH DIRECTO Y JSON
            ========================================================== */
         async function subirPDFAGoogleDrive(base64Completo, nombreArchivo) {
             if (!GOOGLE_SCRIPT_URL) {
@@ -789,53 +789,23 @@
             }
             try {
                 const base64Data = base64Completo.split(',')[1] || base64Completo;
-                
-                return new Promise((resolve) => {
-                    const listener = function(event) {
-                        if (event.data && event.data.fileUrl) {
-                            window.removeEventListener('message', listener);
-                            resolve(event.data.fileUrl);
-                        } else if (event.data && event.data.status === "error") {
-                            window.removeEventListener('message', listener);
-                            resolve(null);
-                        }
-                    };
-                    window.addEventListener('message', listener);
-
-                    const form = document.createElement('form');
-                    form.method = 'POST';
-                    form.action = GOOGLE_SCRIPT_URL;
-                    form.target = '_hidden_iframe';
-
-                    const input = document.createElement('input');
-                    input.type = 'hidden';
-                    input.name = 'data';
-                    input.value = JSON.stringify({
+                const respuesta = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: "POST",
+                    body: JSON.stringify({
                         action: "uploadPDF",
                         base64Data: base64Data,
                         mimeType: "application/pdf",
                         fileName: nombreArchivo
-                    });
-
-                    form.appendChild(input);
-
-                    let iframe = document.getElementById('_hidden_iframe');
-                    if (!iframe) {
-                        iframe = document.createElement('iframe');
-                        iframe.name = '_hidden_iframe';
-                        iframe.id = '_hidden_iframe';
-                        iframe.style.display = 'none';
-                        document.body.appendChild(iframe);
-                    }
-
-                    document.body.appendChild(form);
-                    form.submit();
-                    document.body.removeChild(form);
+                    })
                 });
+                const resultado = await respuesta.json();
+                if (resultado.status === "success") {
+                    return resultado.fileUrl;
+                }
             } catch (error) {
                 console.error("Error al subir a Google Drive:", error);
-                return null;
             }
+            return null;
         }
 
         let usersDB = JSON.parse(localStorage.getItem('users_db')) || {
