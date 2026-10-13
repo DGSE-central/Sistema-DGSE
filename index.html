@@ -35,7 +35,12 @@
                 </div>
                 <div>
                     <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Contraseña</label>
-                    <input type="password" id="loginPass" required placeholder="••••••••" class="w-full border p-2.5 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <div class="relative">
+                        <input type="password" id="loginPass" required placeholder="••••••••" class="w-full border p-2.5 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none pr-10">
+                        <button type="button" onclick="togglePasswordVisibility('loginPass', 'loginEyeIcon')" class="absolute inset-y-0 right-0 px-3 flex items-center text-slate-500 hover:text-slate-700">
+                            <i id="loginEyeIcon" class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
                 </div>
                 <button type="submit" class="w-full bg-blue-700 hover:bg-blue-600 text-white font-bold py-2.5 rounded-lg transition shadow">
                     Ingresar al Sistema
@@ -52,15 +57,15 @@
                     <img src="HERLADICO_DGSE_ANTIGUO.png" class="h-12 w-auto object-contain" alt="Escudo Oficial DGSE" onerror="this.style.display='none'">
                     <div>
                         <h1 class="text-lg font-bold tracking-wide leading-tight">DIRECCIÓN GENERAL DE SEGURIDAD</h1>
-                        <p class="text-xs text-blue-300 font-medium">Sistema de Control</p>
+                        <p class="text-xs text-blue-300 font-medium">Sistema de Control Centralizado</p>
                     </div>
                 </div>
                 <div class="flex items-center space-x-3">
                     <span id="userInfo" class="text-xs bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-full text-slate-300"></span>
-                    <button onclick="openAuditModal()" id="btnAuditLog" class="bg-indigo-900 hover:bg-indigo-800 border border-indigo-700 text-indigo-200 font-medium px-3 py-1.5 rounded-lg text-xs transition flex items-center shadow hidden" title="Ver Historial de Modificaciones">
+                    <button onclick="openAuditModal()" id="btnAuditLog" class="bg-indigo-900 hover:bg-indigo-800 border border-indigo-700 text-indigo-200 font-medium px-3 py-1.5 rounded-lg text-xs transition flex items-center shadow hidden" title="Historial de Auditoría">
                         <i class="fa-solid fa-clock-rotate-left mr-1.5 text-indigo-400"></i> Auditoría
                     </button>
-                    <button onclick="openUsersModal()" id="btnGestionUsuarios" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-medium px-3 py-1.5 rounded-lg text-xs transition flex items-center shadow hidden" title="Configurar Acceso de Personal">
+                    <button onclick="openUsersModal()" id="btnGestionUsuarios" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-medium px-3 py-1.5 rounded-lg text-xs transition flex items-center shadow hidden" title="Gestión de Personal">
                         <i class="fa-solid fa-users-gear mr-1.5"></i> Personal
                     </button>
                     <button onclick="handleLogout()" class="text-slate-400 hover:text-white text-xs px-2 py-1 ml-2" title="Cerrar Sesión">
@@ -88,7 +93,7 @@
                 </div>
             </div>
 
-            <!-- SOLAPA 1: REGISTRO PRINCIPAL DE NOTAS -->
+            <!-- SOLAPA 1: REGISTRO DE NOTAS -->
             <div id="registroTab" class="tab-content">
                 <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 mb-6">
                     <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
@@ -108,31 +113,25 @@
                         </div>
                     </div>
 
-                    <!-- CARGA AUTOMÁTICA INTELIGENTE (CON PARSER PDF.JS) -->
+                    <!-- CARGA AUTOMÁTICA INTELIGENTE (PDF.JS) -->
                     <div id="autoUploadSection" class="hidden my-6 p-6 bg-slate-50 border-2 border-blue-200 rounded-2xl transition">
                         <div class="flex justify-between items-center mb-4">
                             <h3 class="text-md font-bold text-slate-800 flex items-center gap-2">
-                                <i class="fa-solid fa-file-pdf text-blue-600"></i> Extracción Automática desde PDF (GDE) y Subida Privada a Drive
+                                <i class="fa-solid fa-file-pdf text-blue-600"></i> Extracción Automática desde PDF (GDE)
                             </h3>
                             <button onclick="toggleAutoUploadSection()" class="text-slate-400 hover:text-slate-600 text-sm">
                                 <i class="fa-solid fa-xmark text-lg"></i>
                             </button>
                         </div>
-                        <div class="max-w-2xl mx-auto border-2 border-dashed border-blue-300 bg-white rounded-2xl p-6 text-center hover:border-blue-500 transition cursor-pointer relative" id="dropZone">
+                        <div class="max-w-2xl mx-auto border-2 border-dashed border-blue-300 bg-white rounded-2xl p-6 text-center hover:border-blue-500 transition cursor-pointer relative">
                             <input type="file" id="pdfFileInput" accept="application/pdf" class="absolute inset-0 opacity-0 cursor-pointer" onchange="handleFileSelect(this.files[0])">
-                            <div id="dropZoneContent">
+                            <div>
                                 <i class="fa-solid fa-cloud-arrow-up text-3xl text-blue-500 mb-2"></i>
-                                <p class="font-bold text-slate-700 text-sm" id="dropText">Haz clic o arrastra aquí la nota en PDF</p>
+                                <p class="font-bold text-slate-700 text-sm">Haz clic o arrastra aquí la nota en PDF</p>
                             </div>
                         </div>
                         <div id="pdfStatus" class="hidden max-w-2xl mx-auto mt-4 p-3 rounded-xl text-center text-xs font-semibold"></div>
                         <div id="parsedResultForm" class="hidden max-w-3xl mx-auto mt-6 border-t pt-4 space-y-4">
-                            <div class="flex justify-between items-center">
-                                <h4 class="font-bold text-sm text-slate-800 flex items-center gap-2">
-                                    <i class="fa-solid fa-check-double text-green-500"></i> Datos Detectados del Documento
-                                </h4>
-                                <span class="text-xs bg-green-100 text-green-800 font-bold px-2 py-0.5 rounded-full">Verificar antes de guardar</span>
-                            </div>
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-xs font-semibold text-slate-600 mb-1">Fecha</label>
@@ -175,22 +174,6 @@
                             <p class="text-xs text-slate-500 uppercase font-semibold">Total Registros</p>
                             <p id="metricTotal" class="text-2xl font-bold text-slate-800 mt-1">0</p>
                         </div>
-                        <div class="bg-yellow-50 p-4 rounded-xl shadow-sm border border-yellow-200 cursor-pointer" onclick="filterByMetric('Pendiente')">
-                            <p class="text-xs text-yellow-700 uppercase font-semibold">Pendientes</p>
-                            <p id="metricPendientes" class="text-2xl font-bold text-yellow-800 mt-1">0</p>
-                        </div>
-                        <div class="bg-orange-50 p-4 rounded-xl shadow-sm border border-orange-200 cursor-pointer" onclick="filterByMetric('En espera')">
-                            <p class="text-xs text-orange-700 uppercase font-semibold">En Espera</p>
-                            <p id="metricEspera" class="text-2xl font-bold text-orange-800 mt-1">0</p>
-                        </div>
-                        <div class="bg-green-50 p-4 rounded-xl shadow-sm border border-green-200 cursor-pointer" onclick="filterByMetric('Contestado')">
-                            <p class="text-xs text-green-700 uppercase font-semibold">Contestados</p>
-                            <p id="metricContestados" class="text-2xl font-bold text-green-800 mt-1">0</p>
-                        </div>
-                        <div class="bg-slate-100 p-4 rounded-xl shadow-sm border border-slate-300 cursor-pointer" onclick="filterByMetric('Archivado')">
-                            <p class="text-xs text-slate-600 uppercase font-semibold">Archivados</p>
-                            <p id="metricArchivados" class="text-2xl font-bold text-slate-700 mt-1">0</p>
-                        </div>
                     </div>
                 </div>
 
@@ -201,12 +184,11 @@
                                 <th class="p-3">Fecha Firma</th>
                                 <th class="p-3">Promotor</th>
                                 <th class="p-3">Nro. de Nota</th>
-                                <th class="p-3">Referencia / Asunto</th>
+                                <th class="p-3">Referencia</th>
                                 <th class="p-3">Destinatario</th>
-                                <th class="p-3">Límite / Alerta</th>
+                                <th class="p-3">Límite</th>
                                 <th class="p-3">Estado</th>
-                                <th class="p-3">Observaciones</th>
-                                <th class="p-3">Adjuntos</th>
+                                <th class="p-3">Adjunto</th>
                                 <th class="p-3 text-center">Acciones</th>
                             </tr>
                         </thead>
@@ -217,15 +199,13 @@
 
             <!-- SOLAPA 2: EXPEDIENTES GDE -->
             <div id="expedientesTab" class="tab-content hidden">
-                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 mb-6">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
-                            <i class="fa-solid fa-folder-tree text-amber-600"></i> Control de Expedientes GDE
-                        </h2>
-                        <button onclick="openExpedienteModal()" class="bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold px-3.5 py-2 rounded-lg transition shadow">
-                            <i class="fa-solid fa-plus mr-1"></i> Nuevo Expediente
-                        </button>
-                    </div>
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 mb-6 flex justify-between items-center">
+                    <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-folder-tree text-amber-600"></i> Control de Expedientes GDE
+                    </h2>
+                    <button onclick="openExpedienteModal()" class="bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold px-3.5 py-2 rounded-lg transition shadow">
+                        <i class="fa-solid fa-plus mr-1"></i> Nuevo Expediente
+                    </button>
                 </div>
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
                     <table class="w-full text-left text-xs md:text-sm">
@@ -233,7 +213,7 @@
                             <tr>
                                 <th class="p-3">Nro. Expediente GDE</th>
                                 <th class="p-3">Iniciador</th>
-                                <th class="p-3">Asunto / Motivo</th>
+                                <th class="p-3">Asunto</th>
                                 <th class="p-3">Ubicación Actual</th>
                                 <th class="p-3">Estado</th>
                                 <th class="p-3 text-center">Acciones</th>
@@ -246,22 +226,20 @@
 
             <!-- SOLAPA 3: CONTROL DE VIAJES -->
             <div id="viajesTab" class="tab-content hidden">
-                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 mb-6">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
-                            <i class="fa-solid fa-plane-departure text-emerald-600"></i> Control de Comisiones y Viajes
-                        </h2>
-                        <button onclick="openViajeModal()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-3.5 py-2 rounded-lg transition shadow">
-                            <i class="fa-solid fa-plus mr-1"></i> Registrar Viaje
-                        </button>
-                    </div>
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 mb-6 flex justify-between items-center">
+                    <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-plane-departure text-emerald-600"></i> Control de Viajes y Comisiones
+                    </h2>
+                    <button onclick="openViajeModal()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-3.5 py-2 rounded-lg transition shadow">
+                        <i class="fa-solid fa-plus mr-1"></i> Registrar Viaje
+                    </button>
                 </div>
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
                     <table class="w-full text-left text-xs md:text-sm">
                         <thead class="bg-slate-800 text-white uppercase text-xs">
                             <tr>
                                 <th class="p-3">Fecha</th>
-                                <th class="p-3">Personal / Comisionado</th>
+                                <th class="p-3">Personal</th>
                                 <th class="p-3">Destino</th>
                                 <th class="p-3">Motivo</th>
                                 <th class="p-3">Estado</th>
@@ -293,17 +271,19 @@
         </main>
     </div>
 
-    <!-- MODAL GESTIÓN DE PERSONAL / USUARIOS -->
+    <!-- MODAL GESTIÓN DE PERSONAL -->
     <div id="usersModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
         <div class="bg-white rounded-2xl w-full max-w-lg p-6 shadow-2xl relative">
             <h2 class="text-lg font-bold mb-4 text-slate-800 flex items-center gap-2">
-                <i class="fa-solid fa-users-gear text-blue-600"></i> Gestión de Personal y Accesos
+                <i class="fa-solid fa-users-gear text-blue-600"></i> Gestión de Personal
             </h2>
             <form onsubmit="saveNewUser(event)" class="space-y-3 mb-4 bg-slate-50 p-4 rounded-xl border">
-                <p class="text-xs font-bold text-slate-700">Crear o Actualizar Usuario</p>
-                <div class="grid grid-cols-2 gap-2">
-                    <input type="text" id="newUsername" required placeholder="Usuario" class="border p-2 rounded text-xs">
-                    <input type="password" id="newUserPass" placeholder="Contraseña" class="border p-2 rounded text-xs">
+                <input type="text" id="newUsername" required placeholder="Usuario" class="w-full border p-2 rounded text-xs">
+                <div class="relative">
+                    <input type="password" id="newUserPass" placeholder="Contraseña (opcional al editar)" class="w-full border p-2 rounded text-xs pr-10">
+                    <button type="button" onclick="togglePasswordVisibility('newUserPass', 'userEyeIcon')" class="absolute inset-y-0 right-0 px-3 flex items-center text-slate-500">
+                        <i id="userEyeIcon" class="fa-solid fa-eye"></i>
+                    </button>
                 </div>
                 <div class="flex gap-2">
                     <select id="newUserRole" class="border p-2 rounded text-xs w-full bg-white">
@@ -317,17 +297,13 @@
             <div class="max-h-48 overflow-y-auto border rounded-xl">
                 <table class="w-full text-left text-xs">
                     <thead class="bg-slate-800 text-white">
-                        <tr>
-                            <th class="p-2">Usuario</th>
-                            <th class="p-2">Rol</th>
-                            <th class="p-2 text-center">Acción</th>
-                        </tr>
+                        <tr><th class="p-2">Usuario</th><th class="p-2">Rol</th><th class="p-2 text-center">Acción</th></tr>
                     </thead>
                     <tbody id="usersTableBody" class="divide-y"></tbody>
                 </table>
             </div>
             <div class="flex justify-end mt-4">
-                <button onclick="closeUsersModal()" class="px-3 py-1.5 border rounded-lg text-xs hover:bg-slate-100">Cerrar</button>
+                <button onclick="closeUsersModal()" class="px-3 py-1.5 border rounded-lg text-xs">Cerrar</button>
             </div>
         </div>
     </div>
@@ -335,55 +311,32 @@
     <!-- MODAL AUDITORÍA -->
     <div id="auditModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
         <div class="bg-white rounded-2xl w-full max-w-2xl p-6 shadow-2xl relative">
-            <h2 class="text-lg font-bold mb-4 text-slate-800 flex items-center gap-2">
-                <i class="fa-solid fa-clock-rotate-left text-indigo-600"></i> Historial de Auditoría Centralizada
-            </h2>
+            <h2 class="text-lg font-bold mb-4 text-slate-800"><i class="fa-solid fa-clock-rotate-left mr-2"></i> Auditoría Centralizada</h2>
             <div class="max-h-96 overflow-y-auto border rounded-xl">
                 <table class="w-full text-left text-xs">
                     <thead class="bg-indigo-900 text-white">
-                        <tr>
-                            <th class="p-2">Fecha / Hora</th>
-                            <th class="p-2">Usuario</th>
-                            <th class="p-2">Acción</th>
-                            <th class="p-2">Detalles</th>
-                        </tr>
+                        <tr><th class="p-2">Fecha</th><th class="p-2">Usuario</th><th class="p-2">Acción</th><th class="p-2">Detalles</th></tr>
                     </thead>
                     <tbody id="auditTableBody" class="divide-y"></tbody>
                 </table>
             </div>
-            <div class="flex justify-end mt-4">
-                <button onclick="closeAuditModal()" class="px-3 py-1.5 border rounded-lg text-xs hover:bg-slate-100">Cerrar</button>
-            </div>
+            <div class="flex justify-end mt-4"><button onclick="closeAuditModal()" class="px-3 py-1.5 border rounded-lg text-xs">Cerrar</button></div>
         </div>
     </div>
 
     <!-- MODAL NOTA -->
     <div id="itemModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
         <div class="bg-white rounded-2xl w-full max-w-2xl p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
-            <h2 id="modalTitle" class="text-xl font-bold mb-4 text-slate-800">Nueva Nota</h2>
-            <form onsubmit="saveNota(event)" class="space-y-4">
+            <h2 id="modalTitle" class="text-xl font-bold mb-4 text-slate-800">Nota</h2>
+            <form onsubmit="saveNotaModal(event)" class="space-y-4">
                 <input type="hidden" id="notaId">
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Fecha</label>
-                        <input type="date" id="fecha" required class="w-full border p-2 rounded-lg text-sm">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Promotor</label>
-                        <input type="text" id="promotor" required placeholder="Ej. DIOP" class="w-full border p-2 rounded-lg text-sm">
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Número de Nota</label>
-                    <input type="text" id="nroNota" required class="w-full border p-2 rounded-lg text-sm font-bold text-blue-800">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Referencia</label>
-                    <textarea id="referencia" required rows="2" class="w-full border p-2 rounded-lg text-sm"></textarea>
-                </div>
+                <div><label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Fecha</label><input type="date" id="fecha" required class="w-full border p-2 rounded-lg text-sm"></div>
+                <div><label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Promotor</label><input type="text" id="promotor" required class="w-full border p-2 rounded-lg text-sm"></div>
+                <div><label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Nro Nota</label><input type="text" id="nroNota" required class="w-full border p-2 rounded-lg text-sm"></div>
+                <div><label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Referencia</label><textarea id="referencia" required rows="2" class="w-full border p-2 rounded-lg text-sm"></textarea></div>
                 <div class="flex justify-end space-x-3 pt-4">
                     <button type="button" onclick="closeModal()" class="px-4 py-2 border rounded-lg text-sm">Cancelar</button>
-                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium">Guardar Nota</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium">Guardar</button>
                 </div>
             </form>
         </div>
@@ -434,7 +387,7 @@
 
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-        const HARDCODED_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzyE_zwSzWaeo9qVlKF5PzHTll6nEQRcAZTlqA-tl_5edvxQb7JSx4fft3DdRyBvsMe/exec";
+        const HARDCODED_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz2Bn8ijEx7_zUljm8hO3NrI34-UxMWI4cOHEIP4GtjeDYtF2krBcsSlyJ6gnNzlSsp/exec";
 
         let currentUser = JSON.parse(sessionStorage.getItem('activeUser')) || null;
         let authToken = sessionStorage.getItem('authToken') || '';
@@ -443,6 +396,20 @@
         let viajes = [];
         let autoPdfFileBase64 = null;
         let currentFileName = '';
+
+        function togglePasswordVisibility(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.remove("fa-eye");
+                icon.classList.add("fa-eye-slash");
+            } else {
+                input.type = "password";
+                icon.classList.remove("fa-eye-slash");
+                icon.classList.add("fa-eye");
+            }
+        }
 
         async function initApp() {
             if (currentUser && authToken) {
@@ -454,7 +421,6 @@
                     document.getElementById('btnAuditLog')?.classList.remove('hidden');
                     document.getElementById('btnGestionUsuarios')?.classList.remove('hidden');
                 }
-                
                 await loadServerData();
                 applyRolePermissions();
             } else {
@@ -526,7 +492,6 @@
             document.getElementById('autoUploadSection').classList.toggle('hidden');
         }
 
-        // PARSER INTELIGENTE PDF.JS
         async function handleFileSelect(file) {
             if (!file || file.type !== 'application/pdf') return;
             currentFileName = file.name;
@@ -543,19 +508,16 @@
                         fullText += textContent.items.map(item => item.str).join(' ') + ' ';
                     }
 
-                    // Extracción inteligente por expresiones regulares GDE
                     const notaMatch = fullText.match(/(NO-\d{4}-\d+-[A-Z0-9#-]+)/i);
-                    const fechaMatch = fullText.match(/\b(\d{2}[-/]\d{2}[-/]\d{4})\b/);
-                    
                     document.getElementById('autoNroNota').value = notaMatch ? notaMatch[1] : currentFileName.replace('.pdf','');
                     document.getElementById('autoFecha').value = new Date().toISOString().split('T')[0];
                     document.getElementById('autoPromotor').value = 'DIOP';
-                    document.getElementById('autoReferencia').value = fullText.substring(0, 150) + '...';
+                    document.getElementById('autoReferencia').value = fullText.substring(0, 200).trim();
                     document.getElementById('autoAccion').value = 'AGAL';
 
                     document.getElementById('parsedResultForm').classList.remove('hidden');
                     document.getElementById('pdfStatus').classList.remove('hidden');
-                    document.getElementById('pdfStatus').innerText = "PDF analizado con éxito.";
+                    document.getElementById('pdfStatus').innerText = "PDF analizado correctamente.";
                 } catch(err) {
                     console.error("Error leyendo PDF", err);
                 }
@@ -569,18 +531,10 @@
                 const base64Data = autoPdfFileBase64.includes(',') ? autoPdfFileBase64.split(',')[1] : btoa(String.fromCharCode.apply(null, new Uint8Array(autoPdfFileBase64)));
                 const resp = await fetch(HARDCODED_SCRIPT_URL, {
                     method: 'POST',
-                    body: JSON.stringify({
-                        action: 'uploadPDF',
-                        token: authToken,
-                        base64Data: base64Data,
-                        mimeType: 'application/pdf',
-                        fileName: currentFileName
-                    })
+                    body: JSON.stringify({ action: 'uploadPDF', token: authToken, base64Data: base64Data, mimeType: 'application/pdf', fileName: currentFileName })
                 });
                 const resJson = await resp.json();
-                if (resJson.status === 'success') {
-                    driveUrl = resJson.fileUrl;
-                }
+                if (resJson.status === 'success') { driveUrl = resJson.fileUrl; }
             }
 
             const newNota = {
@@ -592,10 +546,7 @@
                 accion: document.getElementById('autoAccion').value,
                 limite: document.getElementById('autoLimite').value,
                 estado: 'Pendiente',
-                respuesta: '',
-                destino: 'ARCH',
-                adjuntoNota: driveUrl,
-                adjuntosRespuesta: []
+                adjuntoNota: driveUrl
             };
             notas.unshift(newNota);
 
@@ -617,28 +568,48 @@
             autoPdfFileBase64 = null;
         }
 
-        function openModal() {
-            document.getElementById('modalTitle').innerText = 'Nueva Nota';
-            document.getElementById('notaId').value = '';
-            document.getElementById('fecha').value = new Date().toISOString().split('T')[0];
-            document.getElementById('promotor').value = '';
-            document.getElementById('nroNota').value = '';
-            document.getElementById('referencia').value = '';
+        function openModal(id = null) {
+            document.getElementById('notaId').value = id || '';
+            if (id) {
+                const n = notas.find(item => item.id === id);
+                if (n) {
+                    document.getElementById('modalTitle').innerText = 'Editar Nota';
+                    document.getElementById('fecha').value = n.fecha || '';
+                    document.getElementById('promotor').value = n.promotor || '';
+                    document.getElementById('nroNota').value = n.nroNota || '';
+                    document.getElementById('referencia').value = n.referencia || '';
+                }
+            } else {
+                document.getElementById('modalTitle').innerText = 'Nueva Nota';
+                document.getElementById('fecha').value = new Date().toISOString().split('T')[0];
+                document.getElementById('promotor').value = '';
+                document.getElementById('nroNota').value = '';
+                document.getElementById('referencia').value = '';
+            }
             document.getElementById('itemModal').classList.remove('hidden');
         }
         function closeModal() { document.getElementById('itemModal').classList.add('hidden'); }
 
-        async function saveNota(e) {
+        async function saveNotaModal(e) {
             e.preventDefault();
-            const nuevaNota = {
-                id: Date.now(),
+            const id = document.getElementById('notaId').value;
+            const notaObj = {
+                id: id ? parseInt(id) : Date.now(),
                 fecha: document.getElementById('fecha').value,
                 promotor: document.getElementById('promotor').value,
                 nroNota: document.getElementById('nroNota').value,
                 referencia: document.getElementById('referencia').value,
                 estado: 'Pendiente'
             };
-            notas.unshift(nuevaNota);
+            if (id) {
+                const idx = notas.findIndex(n => n.id === parseInt(id));
+                if (idx !== -1) {
+                    notaObj.adjuntoNota = notas[idx].adjuntoNota;
+                    notas[idx] = notaObj;
+                }
+            } else {
+                notas.unshift(notaObj);
+            }
             await fetch(HARDCODED_SCRIPT_URL, {
                 method: 'POST',
                 body: JSON.stringify({ action: 'saveNotas', token: authToken, notas: notas })
@@ -648,15 +619,36 @@
             updateEstadisticas();
         }
 
+        async function deleteNota(id) {
+            if (confirm('¿Desea eliminar este registro?')) {
+                notas = notas.filter(item => item.id !== id);
+                await fetch(HARDCODED_SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'saveNotas', token: authToken, notas: notas })
+                });
+                renderTable();
+                updateEstadisticas();
+            }
+        }
+
         function renderTable() {
             const body = document.getElementById('tableBody');
             body.innerHTML = '';
             if (notas.length === 0) {
-                body.innerHTML = `<tr><td colspan="10" class="p-4 text-center text-slate-400">No hay registros.</td></tr>`;
+                body.innerHTML = `<tr><td colspan="9" class="p-4 text-center text-slate-400">No hay registros.</td></tr>`;
                 document.getElementById('metricTotal').innerText = 0;
                 return;
             }
             notas.forEach(n => {
+                let accionesHtml = `<button onclick="openModal(${n.id})" class="text-blue-600 hover:text-blue-800 mr-2" title="Ver"><i class="fa-solid fa-eye"></i></button>`;
+                
+                if (currentUser && currentUser.role === 'Administrador') {
+                    accionesHtml += `
+                        <button onclick="openModal(${n.id})" class="text-amber-600 hover:text-amber-800 mr-2" title="Editar"><i class="fa-solid fa-pen"></i></button>
+                        <button onclick="deleteNota(${n.id})" class="text-red-600 hover:text-red-800" title="Eliminar"><i class="fa-solid fa-trash"></i></button>
+                    `;
+                }
+
                 body.innerHTML += `
                     <tr class="border-b">
                         <td class="p-3">${n.fecha || '-'}</td>
@@ -665,10 +657,9 @@
                         <td class="p-3">${n.referencia || '-'}</td>
                         <td class="p-3">${n.accion || '-'}</td>
                         <td class="p-3">${n.limite || '-'}</td>
-                        <td class="p-3"><span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-bold">${n.estado}</span></td>
-                        <td class="p-3">${n.respuesta || '-'}</td>
+                        <td class="p-3"><span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-bold">${n.estado || 'Pendiente'}</span></td>
                         <td class="p-3">${n.adjuntoNota ? `<a href="${n.adjuntoNota}" target="_blank" class="text-blue-600 font-bold">Ver PDF</a>` : '-'}</td>
-                        <td class="p-3 text-center">-</td>
+                        <td class="p-3 text-center whitespace-nowrap">${accionesHtml}</td>
                     </tr>
                 `;
             });
@@ -698,10 +689,25 @@
         }
         function renderExpedientes() {
             const body = document.getElementById('tableExpedientesBody');
-            body.innerHTML = expedientes.length ===0 ? `<tr><td colspan="6" class="p-4 text-center text-slate-400">No hay expedientes.</td></tr>` : '';
+            body.innerHTML = expedientes.length === 0 ? `<tr><td colspan="6" class="p-4 text-center text-slate-400">No hay expedientes.</td></tr>` : '';
             expedientes.forEach(ex => {
-                body.innerHTML += `<tr class="border-b"><td class="p-3 font-bold text-amber-700">${ex.nro}</td><td class="p-3">${ex.iniciador}</td><td class="p-3">${ex.asunto}</td><td class="p-3">${ex.ubicacion}</td><td class="p-3">${ex.estado}</td><td class="p-3 text-center">-</td></tr>`;
+                let accionesExp = `<span class="text-slate-400">-</span>`;
+                if (currentUser && currentUser.role === 'Administrador') {
+                    accionesExp = `<button onclick="deleteExpediente(${ex.id})" class="text-red-600 hover:text-red-800"><i class="fa-solid fa-trash"></i></button>`;
+                }
+                body.innerHTML += `<tr class="border-b"><td class="p-3 font-bold text-amber-700">${ex.nro}</td><td class="p-3">${ex.iniciador}</td><td class="p-3">${ex.asunto}</td><td class="p-3">${ex.ubicacion}</td><td class="p-3">${ex.estado}</td><td class="p-3 text-center">${accionesExp}</td></tr>`;
             });
+        }
+        async function deleteExpediente(id) {
+            if (confirm('¿Eliminar expediente?')) {
+                expedientes = expedientes.filter(x => x.id !== id);
+                await fetch(HARDCODED_SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'saveExpedientes', token: authToken, expedientes: expedientes })
+                });
+                renderExpedientes();
+                updateEstadisticas();
+            }
         }
 
         // VIAJES
@@ -729,8 +735,23 @@
             const body = document.getElementById('tableViajesBody');
             body.innerHTML = viajes.length === 0 ? `<tr><td colspan="6" class="p-4 text-center text-slate-400">No hay viajes.</td></tr>` : '';
             viajes.forEach(v => {
-                body.innerHTML += `<tr class="border-b"><td class="p-3">${v.fecha}</td><td class="p-3 font-bold">${v.personal}</td><td class="p-3">${v.destino}</td><td class="p-3">${v.motivo}</td><td class="p-3">${v.estado}</td><td class="p-3 text-center">-</td></tr>`;
+                let accionesViaje = `<span class="text-slate-400">-</span>`;
+                if (currentUser && currentUser.role === 'Administrador') {
+                    accionesViaje = `<button onclick="deleteViaje(${v.id})" class="text-red-600 hover:text-red-800"><i class="fa-solid fa-trash"></i></button>`;
+                }
+                body.innerHTML += `<tr class="border-b"><td class="p-3">${v.fecha}</td><td class="p-3 font-bold">${v.personal}</td><td class="p-3">${v.destino}</td><td class="p-3">${v.motivo}</td><td class="p-3">${v.estado}</td><td class="p-3 text-center">${accionesViaje}</td></tr>`;
             });
+        }
+        async function deleteViaje(id) {
+            if (confirm('¿Eliminar viaje?')) {
+                viajes = viajes.filter(x => x.id !== id);
+                await fetch(HARDCODED_SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'saveViajes', token: authToken, viajes: viajes })
+                });
+                renderViajes();
+                updateEstadisticas();
+            }
         }
 
         function updateEstadisticas() {
@@ -739,7 +760,7 @@
             document.getElementById('statTotalViajes').innerText = viajes.length;
         }
 
-        // GESTIÓN DE PERSONAL / USUARIOS
+        // GESTIÓN DE PERSONAL
         async function openUsersModal() {
             document.getElementById('usersModal').classList.remove('hidden');
             const resp = await fetch(HARDCODED_SCRIPT_URL, {
@@ -763,12 +784,19 @@
                 password: document.getElementById('newUserPass').value,
                 role: document.getElementById('newUserRole').value
             };
-            await fetch(HARDCODED_SCRIPT_URL, {
+            const resp = await fetch(HARDCODED_SCRIPT_URL, {
                 method: 'POST',
                 body: JSON.stringify({ action: 'saveUser', token: authToken, user: usr })
             });
-            alert('Usuario guardado con éxito.');
-            closeUsersModal();
+            const res = await resp.json();
+            if (res.status === 'success') {
+                alert('Personal guardado con éxito.');
+                document.getElementById('newUsername').value = '';
+                document.getElementById('newUserPass').value = '';
+                openUsersModal();
+            } else {
+                alert('Error al guardar usuario.');
+            }
         }
         async function deleteUser(username) {
             if (confirm('¿Eliminar usuario?')) {
