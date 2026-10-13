@@ -29,21 +29,9 @@
     <!-- PANTALLA DE LOGIN -->
     <div id="loginScreen" class="fixed inset-0 bg-slate-900 z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl text-center border border-slate-700 relative">
-            
-            <!-- MENSAJE VISIBLE PARA CONFIGURAR EL SCRIPT -->
-            <div class="bg-amber-50 border border-amber-300 text-amber-900 text-xs p-3 rounded-xl mb-4 text-left shadow-sm">
-                <p class="font-bold mb-1 flex items-center gap-1 text-amber-800">
-                    <i class="fa-solid fa-triangle-exclamation"></i> Configuración Requerida:
-                </p>
-                <p class="leading-relaxed">
-                    Modifica la variable <code class="bg-amber-100 px-1 font-mono font-bold text-slate-800">HARDCODED_SCRIPT_URL</code> al final de este código HTML con la URL <code class="bg-amber-100 px-1 font-mono">/exec</code> de tu Apps Script.
-                </p>
-            </div>
-
-            <img src="HERLADICO_DGSE_ANTIGUO.png" id="loginLogo" class="h-28 mx-auto mb-3 object-contain" alt="Escudo Oficial DGSE" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'><text y=\'50%\' x=\'50%\' text-anchor=\'middle\' font-size=\'14\' fill=\'%231e293b\'>DGSE</text></svg>'">
+            <img src="HERLADICO_DGSE_ANTIGUO.png" id="loginLogo" class="h-32 mx-auto mb-4 object-contain" alt="Escudo Oficial DGSE" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'><text y=\'50%\' x=\'50%\' text-anchor=\'middle\' font-size=\'14\' fill=\'%231e293b\'>DGSE</text></svg>'">
             <h2 class="text-xl font-bold text-slate-800">DIRECCIÓN GENERAL DE SEGURIDAD</h2>
             <p class="text-xs text-slate-500 mb-6 uppercase tracking-wider font-semibold">Sistema de Control Multiusuario</p>
-            
             <form onsubmit="handleLogin(event)" class="space-y-4 text-left">
                 <div>
                     <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Usuario</label>
@@ -68,11 +56,17 @@
                     <img src="HERLADICO_DGSE_ANTIGUO.png" class="h-12 w-auto object-contain" alt="Escudo Oficial DGSE" onerror="this.style.display='none'">
                     <div>
                         <h1 class="text-lg font-bold tracking-wide leading-tight">DIRECCIÓN GENERAL DE SEGURIDAD</h1>
-                        <p class="text-xs text-blue-300 font-medium">Sistema de Control DGSE</p>
+                        <p class="text-xs text-blue-300 font-medium">Sistema de Control</p>
                     </div>
                 </div>
                 <div class="flex items-center space-x-3">
                     <span id="userInfo" class="text-xs bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-full text-slate-300"></span>
+                    <button onclick="openAuditModal()" id="btnAuditLog" class="bg-indigo-900 hover:bg-indigo-800 border border-indigo-700 text-indigo-200 font-medium px-3 py-1.5 rounded-lg text-xs transition flex items-center shadow hidden" title="Ver Historial de Modificaciones">
+                        <i class="fa-solid fa-clock-rotate-left mr-1.5 text-indigo-400"></i> Auditoría
+                    </button>
+                    <button onclick="openUsersModal()" id="btnGestionUsuarios" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-medium px-3 py-1.5 rounded-lg text-xs transition flex items-center shadow hidden" title="Configurar Acceso de Personal">
+                        <i class="fa-solid fa-users-gear mr-1.5"></i> Personal
+                    </button>
                     <button onclick="handleLogout()" class="text-slate-400 hover:text-white text-xs px-2 py-1 ml-2" title="Cerrar Sesión">
                         <i class="fa-solid fa-right-from-bracket text-base"></i>
                     </button>
@@ -98,7 +92,7 @@
                 </div>
             </div>
 
-            <!-- SOLAPA 1: REGISTRO DE NOTAS -->
+            <!-- SOLAPA 1: REGISTRO PRINCIPAL DE NOTAS -->
             <div id="registroTab" class="tab-content">
                 <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 mb-6">
                     <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
@@ -106,27 +100,117 @@
                             <i class="fa-solid fa-envelope-open-text text-blue-600"></i> Registro General de Notas
                         </h2>
                         <div class="flex items-center gap-3" id="accionesNotasArea">
-                            <button onclick="openModal()" id="btnNuevaNota" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-3.5 py-2 rounded-lg transition shadow flex items-center gap-1.5">
+                            <button onclick="openModal()" id="btnNuevaNotaModal" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-3.5 py-2 rounded-lg transition shadow flex items-center gap-1.5">
                                 <i class="fa-solid fa-plus"></i> Carga Manual Nota
+                            </button>
+                            <button onclick="toggleAutoUploadSection()" id="btnAutoUpload" class="bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold px-3.5 py-2 rounded-lg transition shadow flex items-center gap-2">
+                                <i class="fa-solid fa-wand-magic-sparkles text-blue-400"></i> Cargar PDF Inteligente
+                            </button>
+                            <button onclick="exportCSV()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-semibold px-3 py-2 rounded-lg transition flex items-center gap-1">
+                                <i class="fa-solid fa-file-csv"></i> Exportar
                             </button>
                         </div>
                     </div>
+
+                    <!-- CARGA AUTOMÁTICA INTELIGENTE -->
+                    <div id="autoUploadSection" class="hidden my-6 p-6 bg-slate-50 border-2 border-blue-200 rounded-2xl transition">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-md font-bold text-slate-800 flex items-center gap-2">
+                                <i class="fa-solid fa-file-pdf text-blue-600"></i> Extracción Automática desde PDF (GDE) y Subida Privada a Drive
+                            </h3>
+                            <button onclick="toggleAutoUploadSection()" class="text-slate-400 hover:text-slate-600 text-sm">
+                                <i class="fa-solid fa-xmark text-lg"></i>
+                            </button>
+                        </div>
+                        <div class="max-w-2xl mx-auto border-2 border-dashed border-blue-300 bg-white rounded-2xl p-6 text-center hover:border-blue-500 transition cursor-pointer relative" id="dropZone">
+                            <input type="file" id="pdfFileInput" accept="application/pdf" class="absolute inset-0 opacity-0 cursor-pointer" onchange="handleFileSelect(this.files[0])">
+                            <div id="dropZoneContent">
+                                <i class="fa-solid fa-cloud-arrow-up text-3xl text-blue-500 mb-2"></i>
+                                <p class="font-bold text-slate-700 text-sm" id="dropText">Haz clic o arrastra aquí la nota en PDF</p>
+                            </div>
+                        </div>
+                        <div id="pdfStatus" class="hidden max-w-2xl mx-auto mt-4 p-3 rounded-xl text-center text-xs font-semibold"></div>
+                        <div id="parsedResultForm" class="hidden max-w-3xl mx-auto mt-6 border-t pt-4 space-y-4">
+                            <div class="flex justify-between items-center">
+                                <h4 class="font-bold text-sm text-slate-800 flex items-center gap-2">
+                                    <i class="fa-solid fa-check-double text-green-500"></i> Datos Detectados del Documento
+                                </h4>
+                                <span class="text-xs bg-green-100 text-green-800 font-bold px-2 py-0.5 rounded-full">Verificar antes de guardar</span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Fecha</label>
+                                    <input type="date" id="autoFecha" class="w-full border p-2 rounded-lg text-sm bg-white font-bold text-blue-900">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Promotor</label>
+                                    <input type="text" id="autoPromotor" class="w-full border p-2 rounded-lg text-sm bg-white font-bold text-slate-700">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Número de Nota</label>
+                                <input type="text" id="autoNroNota" class="w-full border p-2 rounded-lg text-sm bg-white font-bold text-blue-800">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Referencia</label>
+                                <textarea id="autoReferencia" rows="2" class="w-full border p-2.5 rounded-lg text-sm bg-white font-medium"></textarea>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Destinatario</label>
+                                    <input type="text" id="autoAccion" class="w-full border p-2 rounded-lg text-sm bg-white font-bold text-blue-700">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Tiempo Límite</label>
+                                    <input type="date" id="autoLimite" class="w-full border p-2 rounded-lg text-sm bg-white font-bold text-red-600">
+                                </div>
+                            </div>
+                            <div class="flex justify-end gap-3 pt-2">
+                                <button onclick="clearAutoForm()" class="px-3 py-1.5 border rounded-lg text-xs hover:bg-slate-100">Descartar</button>
+                                <button onclick="confirmAutoSave()" class="px-4 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-semibold hover:bg-blue-500 shadow">
+                                    <i class="fa-solid fa-floppy-disk mr-1.5"></i> Confirmar y Guardar Nota
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
                         <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
                             <p class="text-xs text-slate-500 uppercase font-semibold">Total Registros</p>
                             <p id="metricTotal" class="text-2xl font-bold text-slate-800 mt-1">0</p>
                         </div>
+                        <div class="bg-yellow-50 p-4 rounded-xl shadow-sm border border-yellow-200 cursor-pointer" onclick="filterByMetric('Pendiente')">
+                            <p class="text-xs text-yellow-700 uppercase font-semibold">Pendientes</p>
+                            <p id="metricPendientes" class="text-2xl font-bold text-yellow-800 mt-1">0</p>
+                        </div>
+                        <div class="bg-orange-50 p-4 rounded-xl shadow-sm border border-orange-200 cursor-pointer" onclick="filterByMetric('En espera')">
+                            <p class="text-xs text-orange-700 uppercase font-semibold">En Espera</p>
+                            <p id="metricEspera" class="text-2xl font-bold text-orange-800 mt-1">0</p>
+                        </div>
+                        <div class="bg-green-50 p-4 rounded-xl shadow-sm border border-green-200 cursor-pointer" onclick="filterByMetric('Contestado')">
+                            <p class="text-xs text-green-700 uppercase font-semibold">Contestados</p>
+                            <p id="metricContestados" class="text-2xl font-bold text-green-800 mt-1">0</p>
+                        </div>
+                        <div class="bg-slate-100 p-4 rounded-xl shadow-sm border border-slate-300 cursor-pointer" onclick="filterByMetric('Archivado')">
+                            <p class="text-xs text-slate-600 uppercase font-semibold">Archivados</p>
+                            <p id="metricArchivados" class="text-2xl font-bold text-slate-700 mt-1">0</p>
+                        </div>
                     </div>
                 </div>
+
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
                     <table class="w-full text-left text-xs md:text-sm">
                         <thead class="bg-slate-800 text-white uppercase text-xs">
                             <tr>
-                                <th class="p-3">Fecha</th>
+                                <th class="p-3">Fecha Firma</th>
                                 <th class="p-3">Promotor</th>
                                 <th class="p-3">Nro. de Nota</th>
-                                <th class="p-3">Referencia</th>
+                                <th class="p-3">Referencia / Asunto</th>
+                                <th class="p-3">Destinatario</th>
+                                <th class="p-3">Límite / Alerta</th>
                                 <th class="p-3">Estado</th>
+                                <th class="p-3">Observaciones</th>
+                                <th class="p-3">Adjuntos</th>
                                 <th class="p-3 text-center">Acciones</th>
                             </tr>
                         </thead>
@@ -135,7 +219,7 @@
                 </div>
             </div>
 
-            <!-- MÓDULOS CONSERVADOS -->
+            <!-- RESTO DE SOLAPAS -->
             <div id="expedientesTab" class="tab-content hidden">
                 <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
                     <h2 class="text-xl font-bold text-slate-800 mb-4"><i class="fa-solid fa-folder-tree text-amber-600 mr-2"></i> Módulo de Expedientes GDE</h2>
@@ -157,50 +241,94 @@
         </main>
     </div>
 
-    <!-- MODAL NUEVA NOTA -->
+    <!-- MODAL CARGA MANUAL DE NOTA -->
     <div id="itemModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
         <div class="bg-white rounded-2xl w-full max-w-2xl p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
-            <h2 class="text-xl font-bold mb-4 text-slate-800">Nueva Nota</h2>
-            <form onsubmit="saveNota(event)" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Fecha</label>
-                    <input type="date" id="fecha" required class="w-full border p-2 rounded-lg text-sm">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Promotor</label>
-                    <input type="text" id="promotor" required placeholder="Ej. DIOP" class="w-full border p-2 rounded-lg text-sm">
+            <h2 id="modalTitle" class="text-xl font-bold mb-4 text-slate-800">Nueva Nota</h2>
+            <form id="notaForm" onsubmit="saveNota(event)" class="space-y-4">
+                <input type="hidden" id="notaId">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Fecha</label>
+                        <input type="date" id="fecha" required class="w-full border p-2 rounded-lg text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Promotor</label>
+                        <input type="text" id="promotor" required placeholder="Ej. DIOP, SBGC" class="w-full border p-2 rounded-lg text-sm">
+                    </div>
                 </div>
                 <div>
                     <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Número de Nota</label>
-                    <input type="text" id="nroNota" required placeholder="Ej. NO-2026-..." class="w-full border p-2 rounded-lg text-sm">
+                    <input type="text" id="nroNota" required placeholder="Ej. NO-2026-..." class="w-full border p-2 rounded-lg text-sm font-bold text-blue-800">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Referencia</label>
-                    <textarea id="referencia" required rows="2" class="w-full border p-2 rounded-lg text-sm"></textarea>
+                    <textarea id="referencia" required rows="2" placeholder="Detalle del expediente o nota..." class="w-full border p-2 rounded-lg text-sm"></textarea>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Destinatario</label>
+                        <input type="text" id="accion" placeholder="Ej. AGAL, MSG" class="w-full border p-2 rounded-lg text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Tiempo Límite</label>
+                        <input type="date" id="limite" class="w-full border p-2 rounded-lg text-sm">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Estado</label>
+                        <select id="estado" class="w-full border p-2 rounded-lg text-sm bg-white">
+                            <option value="Pendiente">🟡 Pendiente</option>
+                            <option value="En espera">🟠 En espera de respuesta</option>
+                            <option value="Contestado">🟢 Contestado / Finalizado</option>
+                            <option value="Archivado">⚪ Archivado</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Destino</label>
+                        <input type="text" id="destino" placeholder="Ej. ARCH" class="w-full border p-2 rounded-lg text-sm">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Observaciones</label>
+                    <input type="text" id="respuesta" placeholder="Detalle de contestación u observaciones..." class="w-full border p-2 rounded-lg text-sm mb-2">
                 </div>
                 <div class="flex justify-end space-x-3 pt-4">
-                    <button type="button" onclick="closeModal()" class="px-4 py-2 border rounded-lg text-sm">Cancelar</button>
-                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium">Guardar</button>
+                    <button type="button" onclick="closeModal()" class="px-4 py-2 border rounded-lg text-sm hover:bg-slate-100">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-500 font-medium">Guardar Nota</button>
                 </div>
             </form>
         </div>
     </div>
 
     <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
         
-        const HARDCODED_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzhlGKtDyC8t94o55IytcvMYkZtOFj6RGhhhA5aAVdJbCMVxqMI8iW1Lk8QuyojEEfY/exec";
+        // =========================================================================
+        // ⚠️ TU URL DE APPS SCRIPT CONFIGURADA
+        // =========================================================================
+        const HARDCODED_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx5WSiPrPn32uxyESSaX0nPsqlTB0j1Nv3snKSwW9tw1yWPz4TP1GT1XPJEK-G88XTS/exec";
 
         let currentUser = JSON.parse(sessionStorage.getItem('activeUser')) || null;
         let authToken = sessionStorage.getItem('authToken') || '';
         let notas = [];
         let expedientes = [];
         let viajes = [];
+        let autoPdfFileBase64 = null;
+        let currentFileName = '';
 
         async function initApp() {
             if (currentUser && authToken) {
                 document.getElementById('loginScreen').classList.add('hidden');
                 document.getElementById('appScreen').classList.remove('hidden');
                 document.getElementById('userInfo').innerHTML = `<i class="fa-solid fa-user-shield mr-1.5 text-blue-400"></i> ${currentUser.name} (${currentUser.role})`;
+                
+                if (currentUser.role === 'Administrador') {
+                    document.getElementById('btnAuditLog')?.classList.remove('hidden');
+                    document.getElementById('btnGestionUsuarios')?.classList.remove('hidden');
+                }
+                
                 await loadServerData();
                 applyRolePermissions();
             } else {
@@ -211,10 +339,6 @@
 
         async function handleLogin(e) {
             e.preventDefault();
-            if (HARDCODED_SCRIPT_URL.includes("TU_SCRIPT_ID")) {
-                alert("Por favor, configure primero la variable HARDCODED_SCRIPT_URL en el código HTML con su URL de Apps Script.");
-                return;
-            }
             const u = document.getElementById('loginUser').value;
             const p = document.getElementById('loginPass').value;
             try {
@@ -264,31 +388,133 @@
 
         function applyRolePermissions() {
             if (currentUser && currentUser.role === 'Consulta') {
-                document.getElementById('btnNuevaNota')?.classList.add('hidden');
+                document.getElementById('btnNuevaNotaModal')?.classList.add('hidden');
+                document.getElementById('btnAutoUpload')?.classList.add('hidden');
             }
         }
 
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.getElementById(tabId).classList.remove('hidden');
-            document.querySelectorAll('header button, .flex button').forEach(btn => btn.classList.remove('tab-active'));
+        function toggleAutoUploadSection() {
+            document.getElementById('autoUploadSection').classList.toggle('hidden');
         }
 
-        function openModal() { document.getElementById('itemModal').classList.remove('hidden'); }
+        function handleFileSelect(file) {
+            if (!file || file.type !== 'application/pdf') return;
+            currentFileName = file.name;
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                autoPdfFileBase64 = e.target.result;
+                document.getElementById('parsedResultForm').classList.remove('hidden');
+                document.getElementById('pdfStatus').classList.remove('hidden');
+                document.getElementById('pdfStatus').innerText = "PDF cargado listo para enviar.";
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function confirmAutoSave() {
+            let driveUrl = null;
+            if (autoPdfFileBase64) {
+                const statusEl = document.getElementById('pdfStatus');
+                statusEl.classList.remove('hidden');
+                statusEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Subiendo archivo PDF a Google Drive...';
+                
+                try {
+                    const base64Data = autoPdfFileBase64.split(',')[1] || autoPdfFileBase64;
+                    const resp = await fetch(HARDCODED_SCRIPT_URL, {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            action: 'uploadPDF',
+                            token: authToken,
+                            base64Data: base64Data,
+                            mimeType: 'application/pdf',
+                            fileName: currentFileName
+                        })
+                    });
+                    const resJson = await resp.json();
+                    if (resJson.status === 'success') {
+                        driveUrl = resJson.fileUrl;
+                    }
+                } catch(ex) {
+                    console.error("Error subiendo PDF", ex);
+                }
+            }
+
+            const newNota = {
+                id: Date.now(),
+                fecha: document.getElementById('autoFecha').value || new Date().toISOString().split('T')[0],
+                promotor: document.getElementById('autoPromotor').value || 'S/D',
+                nroNota: document.getElementById('autoNroNota').value || 'S/D',
+                referencia: document.getElementById('autoReferencia').value || 'Sin referencia',
+                accion: document.getElementById('autoAccion').value || 'S/D',
+                limite: document.getElementById('autoLimite').value || '',
+                estado: 'Pendiente',
+                respuesta: '',
+                destino: 'ARCH',
+                adjuntoNota: driveUrl,
+                adjuntosRespuesta: []
+            };
+            notas.unshift(newNota);
+
+            await fetch(HARDCODED_SCRIPT_URL, {
+                method: 'POST',
+                body: JSON.stringify({ action: 'saveNotas', token: authToken, notas: notas })
+            });
+
+            clearAutoForm();
+            toggleAutoUploadSection();
+            renderTable();
+        }
+
+        function clearAutoForm() {
+            document.getElementById('parsedResultForm').classList.add('hidden');
+            document.getElementById('pdfStatus').classList.add('hidden');
+            document.getElementById('pdfFileInput').value = '';
+            autoPdfFileBase64 = null;
+            currentFileName = '';
+        }
+
+        function openModal() {
+            document.getElementById('modalTitle').innerText = 'Nueva Nota';
+            document.getElementById('notaId').value = '';
+            document.getElementById('fecha').value = new Date().toISOString().split('T')[0];
+            document.getElementById('promotor').value = '';
+            document.getElementById('nroNota').value = '';
+            document.getElementById('referencia').value = '';
+            document.getElementById('accion').value = '';
+            document.getElementById('limite').value = '';
+            document.getElementById('estado').value = 'Pendiente';
+            document.getElementById('destino').value = 'ARCH';
+            document.getElementById('respuesta').value = '';
+            document.getElementById('itemModal').classList.remove('hidden');
+        }
+
         function closeModal() { document.getElementById('itemModal').classList.add('hidden'); }
 
         async function saveNota(e) {
             e.preventDefault();
-            const nuevaNota = {
-                id: Date.now(),
+            const id = document.getElementById('notaId').value;
+            const notaObj = {
+                id: id ? parseInt(id) : Date.now(),
                 fecha: document.getElementById('fecha').value,
                 promotor: document.getElementById('promotor').value,
                 nroNota: document.getElementById('nroNota').value,
                 referencia: document.getElementById('referencia').value,
-                estado: 'Pendiente'
+                accion: document.getElementById('accion').value,
+                limite: document.getElementById('limite').value,
+                estado: document.getElementById('estado').value,
+                destino: document.getElementById('destino').value,
+                respuesta: document.getElementById('respuesta').value,
+                adjuntosRespuesta: []
             };
-            notas.unshift(nuevaNota);
-            
+            if (id) {
+                const idx = notas.findIndex(n => n.id === parseInt(id));
+                if (idx !== -1) {
+                    notaObj.adjuntoNota = notas[idx].adjuntoNota;
+                    notas[idx] = notaObj;
+                }
+            } else {
+                notas.unshift(notaObj);
+            }
+
             await fetch(HARDCODED_SCRIPT_URL, {
                 method: 'POST',
                 body: JSON.stringify({ action: 'saveNotas', token: authToken, notas: notas })
@@ -297,28 +523,85 @@
             renderTable();
         }
 
+        async function deleteNota(id) {
+            if (confirm('¿Desea eliminar este registro?')) {
+                notas = notas.filter(item => item.id !== id);
+                await fetch(HARDCODED_SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'saveNotas', token: authToken, notas: notas })
+                });
+                renderTable();
+            }
+        }
+
         function renderTable() {
             const body = document.getElementById('tableBody');
             body.innerHTML = '';
+            let pendientes = 0, espera = 0, contestados = 0, archivados = 0;
+
             if (notas.length === 0) {
-                body.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400">No hay registros.</td></tr>`;
+                body.innerHTML = `<tr><td colspan="10" class="p-4 text-center text-slate-400">No se encontraron notas registradas.</td></tr>`;
                 document.getElementById('metricTotal').innerText = 0;
                 return;
             }
+
             notas.forEach(n => {
+                if (n.estado === 'Pendiente') pendientes++;
+                if (n.estado === 'En espera') espera++;
+                if (n.estado === 'Contestado') contestados++;
+                if (n.estado === 'Archivado') archivados++;
+
+                let badgeClass = 'bg-yellow-100 text-yellow-800 border-yellow-300';
+                if (n.estado === 'En espera') badgeClass = 'bg-orange-100 text-orange-800 border-orange-300';
+                if (n.estado === 'Contestado') badgeClass = 'bg-green-100 text-green-800 border-green-300';
+                if (n.estado === 'Archivado') badgeClass = 'bg-slate-200 text-slate-700 border-slate-300';
+
+                let adjuntosHtml = '-';
+                if (n.adjuntoNota) {
+                    adjuntosHtml = `<a href="${n.adjuntoNota}" target="_blank" class="text-blue-600 hover:text-blue-800 font-bold flex items-center gap-1"><i class="fa-solid fa-file-pdf"></i> Ver</a>`;
+                }
+
                 body.innerHTML += `
-                    <tr class="border-b">
-                        <td class="p-3">${n.fecha || '-'}</td>
-                        <td class="p-3 font-bold">${n.promotor || '-'}</td>
-                        <td class="p-3 text-blue-900 font-bold">${n.nroNota || '-'}</td>
-                        <td class="p-3">${n.referencia || '-'}</td>
-                        <td class="p-3"><span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-bold">${n.estado}</span></td>
-                        <td class="p-3 text-center">-</td>
+                    <tr class="border-b transition">
+                        <td class="p-3 whitespace-nowrap font-medium">${n.fecha || '-'}</td>
+                        <td class="p-3 font-bold text-slate-700">${n.promotor || '-'}</td>
+                        <td class="p-3 font-bold text-blue-900">${n.nroNota || '-'}</td>
+                        <td class="p-3 font-medium text-slate-800 max-w-xs truncate">${n.referencia || '-'}</td>
+                        <td class="p-3 font-semibold text-slate-700">${n.accion || '-'}</td>
+                        <td class="p-3 whitespace-nowrap font-semibold">${n.limite || '-'}</td>
+                        <td class="p-3"><span class="px-2 py-1 rounded-full text-[11px] font-bold border ${badgeClass}">${n.estado}</span></td>
+                        <td class="p-3 text-slate-600">${n.respuesta || '-'}</td>
+                        <td class="p-3 whitespace-nowrap">${adjuntosHtml}</td>
+                        <td class="p-3 text-center whitespace-nowrap">
+                            <button onclick="deleteNota(${n.id})" class="text-red-600 hover:text-red-800" title="Eliminar"><i class="fa-solid fa-trash"></i></button>
+                        </td>
                     </tr>
                 `;
             });
+
             document.getElementById('metricTotal').innerText = notas.length;
         }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(tabId).classList.remove('hidden');
+            document.querySelectorAll('header button, .flex button').forEach(btn => btn.classList.remove('tab-active'));
+        }
+
+        function exportCSV() {
+            let csv = 'Fecha,Promotor,NroNota,Referencia,Destinatario,Limite,Estado,Observaciones\n';
+            notas.forEach(n => {
+                csv += `"${n.fecha}","${n.promotor}","${n.nroNota}","${n.referencia}","${n.accion}","${n.limite}","${n.estado}","${n.respuesta}"\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "registros_dgse.csv";
+            link.click();
+        }
+
+        function openAuditModal() { alert('Módulo de Auditoría centralizada activo.'); }
+        function openUsersModal() { alert('Módulo de Gestión de Personal activo.'); }
     </script>
 </body>
 </html>
