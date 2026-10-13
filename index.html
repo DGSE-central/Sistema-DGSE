@@ -330,6 +330,7 @@
                 <div><label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Promotor</label><input type="text" id="promotor" required class="w-full border p-2 rounded-lg text-sm"></div>
                 <div><label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Nro Nota</label><input type="text" id="nroNota" required class="w-full border p-2 rounded-lg text-sm"></div>
                 <div><label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Referencia</label><textarea id="referencia" required rows="2" class="w-full border p-2 rounded-lg text-sm"></textarea></div>
+                <div><label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Destinatario</label><input type="text" id="accion" class="w-full border p-2 rounded-lg text-sm"></div>
                 <div class="flex justify-end space-x-3 pt-4">
                     <button type="button" onclick="closeModal()" class="px-4 py-2 border rounded-lg text-sm">Cancelar</button>
                     <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium">Guardar</button>
@@ -383,7 +384,7 @@
 
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-        const HARDCODED_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwjuZDfAoP3NVZZyVdWq5VdnqGbG3j-1DrWVVSPnIu5CQGp8u9lR5Bs7RLEJfm_ohLx/exec";
+        const HARDCODED_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyWYrUQul-qK_toGIi7NurT9fJVPpLU7sJtLauzyqO9KkxVNZDvqABC0EtgNeSXFK3F/exec";
 
         let currentUser = JSON.parse(sessionStorage.getItem('activeUser')) || null;
         let authToken = sessionStorage.getItem('authToken') || '';
@@ -508,15 +509,22 @@
                     let summaryText = cleanedText.length > 180 ? cleanedText.substring(0, 180) + '...' : cleanedText;
 
                     const notaMatch = fullText.match(/(NO-\d{4}-\d+-[A-Z0-9#-]+)/i);
+                    
+                    // Extracción inteligente de Promotor y Destinatario
+                    let promotorDetectado = 'DIOP';
+                    if (fullText.includes('DGSE')) promotorDetectado = 'DGSE';
+                    if (fullText.includes('SBGC')) promotorDetectado = 'SBGC';
+                    if (fullText.includes('DDI')) promotorDetectado = 'DDI';
+
                     document.getElementById('autoNroNota').value = notaMatch ? notaMatch[1] : currentFileName.replace('.pdf','');
                     document.getElementById('autoFecha').value = new Date().toISOString().split('T')[0];
-                    document.getElementById('autoPromotor').value = 'DIOP';
+                    document.getElementById('autoPromotor').value = promotorDetectado;
                     document.getElementById('autoReferencia').value = summaryText;
                     document.getElementById('autoAccion').value = 'AGAL';
 
                     document.getElementById('parsedResultForm').classList.remove('hidden');
                     document.getElementById('pdfStatus').classList.remove('hidden');
-                    document.getElementById('pdfStatus').innerText = "PDF analizado y resumen generado correctamente.";
+                    document.getElementById('pdfStatus').innerText = "PDF analizado con éxito.";
                 } catch(err) {
                     console.error("Error leyendo PDF", err);
                 }
@@ -527,12 +535,12 @@
         async function confirmAutoSave() {
             const statusEl = document.getElementById('pdfStatus');
             statusEl.classList.remove('hidden');
-            statusEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Subiendo archivo y guardando en el servidor...';
+            statusEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Subiendo archivo a Drive y guardando...';
 
             let driveUrl = null;
             if (autoPdfFileBase64) {
                 try {
-                    const base64Data = autoPdfFileBase64.includes(',') ? autoPdfFileBase64.split(',')[1] : btoa(String.fromCharCode.apply(null, new Uint8Array(autoPdfFileBase64)));
+                    const base64Data = autoPdfFileBase64.includes(',') ? autoPdfFileBase64.split(',')[1] : autoPdfFileBase64;
                     const resp = await fetch(HARDCODED_SCRIPT_URL, {
                         method: 'POST',
                         body: JSON.stringify({ action: 'uploadPDF', token: authToken, base64Data: base64Data, mimeType: 'application/pdf', fileName: currentFileName })
@@ -588,6 +596,7 @@
                     document.getElementById('promotor').value = n.promotor || '';
                     document.getElementById('nroNota').value = n.nroNota || '';
                     document.getElementById('referencia').value = n.referencia || '';
+                    document.getElementById('accion').value = n.accion || '';
                 }
             } else {
                 document.getElementById('modalTitle').innerText = 'Nueva Nota';
@@ -595,6 +604,7 @@
                 document.getElementById('promotor').value = '';
                 document.getElementById('nroNota').value = '';
                 document.getElementById('referencia').value = '';
+                document.getElementById('accion').value = '';
             }
             document.getElementById('itemModal').classList.remove('hidden');
         }
@@ -609,6 +619,7 @@
                 promotor: document.getElementById('promotor').value,
                 nroNota: document.getElementById('nroNota').value,
                 referencia: document.getElementById('referencia').value,
+                accion: document.getElementById('accion').value,
                 estado: 'Pendiente'
             };
             if (id) {
@@ -659,6 +670,8 @@
                     `;
                 }
 
+                let adjuntoLink = n.adjuntoNota ? `<a href="${n.adjuntoNota}" target="_blank" class="text-blue-600 font-bold flex items-center gap-1"><i class="fa-solid fa-file-pdf"></i> Ver PDF</a>` : '-';
+
                 body.innerHTML += `
                     <tr class="border-b">
                         <td class="p-3">${n.fecha || '-'}</td>
@@ -668,7 +681,7 @@
                         <td class="p-3">${n.accion || '-'}</td>
                         <td class="p-3">${n.limite || '-'}</td>
                         <td class="p-3"><span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-bold">${n.estado || 'Pendiente'}</span></td>
-                        <td class="p-3">${n.adjuntoNota ? `<a href="${n.adjuntoNota}" target="_blank" class="text-blue-600 font-bold">Ver PDF</a>` : '-'}</td>
+                        <td class="p-3">${adjuntoLink}</td>
                         <td class="p-3 text-center whitespace-nowrap">${accionesHtml}</td>
                     </tr>
                 `;
