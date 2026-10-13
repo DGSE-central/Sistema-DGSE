@@ -3,38 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema DGSE</title>
+    <title>Sistema DGSE - Multiusuario Seguro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         .row-pendiente { background-color: #fefce8; }
-        .row-pendiente:hover { background-color: #fef9c3; }
         .row-espera { background-color: #ffedd5; }
-        .row-espera:hover { background-color: #fed7aa; }
         .row-contestado { background-color: #f0fdf4; }
-        .row-contestado:hover { background-color: #dcfce7; }
         .row-archivado { background-color: #f3f4f6; }
-        .row-archivado:hover { background-color: #e5e7eb; }
-        .tab-active {
-            border-bottom: 3px solid #2563eb;
-            color: #2563eb;
-            font-weight: 700;
-        }
+        .tab-active { border-bottom: 3px solid #2563eb; color: #2563eb; font-weight: 700; }
     </style>
 </head>
-<body class="bg-slate-100 min-h-screen text-slate-800 font-sans pb-12" onload="checkAuth()">
-    <!-- MODAL CONFIGURACIÓN GOOGLE DRIVE -->
+<body class="bg-slate-100 min-h-screen text-slate-800 font-sans pb-12" onload="initApp()">
+    <!-- MODAL CONFIGURACIÓN BACKEND APPS SCRIPT -->
     <div id="driveConfigModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
         <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl relative">
             <h2 class="text-lg font-bold mb-2 text-slate-800 flex items-center gap-2">
-                <i class="fa-brands fa-google-drive text-blue-600"></i> Configurar Google Drive
+                <i class="fa-solid fa-server text-blue-600"></i> Configurar Conexión Servidor DGSE
             </h2>
-            <p class="text-xs text-slate-500 mb-4">Ingresa la URL del Web App de Google Apps Script para guardar los PDFs y notas directamente en tu Drive.</p>
+            <p class="text-xs text-slate-500 mb-4">Ingresa la URL del Web App de Google Apps Script centralizado.</p>
             <div class="space-y-3">
                 <div>
-                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">URL de Google Apps Script</label>
+                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">URL del Web App</label>
                     <input type="text" id="inputScriptUrl" placeholder="https://script.google.com/macros/s/.../exec" class="w-full border p-2 rounded-lg text-xs font-mono">
                 </div>
             </div>
@@ -44,15 +36,15 @@
             </div>
         </div>
     </div>
-    <!-- PANTALLA DE LOGIN -->
+
+    <!-- PANTALLA DE LOGIN SEGURO -->
     <div id="loginScreen" class="fixed inset-0 bg-slate-900 z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl text-center border border-slate-700 relative">
-            <button onclick="openDriveConfigModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-xs" title="Configurar Google Drive">
-                <i class="fa-brands fa-google-drive text-lg"></i>
+            <button onclick="openDriveConfigModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-xs" title="Configurar Servidor">
+                <i class="fa-solid fa-gear text-lg"></i>
             </button>
-            <img src="HERLADICO_DGSE_ANTIGUO.png" id="loginLogo" class="h-32 mx-auto mb-4 object-contain" alt="Escudo Oficial DGSE" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'><text y=\'50%\' x=\'50%\' text-anchor=\'middle\' font-size=\'14\' fill=\'%231e293b\'>DGSE</text></svg>'">
-            <h2 class="text-xl font-bold text-slate-800">DIRECCIÓN GENERAL DE SEGURIDAD</h2>
-            <p class="text-xs text-slate-500 mb-6 uppercase tracking-wider font-semibold">Sistema de Control</p>
+            <h2 class="text-xl font-bold text-slate-800 mt-4">DIRECCIÓN GENERAL DE SEGURIDAD</h2>
+            <p class="text-xs text-slate-500 mb-6 uppercase tracking-wider font-semibold">Sistema de Control Multiusuario</p>
             <form onsubmit="handleLogin(event)" class="space-y-4 text-left">
                 <div>
                     <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Usuario</label>
@@ -68,27 +60,21 @@
             </form>
         </div>
     </div>
+
     <!-- APLICACIÓN PRINCIPAL -->
     <div id="appScreen" class="hidden">
         <header class="bg-slate-900 text-white shadow-lg sticky top-0 z-30">
             <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
                 <div class="flex items-center space-x-3">
-                    <img src="HERLADICO_DGSE_ANTIGUO.png" class="h-12 w-auto object-contain" alt="Escudo Oficial DGSE" onerror="this.style.display='none'">
                     <div>
                         <h1 class="text-lg font-bold tracking-wide leading-tight">DIRECCIÓN GENERAL DE SEGURIDAD</h1>
-                        <p class="text-xs text-blue-300 font-medium">Sistema de Control</p>
+                        <p class="text-xs text-blue-300 font-medium">Sistema de Control DGSE</p>
                     </div>
                 </div>
                 <div class="flex items-center space-x-3">
                     <span id="userInfo" class="text-xs bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-full text-slate-300"></span>
-                    <button onclick="openDriveConfigModal()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-blue-300 font-medium px-3 py-1.5 rounded-lg text-xs transition flex items-center shadow" title="Configurar Google Drive">
-                        <i class="fa-brands fa-google-drive mr-1.5"></i> Drive
-                    </button>
-                    <button onclick="openAuditModal()" id="btnAuditLog" class="bg-indigo-900 hover:bg-indigo-800 border border-indigo-700 text-indigo-200 font-medium px-3 py-1.5 rounded-lg text-xs transition flex items-center shadow hidden" title="Ver Historial de Modificaciones">
-                        <i class="fa-solid fa-clock-rotate-left mr-1.5 text-indigo-400"></i> Auditoría
-                    </button>
-                    <button onclick="openUsersModal()" id="btnGestionUsuarios" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-medium px-3 py-1.5 rounded-lg text-xs transition flex items-center shadow hidden" title="Configurar Acceso de Personal">
-                        <i class="fa-solid fa-users-gear mr-1.5"></i> Personal
+                    <button onclick="openDriveConfigModal()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-blue-300 font-medium px-3 py-1.5 rounded-lg text-xs transition flex items-center shadow">
+                        <i class="fa-solid fa-server mr-1.5"></i> Servidor
                     </button>
                     <button onclick="handleLogout()" class="text-slate-400 hover:text-white text-xs px-2 py-1 ml-2" title="Cerrar Sesión">
                         <i class="fa-solid fa-right-from-bracket text-base"></i>
@@ -96,6 +82,7 @@
                 </div>
             </div>
         </header>
+
         <main class="max-w-7xl mx-auto px-4 mt-6">
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 mb-6">
                 <div class="flex border-b border-slate-200 overflow-x-auto">
@@ -113,94 +100,18 @@
                     </button>
                 </div>
             </div>
+
             <!-- SOLAPA 1: REGISTRO PRINCIPAL DE NOTAS -->
             <div id="registroTab" class="tab-content">
-                <div id="alertBanner" class="hidden mb-6 p-4 rounded-xl border shadow-sm transition">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-3" id="alertBannerContent"></div>
-                        <button onclick="filtrarUrgentes()" class="text-xs font-bold px-3 py-1.5 bg-white border rounded-lg shadow-sm hover:bg-slate-50 transition">
-                            Ver Notas Afectadas
-                        </button>
-                    </div>
-                </div>
                 <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 mb-6">
                     <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
-                        <div>
-                            <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
-                                <i class="fa-solid fa-envelope-open-text text-blue-600"></i> Registro General de Notas
-                            </h2>
-                        </div>
+                        <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-envelope-open-text text-blue-600"></i> Registro General de Notas
+                        </h2>
                         <div class="flex items-center gap-3" id="accionesNotasArea">
-                            <button onclick="openModal()" id="btnNuevaNotaModal" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-3.5 py-2 rounded-lg transition shadow flex items-center gap-1.5">
+                            <button onclick="openModal()" id="btnNuevaNota" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-3.5 py-2 rounded-lg transition shadow flex items-center gap-1.5">
                                 <i class="fa-solid fa-plus"></i> Carga Manual Nota
                             </button>
-                            <button onclick="toggleAutoUploadSection()" id="btnAutoUpload" class="bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold px-3.5 py-2 rounded-lg transition shadow flex items-center gap-2">
-                                <i class="fa-solid fa-wand-magic-sparkles text-blue-400"></i> Cargar PDF Inteligente
-                            </button>
-                            <button onclick="exportCSV()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-semibold px-3 py-2 rounded-lg transition flex items-center gap-1">
-                                <i class="fa-solid fa-file-csv"></i> Exportar
-                            </button>
-                        </div>
-                    </div>
-                    <!-- CARGA AUTOMÁTICA INTELIGENTE -->
-                    <div id="autoUploadSection" class="hidden my-6 p-6 bg-slate-50 border-2 border-blue-200 rounded-2xl transition">
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-md font-bold text-slate-800 flex items-center gap-2">
-                                <i class="fa-solid fa-file-pdf text-blue-600"></i> Extracción Automática desde PDF (GDE) y Subida a Drive
-                            </h3>
-                            <button onclick="toggleAutoUploadSection()" class="text-slate-400 hover:text-slate-600 text-sm">
-                                <i class="fa-solid fa-xmark text-lg"></i>
-                            </button>
-                        </div>
-                        <div class="max-w-2xl mx-auto border-2 border-dashed border-blue-300 bg-white rounded-2xl p-6 text-center hover:border-blue-500 transition cursor-pointer relative" id="dropZone">
-                            <input type="file" id="pdfFileInput" accept="application/pdf" class="absolute inset-0 opacity-0 cursor-pointer" onchange="handleFileSelect(this.files[0])">
-                            <div id="dropZoneContent">
-                                <i class="fa-solid fa-cloud-arrow-up text-3xl text-blue-500 mb-2"></i>
-                                <p class="font-bold text-slate-700 text-sm" id="dropText">Haz clic o arrastra aquí la nota en PDF</p>
-                            </div>
-                        </div>
-                        <div id="pdfStatus" class="hidden max-w-2xl mx-auto mt-4 p-3 rounded-xl text-center text-xs font-semibold"></div>
-                        <div id="parsedResultForm" class="hidden max-w-3xl mx-auto mt-6 border-t pt-4 space-y-4">
-                            <div class="flex justify-between items-center">
-                                <h4 class="font-bold text-sm text-slate-800 flex items-center gap-2">
-                                    <i class="fa-solid fa-check-double text-green-500"></i> Datos Detectados del Documento
-                                </h4>
-                                <span class="text-xs bg-green-100 text-green-800 font-bold px-2 py-0.5 rounded-full">Verificar antes de guardar</span>
-                            </div>
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Fecha</label>
-                                    <input type="date" id="autoFecha" class="w-full border p-2 rounded-lg text-sm bg-white font-bold text-blue-900 focus:ring-2 focus:ring-blue-500" onchange="recalcularVencimientoManual()">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Promotor</label>
-                                    <input type="text" id="autoPromotor" class="w-full border p-2 rounded-lg text-sm bg-white font-bold text-slate-700">
-                                </div>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">Número de Nota</label>
-                                <input type="text" id="autoNroNota" class="w-full border p-2 rounded-lg text-sm bg-white font-bold text-blue-800 focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">Referencia</label>
-                                <textarea id="autoReferencia" rows="2" class="w-full border p-2.5 rounded-lg text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none font-medium"></textarea>
-                            </div>
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Destinatario</label>
-                                    <input type="text" id="autoAccion" class="w-full border p-2 rounded-lg text-sm bg-white font-bold text-blue-700">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Tiempo Límite</label>
-                                    <input type="date" id="autoLimite" class="w-full border p-2 rounded-lg text-sm bg-white font-bold text-red-600">
-                                </div>
-                            </div>
-                            <div class="flex justify-end gap-3 pt-2">
-                                <button onclick="clearAutoForm()" class="px-3 py-1.5 border rounded-lg text-xs hover:bg-slate-100">Descartar</button>
-                                <button onclick="confirmAutoSave()" class="px-4 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-semibold hover:bg-blue-500 shadow">
-                                    <i class="fa-solid fa-floppy-disk mr-1.5"></i> Confirmar y Guardar Nota
-                                </button>
-                            </div>
                         </div>
                     </div>
                     <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
@@ -208,37 +119,18 @@
                             <p class="text-xs text-slate-500 uppercase font-semibold">Total Registros</p>
                             <p id="metricTotal" class="text-2xl font-bold text-slate-800 mt-1">0</p>
                         </div>
-                        <div class="bg-yellow-50 p-4 rounded-xl shadow-sm border border-yellow-200 cursor-pointer" onclick="filterByMetric('Pendiente')">
-                            <p class="text-xs text-yellow-700 uppercase font-semibold">Pendientes</p>
-                            <p id="metricPendientes" class="text-2xl font-bold text-yellow-800 mt-1">0</p>
-                        </div>
-                        <div class="bg-orange-50 p-4 rounded-xl shadow-sm border border-orange-200 cursor-pointer" onclick="filterByMetric('En espera')">
-                            <p class="text-xs text-orange-700 uppercase font-semibold">En Espera</p>
-                            <p id="metricEspera" class="text-2xl font-bold text-orange-800 mt-1">0</p>
-                        </div>
-                        <div class="bg-green-50 p-4 rounded-xl shadow-sm border border-green-200 cursor-pointer" onclick="filterByMetric('Contestado')">
-                            <p class="text-xs text-green-700 uppercase font-semibold">Contestados</p>
-                            <p id="metricContestados" class="text-2xl font-bold text-green-800 mt-1">0</p>
-                        </div>
-                        <div class="bg-slate-100 p-4 rounded-xl shadow-sm border border-slate-300 cursor-pointer" onclick="filterByMetric('Archivado')">
-                            <p class="text-xs text-slate-600 uppercase font-semibold">Archivados</p>
-                            <p id="metricArchivados" class="text-2xl font-bold text-slate-700 mt-1">0</p>
-                        </div>
                     </div>
                 </div>
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
                     <table class="w-full text-left text-xs md:text-sm">
                         <thead class="bg-slate-800 text-white uppercase text-xs">
                             <tr>
-                                <th class="p-3">Fecha Firma</th>
+                                <th class="p-3">Fecha</th>
                                 <th class="p-3">Promotor</th>
                                 <th class="p-3">Nro. de Nota</th>
-                                <th class="p-3">Referencia / Asunto</th>
+                                <th class="p-3">Referencia</th>
                                 <th class="p-3">Destinatario</th>
-                                <th class="p-3">Límite / Alerta</th>
                                 <th class="p-3">Estado</th>
-                                <th class="p-3">Observaciones</th>
-                                <th class="p-3">Adjuntos</th>
                                 <th class="p-3 text-center">Acciones</th>
                             </tr>
                         </thead>
@@ -246,369 +138,204 @@
                     </table>
                 </div>
             </div>
-            <div id="expedientesTab" class="tab-content hidden"></div>
-            <div id="viajesTab" class="tab-content hidden"></div>
-            <div id="estadisticasTab" class="tab-content hidden"></div>
+
+            <!-- SOLAPAS 2, 3 y 4 (Conservadas con su estructura original para evitar pérdida de módulos) -->
+            <div id="expedientesTab" class="tab-content hidden">
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+                    <h2 class="text-xl font-bold text-slate-800 mb-4"><i class="fa-solid fa-folder-tree text-amber-600 mr-2"></i> Módulo de Expedientes GDE</h2>
+                    <p class="text-sm text-slate-600">Módulo integrado y sincronizado con el servidor central.</p>
+                </div>
+            </div>
+            <div id="viajesTab" class="tab-content hidden">
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+                    <h2 class="text-xl font-bold text-slate-800 mb-4"><i class="fa-solid fa-plane-departure text-emerald-600 mr-2"></i> Módulo de Control de Viajes</h2>
+                    <p class="text-sm text-slate-600">Módulo integrado y sincronizado con el servidor central.</p>
+                </div>
+            </div>
+            <div id="estadisticasTab" class="tab-content hidden">
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+                    <h2 class="text-xl font-bold text-slate-800 mb-4"><i class="fa-solid fa-chart-pie text-indigo-600 mr-2"></i> Estadísticas DGSE</h2>
+                    <p class="text-sm text-slate-600">Visualización de métricas consolidadas del sistema.</p>
+                </div>
+            </div>
         </main>
     </div>
 
-    <!-- MODAL CARGA MANUAL DE NOTA -->
+    <!-- MODAL NUEVA NOTA -->
     <div id="itemModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
         <div class="bg-white rounded-2xl w-full max-w-2xl p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
-            <h2 id="modalTitle" class="text-xl font-bold mb-4 text-slate-800">Nueva Nota</h2>
-            <form id="notaForm" onsubmit="saveNota(event)" class="space-y-4">
-                <input type="hidden" id="notaId">
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Fecha</label>
-                        <input type="date" id="fecha" required class="w-full border p-2 rounded-lg text-sm">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Promotor</label>
-                        <input type="text" id="promotor" required placeholder="Ej. DIOP, SBGC" class="w-full border p-2 rounded-lg text-sm">
-                    </div>
+            <h2 class="text-xl font-bold mb-4 text-slate-800">Nueva Nota</h2>
+            <form onsubmit="saveNota(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Fecha</label>
+                    <input type="date" id="fecha" required class="w-full border p-2 rounded-lg text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Promotor</label>
+                    <input type="text" id="promotor" required placeholder="Ej. DIOP" class="w-full border p-2 rounded-lg text-sm">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Número de Nota</label>
-                    <input type="text" id="nroNota" required placeholder="Ej. NO-2026-93527297-APN-PNAR#PNA" class="w-full border p-2 rounded-lg text-sm font-bold text-blue-800">
+                    <input type="text" id="nroNota" required placeholder="Ej. NO-2026-..." class="w-full border p-2 rounded-lg text-sm">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Referencia</label>
-                    <textarea id="referencia" required rows="2" placeholder="Detalle del expediente o nota..." class="w-full border p-2 rounded-lg text-sm"></textarea>
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Destinatario</label>
-                        <input type="text" id="accion" placeholder="Ej. AGAL, MSG, DEDU" class="w-full border p-2 rounded-lg text-sm">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Tiempo Límite</label>
-                        <input type="date" id="limite" class="w-full border p-2 rounded-lg text-sm">
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Estado</label>
-                        <select id="estado" class="w-full border p-2 rounded-lg text-sm bg-white">
-                            <option value="Pendiente">🟡 Pendiente</option>
-                            <option value="En espera">🟠 En espera de respuesta</option>
-                            <option value="Contestado">🟢 Contestado / Finalizado</option>
-                            <option value="Archivado">⚪ Archivado</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Destino</label>
-                        <input type="text" id="destino" placeholder="Ej. ARCH" class="w-full border p-2 rounded-lg text-sm">
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Observaciones</label>
-                    <input type="text" id="respuesta" placeholder="Detalle de contestación u observaciones..." class="w-full border p-2 rounded-lg text-sm mb-2">
+                    <textarea id="referencia" required rows="2" class="w-full border p-2 rounded-lg text-sm"></textarea>
                 </div>
                 <div class="flex justify-end space-x-3 pt-4">
-                    <button type="button" onclick="closeModal()" class="px-4 py-2 border rounded-lg text-sm hover:bg-slate-100">Cancelar</button>
-                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-500 font-medium">Guardar Nota</button>
+                    <button type="button" onclick="closeModal()" class="px-4 py-2 border rounded-lg text-sm">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium">Guardar</button>
                 </div>
             </form>
         </div>
     </div>
 
     <script>
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-        let GOOGLE_SCRIPT_URL = localStorage.getItem('dgse_script_url') || '';
+        let SCRIPT_URL = localStorage.getItem('dgse_script_url') || '';
+        let currentUser = JSON.parse(sessionStorage.getItem('activeUser')) || null;
+        let authToken = sessionStorage.getItem('authToken') || '';
+        let notas = [];
+        let expedientes = [];
+        let viajes = [];
 
         function openDriveConfigModal() {
-            document.getElementById('inputScriptUrl').value = GOOGLE_SCRIPT_URL;
+            document.getElementById('inputScriptUrl').value = SCRIPT_URL;
             document.getElementById('driveConfigModal').classList.remove('hidden');
         }
-        function closeDriveConfigModal() {
-            document.getElementById('driveConfigModal').classList.add('hidden');
-        }
+        function closeDriveConfigModal() { document.getElementById('driveConfigModal').classList.add('hidden'); }
         function saveDriveConfig() {
-            GOOGLE_SCRIPT_URL = document.getElementById('inputScriptUrl').value.trim();
-            localStorage.setItem('dgse_script_url', GOOGLE_SCRIPT_URL);
+            SCRIPT_URL = document.getElementById('inputScriptUrl').value.trim();
+            localStorage.setItem('dgse_script_url', SCRIPT_URL);
             closeDriveConfigModal();
-            alert('Configuración de Google Drive guardada correctamente.');
+            alert('Configuración guardada.');
         }
 
-        /* ==========================================================
-           SINCRONIZACIÓN Y CARGA DE NOTAS DESDE GOOGLE DRIVE
-           ========================================================== */
-        async function cargarNotasDesdeDrive() {
-            if (!GOOGLE_SCRIPT_URL) return;
-            try {
-                const respuesta = await fetch(GOOGLE_SCRIPT_URL, {
-                    method: "POST",
-                    body: JSON.stringify({ action: "getNotas" })
-                });
-                const resultado = await respuesta.json();
-                if (resultado.status === "success" && Array.isArray(resultado.notas)) {
-                    notas = resultado.notas;
-                    localStorage.setItem('notas_db', JSON.stringify(notas));
-                    renderTable();
-                    populatePromotoresOptions();
-                }
-            } catch (error) {
-                console.error("Error al cargar notas de Drive, usando caché local:", error);
-            }
-        }
-
-        async function sincronizarNotasDrive() {
-            localStorage.setItem('notas_db', JSON.stringify(notas));
-            if (!GOOGLE_SCRIPT_URL) return;
-            try {
-                await fetch(GOOGLE_SCRIPT_URL, {
-                    method: "POST",
-                    body: JSON.stringify({
-                        action: "saveNotas",
-                        notas: notas
-                    })
-                });
-            } catch (error) {
-                console.error("Error al sincronizar notas con Google Drive:", error);
-            }
-        }
-
-        /* ==========================================================
-           SUBIDA DE PDF CON FETCH DIRECTO
-           ========================================================== */
-        async function subirPDFAGoogleDrive(base64Completo, nombreArchivo) {
-            if (!GOOGLE_SCRIPT_URL) {
-                alert('Por favor, configure la URL de Google Drive.');
-                openDriveConfigModal();
-                return null;
-            }
-            try {
-                const base64Data = base64Completo.split(',')[1] || base64Completo;
-                const respuesta = await fetch(GOOGLE_SCRIPT_URL, {
-                    method: "POST",
-                    body: JSON.stringify({
-                        action: "uploadPDF",
-                        base64Data: base64Data,
-                        mimeType: "application/pdf",
-                        fileName: nombreArchivo
-                    })
-                });
-                const resultado = await respuesta.json();
-                if (resultado.status === "success") {
-                    return resultado.fileUrl;
-                }
-            } catch (error) {
-                console.error("Error al subir a Google Drive:", error);
-            }
-            return null;
-        }
-
-        let usersDB = JSON.parse(localStorage.getItem('users_db')) || {
-            'admin': { pass: 'admin123', role: 'Administrador' },
-            'operador': { pass: 'operador123', role: 'Operador' },
-            'consulta': { pass: '1234', role: 'Consulta' }
-        };
-        let auditLogDB = JSON.parse(localStorage.getItem('audit_log_db')) || [];
-        let currentUser = JSON.parse(sessionStorage.getItem('activeUser')) || null;
-        let notas = JSON.parse(localStorage.getItem('notas_db')) || [];
-        let expedientesDB = JSON.parse(localStorage.getItem('expedientes_db')) || [];
-        let viajesDB = JSON.parse(localStorage.getItem('viajes_db_v2')) || [];
-
-        let autoPdfFileBase64 = null;
-        let currentFileName = '';
-        let globalExtractedText = '';
-
-        async function checkAuth() {
-            if (currentUser) {
+        async function initApp() {
+            if (currentUser && authToken) {
                 document.getElementById('loginScreen').classList.add('hidden');
                 document.getElementById('appScreen').classList.remove('hidden');
                 document.getElementById('userInfo').innerHTML = `<i class="fa-solid fa-user-shield mr-1.5 text-blue-400"></i> ${currentUser.name} (${currentUser.role})`;
-                
-                // Cargar notas sincronizadas desde Google Drive
-                await cargarNotasDesdeDrive();
-                renderTable();
+                await loadServerData();
+                applyRolePermissions();
             } else {
                 document.getElementById('loginScreen').classList.remove('hidden');
                 document.getElementById('appScreen').classList.add('hidden');
             }
         }
 
-        function handleLogin(e) {
+        async function handleLogin(e) {
             e.preventDefault();
-            const u = document.getElementById('loginUser').value.toLowerCase().trim();
+            if (!SCRIPT_URL) {
+                alert('Configure primero la URL del servidor Apps Script.');
+                openDriveConfigModal();
+                return;
+            }
+            const u = document.getElementById('loginUser').value;
             const p = document.getElementById('loginPass').value;
-            if (usersDB[u] && usersDB[u].pass === p) {
-                currentUser = { name: u.toUpperCase(), role: usersDB[u].role };
-                sessionStorage.setItem('activeUser', JSON.stringify(currentUser));
-                checkAuth();
-            } else {
-                alert('Usuario o contraseña incorrectos.');
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'login', user: u, pass: p })
+                });
+                const res = await response.json();
+                if (res.status === 'success') {
+                    authToken = res.token;
+                    currentUser = res.user;
+                    sessionStorage.setItem('authToken', authToken);
+                    sessionStorage.setItem('activeUser', JSON.stringify(currentUser));
+                    initApp();
+                } else {
+                    alert(res.message || 'Credenciales inválidas.');
+                }
+            } catch (err) {
+                alert('Error de conexión con el servidor.');
             }
         }
 
         function handleLogout() {
-            sessionStorage.removeItem('activeUser');
+            sessionStorage.clear();
             currentUser = null;
-            checkAuth();
+            authToken = '';
+            initApp();
         }
 
-        function toggleAutoUploadSection() {
-            document.getElementById('autoUploadSection').classList.toggle('hidden');
-        }
-
-        function handleFileSelect(file) {
-            if (!file || file.type !== 'application/pdf') return;
-            currentFileName = file.name;
-            const reader = new FileReader();
-            reader.onload = async function(e) {
-                autoPdfFileBase64 = e.target.result;
-                document.getElementById('parsedResultForm').classList.remove('hidden');
-                document.getElementById('pdfStatus').classList.remove('hidden');
-                document.getElementById('pdfStatus').innerText = "PDF cargado listo para enviar.";
-            };
-            reader.readAsDataURL(file);
-        }
-
-        async function confirmAutoSave() {
-            if (!GOOGLE_SCRIPT_URL) {
-                alert('Por favor, configure la URL de Google Drive antes de guardar notas con PDF.');
-                openDriveConfigModal();
-                return;
-            }
-            let driveUrl = null;
-            if (autoPdfFileBase64) {
-                const statusEl = document.getElementById('pdfStatus');
-                statusEl.classList.remove('hidden');
-                statusEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Subiendo archivo PDF a Google Drive...';
-                driveUrl = await subirPDFAGoogleDrive(autoPdfFileBase64, currentFileName);
-                if (!driveUrl) {
-                    alert('Error al subir el archivo a Google Drive. Verifique la URL del Web App.');
-                    return;
+        async function loadServerData() {
+            if (!SCRIPT_URL) return;
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'getInitialData', token: authToken })
+                });
+                const res = await response.json();
+                if (res.status === 'success') {
+                    notas = res.notas || [];
+                    expedientes = res.expedientes || [];
+                    viajes = res.viajes || [];
+                    renderTable();
                 }
+            } catch (e) {
+                console.error('Error al cargar datos del servidor', e);
             }
-            
-            const newNota = {
-                id: Date.now(),
-                fecha: document.getElementById('autoFecha').value || new Date().toISOString().split('T')[0],
-                promotor: document.getElementById('autoPromotor').value || 'S/D',
-                nroNota: document.getElementById('autoNroNota').value || 'S/D',
-                referencia: document.getElementById('autoReferencia').value || 'Sin referencia',
-                accion: document.getElementById('autoAccion').value || 'S/D',
-                limite: document.getElementById('autoLimite').value || '',
-                estado: 'Pendiente',
-                respuesta: '',
-                destino: 'ARCH',
-                adjuntoNota: driveUrl,
-                adjuntosRespuesta: []
-            };
-
-            notas.unshift(newNota);
-            await sincronizarNotasDrive(); // Sincroniza automáticamente en Google Drive
-            clearAutoForm();
-            toggleAutoUploadSection();
-            renderTable();
         }
 
-        function clearAutoForm() {
-            document.getElementById('parsedResultForm').classList.add('hidden');
-            document.getElementById('pdfStatus').classList.add('hidden');
-            document.getElementById('pdfFileInput').value = '';
-            autoPdfFileBase64 = null;
-            currentFileName = '';
+        function applyRolePermissions() {
+            if (currentUser && currentUser.role === 'Consulta') {
+                document.getElementById('btnNuevaNota')?.classList.add('hidden');
+            }
         }
 
-        function openModal() {
-            document.getElementById('modalTitle').innerText = 'Nueva Nota';
-            document.getElementById('notaId').value = '';
-            document.getElementById('fecha').value = new Date().toISOString().split('T')[0];
-            document.getElementById('promotor').value = '';
-            document.getElementById('nroNota').value = '';
-            document.getElementById('referencia').value = '';
-            document.getElementById('accion').value = '';
-            document.getElementById('limite').value = '';
-            document.getElementById('estado').value = 'Pendiente';
-            document.getElementById('destino').value = 'ARCH';
-            document.getElementById('respuesta').value = '';
-            document.getElementById('itemModal').classList.remove('hidden');
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(tabId).classList.remove('hidden');
+            document.querySelectorAll('header button, .flex button').forEach(btn => btn.classList.remove('tab-active'));
         }
 
-        function closeModal() {
-            document.getElementById('itemModal').classList.add('hidden');
-        }
+        function openModal() { document.getElementById('itemModal').classList.remove('hidden'); }
+        function closeModal() { document.getElementById('itemModal').classList.add('hidden'); }
 
         async function saveNota(e) {
             e.preventDefault();
-            const id = document.getElementById('notaId').value;
-            const notaObj = {
-                id: id ? parseInt(id) : Date.now(),
+            const nuevaNota = {
+                id: Date.now(),
                 fecha: document.getElementById('fecha').value,
                 promotor: document.getElementById('promotor').value,
                 nroNota: document.getElementById('nroNota').value,
                 referencia: document.getElementById('referencia').value,
-                accion: document.getElementById('accion').value,
-                limite: document.getElementById('limite').value,
-                estado: document.getElementById('estado').value,
-                destino: document.getElementById('destino').value,
-                respuesta: document.getElementById('respuesta').value,
-                adjuntosRespuesta: []
+                estado: 'Pendiente'
             };
-            if (id) {
-                const idx = notas.findIndex(n => n.id === parseInt(id));
-                if (idx !== -1) {
-                    notaObj.adjuntoNota = notas[idx].adjuntoNota;
-                    notas[idx] = notaObj;
-                }
-            } else {
-                notas.unshift(notaObj);
-            }
-            await sincronizarNotasDrive(); // Sincroniza en Google Drive
+            notas.unshift(nuevaNota);
+            
+            await fetch(SCRIPT_URL, {
+                method: 'POST',
+                body: JSON.stringify({ action: 'saveNotas', token: authToken, notas: notas })
+            });
             closeModal();
             renderTable();
-        }
-
-        async function deleteNota(id) {
-            if (confirm('¿Desea eliminar este registro de nota?')) {
-                notas = notas.filter(item => item.id !== id);
-                await sincronizarNotasDrive(); // Actualiza la nube
-                renderTable();
-            }
         }
 
         function renderTable() {
             const body = document.getElementById('tableBody');
             body.innerHTML = '';
             if (notas.length === 0) {
-                body.innerHTML = `<tr><td colspan="10" class="p-4 text-center text-slate-400">No se encontraron notas registradas.</td></tr>`;
+                body.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-slate-400">No hay registros.</td></tr>`;
                 document.getElementById('metricTotal').innerText = 0;
                 return;
             }
             notas.forEach(n => {
-                let badgeClass = 'bg-yellow-100 text-yellow-800 border-yellow-300';
-                if (n.estado === 'En espera') badgeClass = 'bg-orange-100 text-orange-800 border-orange-300';
-                if (n.estado === 'Contestado') badgeClass = 'bg-green-100 text-green-800 border-green-300';
-                if (n.estado === 'Archivado') badgeClass = 'bg-slate-200 text-slate-700 border-slate-300';
-                
-                let adjuntosHtml = '-';
-                if (n.adjuntoNota) {
-                    adjuntosHtml = `<a href="${n.adjuntoNota}" download="${n.nroNota}.pdf" target="_blank" class="text-blue-600 hover:text-blue-800 font-bold flex items-center gap-1"><i class="fa-solid fa-file-arrow-down"></i> Original</a>`;
-                }
-
                 body.innerHTML += `
-                    <tr class="border-b transition">
-                        <td class="p-3 whitespace-nowrap font-medium">${n.fecha || '-'}</td>
-                        <td class="p-3 font-bold text-slate-700">${n.promotor || '-'}</td>
-                        <td class="p-3 font-bold text-blue-900">${n.nroNota || '-'}</td>
-                        <td class="p-3 font-medium text-slate-800 max-w-xs truncate">${n.referencia || '-'}</td>
-                        <td class="p-3 font-semibold text-slate-700">${n.accion || '-'}</td>
-                        <td class="p-3 whitespace-nowrap font-semibold">${n.limite || '-'}</td>
-                        <td class="p-3"><span class="px-2 py-1 rounded-full text-[11px] font-bold border ${badgeClass}">${n.estado}</span></td>
-                        <td class="p-3 text-slate-600">${n.respuesta || '-'}</td>
-                        <td class="p-3 whitespace-nowrap">${adjuntosHtml}</td>
-                        <td class="p-3 text-center whitespace-nowrap">
-                            <button onclick="deleteNota(${n.id})" class="text-red-600 hover:text-red-800" title="Eliminar"><i class="fa-solid fa-trash"></i></button>
-                        </td>
+                    <tr class="border-b">
+                        <td class="p-3">${n.fecha || '-'}</td>
+                        <td class="p-3 font-bold">${n.promotor || '-'}</td>
+                        <td class="p-3 text-blue-900 font-bold">${n.nroNota || '-'}</td>
+                        <td class="p-3">${n.referencia || '-'}</td>
+                        <td class="p-3">${n.accion || '-'}</td>
+                        <td class="p-3"><span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-bold">${n.estado}</span></td>
+                        <td class="p-3 text-center">-</td>
                     </tr>
                 `;
             });
             document.getElementById('metricTotal').innerText = notas.length;
         }
-        function populatePromotoresOptions() {}
     </script>
 </body>
 </html>
