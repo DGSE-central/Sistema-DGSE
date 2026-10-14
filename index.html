@@ -384,7 +384,7 @@
 
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-        const HARDCODED_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbynsH2AVERa-v4xWCnfKDtenU1U_ERUlQZUN7XTMrtUhj-yFxrtmRZ9hf4KiDQK4lnz/exec";
+        const HARDCODED_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz3ulSrxZ2MCALn1GEAFgD9NrDUMajqrBjHMrtGS-sMO0dtQZhdNokR7zvBz0CKiEqD/exec";
 
         let currentUser = JSON.parse(sessionStorage.getItem('activeUser')) || null;
         let authToken = sessionStorage.getItem('authToken') || '';
@@ -532,18 +532,20 @@
                         refText = altRef ? altRef[1].trim() : (cleanedText.length > 180 ? cleanedText.substring(0, 180) + '...' : cleanedText);
                     }
 
+                    // Extracción inteligente del destinatario (1 o 2 se muestran; si son muchos, primero + DGSE#PNA y otros)
                     let destinatarioExtraido = '';
-                    if (fullText.includes('DGSE#PNA') || fullText.includes('DGSE')) {
-                        destinatarioExtraido = 'DIRECTOR GENERAL DE SEGURIDAD';
-                    } else if (fullText.includes('SUBPREFECTO NACIONAL NAVAL')) {
-                        destinatarioExtraido = 'SEÑOR SUBPREFECTO NACIONAL NAVAL';
-                    } else {
-                        const destMatch = fullText.match(/A:\s*([A-ZÁÉÍÓÚÑ\s,\(\)#-]+?)(?=\s*Con Copia|\s*De mi mayor|\s*Referencia|$)/i);
-                        if (destMatch && destMatch[1]) {
-                            destinatarioExtraido = destMatch[1].split(',')[0].trim();
+                    const destMatch = fullText.match(/A:\s*([^\n\r]+?)(?=\s*Con Copia|\s*De mi mayor|\s*Referencia|$)/i);
+                    if (destMatch && destMatch[1]) {
+                        let rawDest = destMatch[1].trim();
+                        let listItems = rawDest.split(/,\s*(?=[A-ZÁÉÍÓÚÑ])/);
+                        if (listItems.length <= 2) {
+                            destinatarioExtraido = rawDest;
                         } else {
-                            destinatarioExtraido = 'DIRECCIÓN GENERAL DE SEGURIDAD';
+                            let primerDest = listItems[0].trim();
+                            destinatarioExtraido = primerDest + ", DGSE#PNA y otros";
                         }
+                    } else {
+                        destinatarioExtraido = 'DIRECCIÓN GENERAL DE SEGURIDAD';
                     }
 
                     document.getElementById('autoNroNota').value = detectedNroNota;
