@@ -382,6 +382,20 @@
         </div>
     </div>
 
+    <!-- VISOR PRIVADO DE PDF: muestra el documento dentro del sistema, sin forzar su descarga -->
+    <div id="privatePdfViewerModal" class="hidden fixed inset-0 z-[100] bg-slate-950/80 p-2 md:p-6">
+        <div class="mx-auto flex h-full max-w-6xl flex-col overflow-hidden rounded-xl bg-white shadow-2xl">
+            <div class="flex items-center justify-between gap-3 border-b bg-slate-100 px-4 py-3">
+                <div class="font-bold text-slate-800"><i class="fa-solid fa-file-pdf mr-2 text-red-600"></i>Visualización de nota PDF</div>
+                <div class="flex items-center gap-2">
+                    <a id="privatePdfOpenTab" href="#" target="_blank" rel="noopener noreferrer" class="rounded-lg border bg-white px-3 py-2 text-sm font-semibold text-blue-700 hover:bg-blue-50">Abrir en otra pestaña</a>
+                    <button type="button" onclick="closePrivatePDFViewer()" class="rounded-lg bg-slate-800 px-3 py-2 text-sm font-bold text-white hover:bg-slate-700"><i class="fa-solid fa-xmark mr-1"></i>Cerrar</button>
+                </div>
+            </div>
+            <iframe id="privatePdfFrame" title="Documento PDF" class="min-h-0 w-full flex-1 bg-slate-200" src="about:blank"></iframe>
+        </div>
+    </div>
+
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
         const HARDCODED_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyjb3GzVCXyX9R1n0ErDKDAFb92aMXpLTqgQxvF9yZrd4q7kSxG7PO_pVVO5_s9YqKv/exec";
@@ -395,6 +409,7 @@
         let currentFileName = '';
         let pendingAutoNotaId = null;
         let pendingUploadKey = null;
+        let activePdfObjectUrl = null;
 
         function togglePasswordVisibility(inputId, iconId) {
             const input = document.getElementById(inputId);
@@ -556,29 +571,41 @@
                         else promotorExtraido = 'ORGANISMO EXTERNO / MINISTERIO';
                     }
 
-                    // 3. DESTINATARIO: tomar únicamente el contenido del encabezado que comienza con A:.
-                    // No usar destinatarios predeterminados ni buscar nombres en el cuerpo del documento.
+                    // 3. DESTINATARIO: recopilar desde la línea que comienza con "A:" hasta
+                    // inmediatamente antes de "Con copia a:". Esto permite capturar destinatarios
+                    // distribuidos en varias líneas sin incorporar el cuerpo de la nota.
                     let destinatarioExtraido = '';
-                    const recipientHeaderLine = recipientHeaderLines.find(line => /^\s*A\s*:\s*/i.test(line));
-                    if (recipientHeaderLine) {
-                        const recipientMatch = recipientHeaderLine.match(/^\s*A\s*:\s*(.*?)\s*$/i);
-                        if (recipientMatch && recipientMatch[1]) {
-                            const recipientText = recipientMatch[1].trim();
+                    const startRecipientIndex = recipientHeaderLines.findIndex(line => /^\s*A\s*:/i.test(line));
+                    if (startRecipientIndex >= 0) {
+                        const recipientBlock = [];
+                        const firstRecipientLine = recipientHeaderLines[startRecipientIndex].replace(/^\s*A\s*:\s*/i, '').trim();
+                        if (firstRecipientLine) recipientBlock.push(firstRecipientLine);
+                        for (let idx = startRecipientIndex + 1; idx < recipientHeaderLines.length; idx++) {
+                            const line = recipientHeaderLines[idx].replace(/\s+/g, ' ').trim();
+                            if (/^Con\s+copia\s+a\s*:/i.test(line)) break;
+                            // Si el PDF no trae "Con copia a:", evitar seguir hasta el cuerpo de la nota.
+                            if (/^(?:Referencia|Ref\.?|Asunto|De|Fecha|Asunto)\s*:/i.test(line)) break;
+                            if (line) recipientBlock.push(line);
+                            if (recipientBlock.length >= 8) break;
+                        }
+                        const recipientText = recipientBlock.join(' ').replace(/\s+/g, ' ').trim();
+                        if (recipientText) {
                             const hasDGSE = /DGSE/i.test(recipientText);
-                            const hasMultipleRecipients = /,|;|\/|\bY\b|\bOTROS?\b/i.test(recipientText);
+                            const hasMultipleRecipients = recipientBlock.length > 1 || /[,;\/]|\bY\b|\bOTROS?\b/i.test(recipientText);
                             destinatarioExtraido = (hasDGSE && hasMultipleRecipients)
                                 ? 'USUARIO-DGSE#PNA Y OTROS'
                                 : recipientText;
                         }
                     }
 
-                    // 4. Generación de Resumen / Referencia
+                    // 4. REFERENCIA: extraer solo una etiqueta explícita y su contenido.
+                    // No usar el texto completo de la nota como referencia. Si no hay referencia,
+                    // dejar el campo vacío para que el usuario lo complete manualmente.
                     let refText = '';
-                    const refMatch = fullText.match(/Referencia:\s*([^\n\r]+)/i);
-                    if (refMatch) {
-                        refText = refMatch[1].trim();
-                    } else {
-                        refText = cleanedText.length > 200 ? cleanedText.substring(0, 200) + '...' : cleanedText;
+                    const referenceLineIndex = recipientHeaderLines.findIndex(line => /^\s*(?:Referencia|Ref\.?|Asunto)\s*:/i.test(line));
+                    if (referenceLineIndex >= 0) {
+                        const referenceMatch = recipientHeaderLines[referenceLineIndex].match(/^\s*(?:Referencia|Ref\.?|Asunto)\s*:\s*(.*?)\s*$/i);
+                        if (referenceMatch && referenceMatch[1]) refText = referenceMatch[1].trim();
                     }
 
                     // 5. Cargar datos extraídos en el formulario preliminar para revisión
@@ -773,9 +800,8 @@
         }
 
         async function openPrivatePDF(fileId) {
-            // Abrir la pestaña durante el clic para evitar bloqueos del navegador mientras se consulta el servidor.
-            const pdfWindow = window.open('', '_blank');
             try {
+                if (!fileId) throw new Error('La nota no tiene un identificador de PDF asociado.');
                 const response = await fetch(HARDCODED_SCRIPT_URL, {
                     method: 'POST',
                     body: JSON.stringify({ action: 'getPDF', token: authToken, fileId: fileId })
@@ -788,24 +814,34 @@
                 const binary = atob(result.base64Data);
                 const bytes = new Uint8Array(binary.length);
                 for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-                const blob = new Blob([bytes], { type: result.mimeType || 'application/pdf' });
-                const objectUrl = URL.createObjectURL(blob);
+                const blob = new Blob([bytes], { type: 'application/pdf' });
 
-                if (pdfWindow && !pdfWindow.closed) {
-                    pdfWindow.location.href = objectUrl;
-                } else {
-                    const link = document.createElement('a');
-                    link.href = objectUrl;
-                    link.download = result.fileName || 'documento.pdf';
-                    document.body.appendChild(link);
-                    link.click();
-                    link.remove();
+                // Liberar el objeto anterior para evitar consumir memoria al abrir varios PDF.
+                if (activePdfObjectUrl) {
+                    URL.revokeObjectURL(activePdfObjectUrl);
+                    activePdfObjectUrl = null;
                 }
-                setTimeout(() => URL.revokeObjectURL(objectUrl), 60000);
+                activePdfObjectUrl = URL.createObjectURL(blob);
+                const frame = document.getElementById('privatePdfFrame');
+                const modal = document.getElementById('privatePdfViewerModal');
+                const openTab = document.getElementById('privatePdfOpenTab');
+                frame.src = activePdfObjectUrl + '#toolbar=1&navpanes=1&view=FitH';
+                openTab.href = activePdfObjectUrl;
+                modal.classList.remove('hidden');
             } catch (err) {
-                if (pdfWindow && !pdfWindow.closed) pdfWindow.close();
                 console.error('Error al recuperar el PDF privado:', err);
                 alert('No se pudo visualizar el PDF. Verifique su sesión y sus permisos. ' + (err.message || err));
+            }
+        }
+
+        function closePrivatePDFViewer() {
+            const modal = document.getElementById('privatePdfViewerModal');
+            const frame = document.getElementById('privatePdfFrame');
+            if (frame) frame.src = 'about:blank';
+            if (modal) modal.classList.add('hidden');
+            if (activePdfObjectUrl) {
+                URL.revokeObjectURL(activePdfObjectUrl);
+                activePdfObjectUrl = null;
             }
         }
 
