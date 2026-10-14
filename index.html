@@ -126,20 +126,20 @@
                                 <p class="font-bold text-slate-700 text-sm">Haz clic o arrastra aquí la nota en PDF</p>
                             </div>
                         </div>
-                        <div id="pdfStatus" class="hidden max-w-2xl mx-auto mt-4 p-3 rounded-xl text-center text-xs font-semibold"></div>
+                        <div id="pdfStatus" class="hidden max-w-2xl mx-auto mt-4 p-3 rounded-xl text-center text-xs font-semibold bg-blue-50 text-blue-800"></div>
                         <div id="parsedResultForm" class="hidden max-w-3xl mx-auto mt-6 border-t pt-4 space-y-4">
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Fecha</label>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Fecha Firma</label>
                                     <input type="date" id="autoFecha" class="w-full border p-2 rounded-lg text-sm bg-white font-bold text-blue-900">
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Promotor</label>
-                                    <input type="text" id="autoPromotor" class="w-full border p-2 rounded-lg text-sm bg-white font-bold text-slate-700">
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Promotor (Cuatrigrama / Organismo)</label>
+                                    <input type="text" id="autoPromotor" placeholder="ej: SSAEYFI#MSG o DGSE#PNA" class="w-full border p-2 rounded-lg text-sm bg-white font-bold text-slate-800">
                                 </div>
                             </div>
                             <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">Número de Nota</label>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Número de Nota / Documento</label>
                                 <input type="text" id="autoNroNota" class="w-full border p-2 rounded-lg text-sm bg-white font-bold text-blue-800">
                             </div>
                             <div>
@@ -148,8 +148,8 @@
                             </div>
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Destinatario</label>
-                                    <input type="text" id="autoAccion" class="w-full border p-2 rounded-lg text-sm bg-white font-bold text-blue-700">
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Destinatario / Derivación</label>
+                                    <input type="text" id="autoAccion" placeholder="ej: AL SEÑOR SUBPREFECTO NACIONAL NAVAL" class="w-full border p-2 rounded-lg text-sm bg-white font-bold text-blue-700">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-semibold text-slate-600 mb-1">Tiempo Límite</label>
@@ -326,11 +326,11 @@
             <h2 id="modalTitle" class="text-xl font-bold mb-4 text-slate-800">Nota</h2>
             <form onsubmit="saveNotaModal(event)" class="space-y-4">
                 <input type="hidden" id="notaId">
-                <div><label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Fecha</label><input type="date" id="fecha" required class="w-full border p-2 rounded-lg text-sm"></div>
-                <div><label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Promotor</label><input type="text" id="promotor" required class="w-full border p-2 rounded-lg text-sm"></div>
+                <div><label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Fecha Firma</label><input type="date" id="fecha" required class="w-full border p-2 rounded-lg text-sm"></div>
+                <div><label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Promotor (Cuatrigrama)</label><input type="text" id="promotor" required class="w-full border p-2 rounded-lg text-sm"></div>
                 <div><label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Nro Nota</label><input type="text" id="nroNota" required class="w-full border p-2 rounded-lg text-sm"></div>
-                <div><label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Referencia</label><textarea id="referencia" required rows="2" class="w-full border p-2 rounded-lg text-sm"></textarea></div>
-                <div><label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Destinatario</label><input type="text" id="accion" class="w-full border p-2 rounded-lg text-sm"></div>
+                <div><label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Referencia / Resumen</label><textarea id="referencia" required rows="2" class="w-full border p-2 rounded-lg text-sm"></textarea></div>
+                <div><label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Destinatario / Derivación</label><input type="text" id="accion" class="w-full border p-2 rounded-lg text-sm"></div>
                 <div class="flex justify-end space-x-3 pt-4">
                     <button type="button" onclick="closeModal()" class="px-4 py-2 border rounded-lg text-sm">Cancelar</button>
                     <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium">Guardar</button>
@@ -384,7 +384,7 @@
 
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-        const HARDCODED_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyWYrUQul-qK_toGIi7NurT9fJVPpLU7sJtLauzyqO9KkxVNZDvqABC0EtgNeSXFK3F/exec";
+        const HARDCODED_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzyX_yaVMBUHSjTPXr-HYyKiQczaTFlaVO3vbYeF_WP0y85DcXuQUlhJx5iHQOx17T3/exec";
 
         let currentUser = JSON.parse(sessionStorage.getItem('activeUser')) || null;
         let authToken = sessionStorage.getItem('authToken') || '';
@@ -492,6 +492,8 @@
         async function handleFileSelect(file) {
             if (!file || file.type !== 'application/pdf') return;
             currentFileName = file.name;
+            
+            // Convertir archivo a Data URL / Base64 para guardado
             const reader = new FileReader();
             reader.onload = async function(e) {
                 autoPdfFileBase64 = e.target.result;
@@ -506,27 +508,66 @@
                     }
 
                     let cleanedText = fullText.replace(/\s+/g, ' ').trim();
-                    let summaryText = cleanedText.length > 180 ? cleanedText.substring(0, 180) + '...' : cleanedText;
-
-                    const notaMatch = fullText.match(/(NO-\d{4}-\d+-[A-Z0-9#-]+)/i);
                     
-                    // Extracción inteligente de Promotor y Destinatario
-                    let promotorDetectado = 'DIOP';
-                    if (fullText.includes('DGSE')) promotorDetectado = 'DGSE';
-                    if (fullText.includes('SBGC')) promotorDetectado = 'SBGC';
-                    if (fullText.includes('DDI')) promotorDetectado = 'DDI';
+                    // 1. Detección de Número de Nota / Documento GDE
+                    const nroMatch = fullText.match(/((?:NO|IF|ACTA|PV|EX)-\d{4}-\d+-[A-Z0-9%#-]+)/i);
+                    let detectedNroNota = nroMatch ? nroMatch[1] : currentFileName.replace(/\.pdf$/i, '');
 
-                    document.getElementById('autoNroNota').value = notaMatch ? notaMatch[1] : currentFileName.replace('.pdf','');
+                    // 2. Extracción Inteligente del PROMOTOR (Cuatrigrama / Organismo)
+                    let promotorExtraido = '';
+                    if (detectedNroNota.includes('-APN-')) {
+                        const parts = detectedNroNota.split('-APN-');
+                        if (parts.length > 1) {
+                            promotorExtraido = parts[1].trim();
+                        }
+                    } else if (detectedNroNota.includes('-PNA#')) {
+                        const parts = detectedNroNota.split('-');
+                        promotorExtraido = parts[parts.length - 1].trim();
+                    }
+
+                    if (!promotorExtraido) {
+                        if (fullText.includes('SSAEYFI#MSG')) promotorExtraido = 'SSAEYFI#MSG';
+                        else if (fullText.includes('DGSE#PNA')) promotorExtraido = 'DGSE#PNA';
+                        else if (fullText.includes('DGSE')) promotorExtraido = 'DGSE';
+                        else promotorExtraido = 'ORGANISMO EXTERNO / MINISTERIO';
+                    }
+
+                    // 3. Extracción Inteligente del DESTINATARIO
+                    let destinatarioExtraido = '';
+                    const destRegex = /(?:A|AL|A LA|PARA)\s+([A-ZÁÉÍÓÚÑ\s]{5,60})(?=\s*-\s*|\s*,\s*|\s*\.|\s*Referencia|\s*De|\s*Asunto|$)/i;
+                    const destMatch = fullText.match(destRegex);
+                    if (destMatch && destMatch[1]) {
+                        destinatarioExtraido = destMatch[1].trim();
+                    } else {
+                        if (fullText.includes('SUBPREFECTO NACIONAL NAVAL')) destinatarioExtraido = 'AL SEÑOR SUBPREFECTO NACIONAL NAVAL';
+                        else if (fullText.includes('PREFECTO NACIONAL NAVAL')) destinatarioExtraido = 'AL SEÑOR PREFECTO NACIONAL NAVAL';
+                        else if (fullText.includes('DIRECCION DEL PERSONAL')) destinatarioExtraido = 'A LA DIRECCION DEL PERSONAL';
+                        else destinatarioExtraido = 'A LA DIRECCIÓN GENERAL DE SEGURIDAD';
+                    }
+
+                    // 4. Generación de Resumen / Referencia
+                    let refText = '';
+                    const refMatch = fullText.match(/Referencia:\s*([^\n\r]+)/i);
+                    if (refMatch) {
+                        refText = refMatch[1].trim();
+                    } else {
+                        refText = cleanedText.length > 200 ? cleanedText.substring(0, 200) + '...' : cleanedText;
+                    }
+
+                    // 5. Cargar datos extraídos en el formulario preliminar para revisión
+                    document.getElementById('autoNroNota').value = detectedNroNota;
                     document.getElementById('autoFecha').value = new Date().toISOString().split('T')[0];
-                    document.getElementById('autoPromotor').value = promotorDetectado;
-                    document.getElementById('autoReferencia').value = summaryText;
-                    document.getElementById('autoAccion').value = 'AGAL';
+                    document.getElementById('autoPromotor').value = promotorExtraido;
+                    document.getElementById('autoReferencia').value = refText;
+                    document.getElementById('autoAccion').value = destinatarioExtraido;
 
                     document.getElementById('parsedResultForm').classList.remove('hidden');
                     document.getElementById('pdfStatus').classList.remove('hidden');
-                    document.getElementById('pdfStatus').innerText = "PDF analizado con éxito.";
+                    document.getElementById('pdfStatus').innerHTML = '<i class="fa-solid fa-circle-check text-emerald-600 mr-1.5"></i> PDF analizado correctamente. Verifique y guarde los datos.';
                 } catch(err) {
                     console.error("Error leyendo PDF", err);
+                    document.getElementById('pdfStatus').classList.remove('hidden');
+                    document.getElementById('pdfStatus').innerText = "Error al procesar el archivo PDF. Intente nuevamente.";
                 }
             };
             reader.readAsArrayBuffer(file);
@@ -535,20 +576,39 @@
         async function confirmAutoSave() {
             const statusEl = document.getElementById('pdfStatus');
             statusEl.classList.remove('hidden');
-            statusEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Subiendo archivo a Drive y guardando...';
+            statusEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Subiendo archivo a Drive y guardando nota en el servidor...';
 
             let driveUrl = null;
             if (autoPdfFileBase64) {
                 try {
-                    const base64Data = autoPdfFileBase64.includes(',') ? autoPdfFileBase64.split(',')[1] : autoPdfFileBase64;
+                    let pureBase64 = '';
+                    if (typeof autoPdfFileBase64 === 'string') {
+                        pureBase64 = autoPdfFileBase64.includes(',') ? autoPdfFileBase64.split(',')[1] : autoPdfFileBase64;
+                    } else {
+                        const bytes = new Uint8Array(autoPdfFileBase64);
+                        let binary = '';
+                        for (let i = 0; i < bytes.byteLength; i++) {
+                            binary += String.fromCharCode(bytes[i]);
+                        }
+                        pureBase64 = btoa(binary);
+                    }
+
                     const resp = await fetch(HARDCODED_SCRIPT_URL, {
                         method: 'POST',
-                        body: JSON.stringify({ action: 'uploadPDF', token: authToken, base64Data: base64Data, mimeType: 'application/pdf', fileName: currentFileName })
+                        body: JSON.stringify({
+                            action: 'uploadPDF',
+                            token: authToken,
+                            base64Data: pureBase64,
+                            mimeType: 'application/pdf',
+                            fileName: currentFileName
+                        })
                     });
                     const resJson = await resp.json();
-                    if (resJson.status === 'success') { driveUrl = resJson.fileUrl; }
+                    if (resJson.status === 'success' && resJson.fileUrl) {
+                        driveUrl = resJson.fileUrl;
+                    }
                 } catch(err) {
-                    console.error("Error al subir PDF a Drive:", err);
+                    console.error("Error al subir el archivo PDF a Drive:", err);
                 }
             }
 
@@ -563,6 +623,7 @@
                 estado: 'Pendiente',
                 adjuntoNota: driveUrl
             };
+
             notas.unshift(newNota);
 
             try {
@@ -575,7 +636,7 @@
                 renderTable();
                 updateEstadisticas();
             } catch(e) {
-                alert('Error al guardar la nota en el servidor central.');
+                alert('Error al guardar el registro en el servidor central.');
             }
         }
 
@@ -670,18 +731,18 @@
                     `;
                 }
 
-                let adjuntoLink = n.adjuntoNota ? `<a href="${n.adjuntoNota}" target="_blank" class="text-blue-600 font-bold flex items-center gap-1"><i class="fa-solid fa-file-pdf"></i> Ver PDF</a>` : '-';
+                let adjuntoLink = n.adjuntoNota ? `<a href="${n.adjuntoNota}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 font-bold flex items-center gap-1"><i class="fa-solid fa-file-pdf text-red-600 text-sm"></i> Ver PDF</a>` : '-';
 
                 body.innerHTML += `
-                    <tr class="border-b">
+                    <tr class="border-b hover:bg-slate-50 transition">
                         <td class="p-3">${n.fecha || '-'}</td>
-                        <td class="p-3 font-bold">${n.promotor || '-'}</td>
+                        <td class="p-3 font-bold text-slate-800">${n.promotor || '-'}</td>
                         <td class="p-3 text-blue-900 font-bold">${n.nroNota || '-'}</td>
-                        <td class="p-3">${n.referencia || '-'}</td>
-                        <td class="p-3">${n.accion || '-'}</td>
+                        <td class="p-3 max-w-xs truncate">${n.referencia || '-'}</td>
+                        <td class="p-3 font-medium text-slate-700">${n.accion || '-'}</td>
                         <td class="p-3">${n.limite || '-'}</td>
                         <td class="p-3"><span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-bold">${n.estado || 'Pendiente'}</span></td>
-                        <td class="p-3">${adjuntoLink}</td>
+                        <td class="p-3 whitespace-nowrap">${adjuntoLink}</td>
                         <td class="p-3 text-center whitespace-nowrap">${accionesHtml}</td>
                     </tr>
                 `;
