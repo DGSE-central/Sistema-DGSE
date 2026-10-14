@@ -113,7 +113,7 @@
                     <div id="autoUploadSection" class="hidden my-6 p-6 bg-slate-50 border-2 border-blue-200 rounded-2xl transition">
                         <div class="flex justify-between items-center mb-4">
                             <h3 class="text-md font-bold text-slate-800 flex items-center gap-2">
-                                <i class="fa-solid fa-file-pdf text-blue-600"></i> Extracción Automática y Almacenamiento Privado en Drive
+                                <i class="fa-solid fa-file-pdf text-blue-600"></i> Extracción Automática desde PDF (GDE) y Subida Privada a Drive
                             </h3>
                             <button onclick="toggleAutoUploadSection()" class="text-slate-400 hover:text-slate-600 text-sm">
                                 <i class="fa-solid fa-xmark text-lg"></i>
@@ -134,8 +134,8 @@
                                     <input type="date" id="autoFecha" class="w-full border p-2 rounded-lg text-sm bg-white font-bold text-blue-900">
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Promotor (Cuatrigrama)</label>
-                                    <input type="text" id="autoPromotor" class="w-full border p-2 rounded-lg text-sm bg-white font-bold text-slate-800">
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Promotor (Cuatrigrama / Organismo)</label>
+                                    <input type="text" id="autoPromotor" placeholder="ej: SSAEYFI#MSG o DGSE#PNA" class="w-full border p-2 rounded-lg text-sm bg-white font-bold text-slate-800">
                                 </div>
                             </div>
                             <div>
@@ -143,13 +143,13 @@
                                 <input type="text" id="autoNroNota" class="w-full border p-2 rounded-lg text-sm bg-white font-bold text-blue-800">
                             </div>
                             <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">Resumen / Referencia Extraída</label>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Resumen / Descripción Automática</label>
                                 <textarea id="autoReferencia" rows="2" class="w-full border p-2.5 rounded-lg text-sm bg-white font-medium"></textarea>
                             </div>
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-xs font-semibold text-slate-600 mb-1">Destinatario / Derivación</label>
-                                    <input type="text" id="autoAccion" class="w-full border p-2 rounded-lg text-sm bg-white font-bold text-blue-700">
+                                    <input type="text" id="autoAccion" placeholder="ej: AL SEÑOR SUBPREFECTO NACIONAL NAVAL" class="w-full border p-2 rounded-lg text-sm bg-white font-bold text-blue-700">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-semibold text-slate-600 mb-1">Tiempo Límite</label>
@@ -158,8 +158,8 @@
                             </div>
                             <div class="flex justify-end gap-3 pt-2">
                                 <button onclick="clearAutoForm()" class="px-3 py-1.5 border rounded-lg text-xs hover:bg-slate-100">Descartar</button>
-                                <button onclick="confirmAutoSave()" class="px-4 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-semibold hover:bg-blue-500 shadow flex items-center gap-2">
-                                    <i class="fa-solid fa-floppy-disk"></i> Confirmar y Guardar Nota
+                                <button onclick="confirmAutoSave()" class="px-4 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-semibold hover:bg-blue-500 shadow">
+                                    <i class="fa-solid fa-floppy-disk mr-1.5"></i> Confirmar y Guardar Nota
                                 </button>
                             </div>
                         </div>
@@ -384,7 +384,7 @@
 
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-        const HARDCODED_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyYcn0-2u6caqiq4_knXndLJjqgf5-GNB2lDrfK3beEaXtUM1O5BLT4p8s1omJLUi6Z/exec";
+        const HARDCODED_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyjb3GzVCXyX9R1n0ErDKDAFb92aMXpLTqgQxvF9yZrd4q7kSxG7PO_pVVO5_s9YqKv/exec";
 
         let currentUser = JSON.parse(sessionStorage.getItem('activeUser')) || null;
         let authToken = sessionStorage.getItem('authToken') || '';
@@ -393,6 +393,8 @@
         let viajes = [];
         let autoPdfFileBase64 = null;
         let currentFileName = '';
+        let pendingAutoNotaId = null;
+        let pendingUploadKey = null;
 
         function togglePasswordVisibility(inputId, iconId) {
             const input = document.getElementById(inputId);
@@ -492,7 +494,10 @@
         async function handleFileSelect(file) {
             if (!file || file.type !== 'application/pdf') return;
             currentFileName = file.name;
+            pendingAutoNotaId = Date.now();
+            pendingUploadKey = 'dgse-nota-' + pendingAutoNotaId;
             
+            // Convertir archivo a Data URL / Base64 para guardado
             const reader = new FileReader();
             reader.onload = async function(e) {
                 autoPdfFileBase64 = e.target.result;
@@ -500,54 +505,78 @@
                 try {
                     const pdf = await pdfjsLib.getDocument(typedarray).promise;
                     let fullText = '';
+                    let recipientHeaderLines = [];
                     for (let i = 1; i <= pdf.numPages; i++) {
                         const page = await pdf.getPage(i);
                         const textContent = await page.getTextContent();
                         fullText += textContent.items.map(item => item.str).join(' ') + ' ';
+
+                        // Se agrupan los elementos por línea visual para localizar exclusivamente el encabezado A:.
+                        const linesByY = new Map();
+                        textContent.items.forEach(item => {
+                            const y = Math.round(item.transform && item.transform[5] ? item.transform[5] : 0);
+                            if (!linesByY.has(y)) linesByY.set(y, []);
+                            linesByY.get(y).push({ x: item.transform && item.transform[4] ? item.transform[4] : 0, text: item.str });
+                        });
+                        Array.from(linesByY.entries())
+                            .sort((a, b) => b[0] - a[0])
+                            .forEach(entry => {
+                                const line = entry[1].sort((a, b) => a.x - b.x).map(item => item.text).join(' ').replace(/\s+/g, ' ').trim();
+                                if (line) recipientHeaderLines.push(line);
+                            });
                     }
+
                     let cleanedText = fullText.replace(/\s+/g, ' ').trim();
                     
+                    // 1. Detección de Número de Nota / Documento GDE
                     const nroMatch = fullText.match(/((?:NO|IF|ACTA|PV|EX)-\d{4}-\d+-[A-Z0-9%#-]+)/i);
                     let detectedNroNota = nroMatch ? nroMatch[1] : currentFileName.replace(/\.pdf$/i, '');
-                    
+
+                    // 2. Extracción Inteligente del PROMOTOR (Cuatrigrama / Organismo)
                     let promotorExtraido = '';
                     if (detectedNroNota.includes('-APN-')) {
                         const parts = detectedNroNota.split('-APN-');
-                        if (parts.length > 1) promotorExtraido = parts[1].trim();
+                        if (parts.length > 1) {
+                            promotorExtraido = parts[1].trim();
+                        }
                     } else if (detectedNroNota.includes('-PNA#')) {
                         const parts = detectedNroNota.split('-');
                         promotorExtraido = parts[parts.length - 1].trim();
                     }
+
                     if (!promotorExtraido) {
-                        const promMatch = fullText.match(/([A-Z0-9]+#(?:PNA|MSG|APN))/i);
-                        promotorExtraido = promMatch ? promMatch[1] : 'SGEN#PNA';
+                        if (fullText.includes('SSAEYFI#MSG')) promotorExtraido = 'SSAEYFI#MSG';
+                        else if (fullText.includes('DGSE#PNA')) promotorExtraido = 'DGSE#PNA';
+                        else if (fullText.includes('DGSE')) promotorExtraido = 'DGSE';
+                        else promotorExtraido = 'ORGANISMO EXTERNO / MINISTERIO';
                     }
 
+                    // 3. DESTINATARIO: tomar únicamente el contenido del encabezado que comienza con A:.
+                    // No usar destinatarios predeterminados ni buscar nombres en el cuerpo del documento.
+                    let destinatarioExtraido = '';
+                    const recipientHeaderLine = recipientHeaderLines.find(line => /^\s*A\s*:\s*/i.test(line));
+                    if (recipientHeaderLine) {
+                        const recipientMatch = recipientHeaderLine.match(/^\s*A\s*:\s*(.*?)\s*$/i);
+                        if (recipientMatch && recipientMatch[1]) {
+                            const recipientText = recipientMatch[1].trim();
+                            const hasDGSE = /DGSE/i.test(recipientText);
+                            const hasMultipleRecipients = /,|;|\/|\bY\b|\bOTROS?\b/i.test(recipientText);
+                            destinatarioExtraido = (hasDGSE && hasMultipleRecipients)
+                                ? 'USUARIO-DGSE#PNA Y OTROS'
+                                : recipientText;
+                        }
+                    }
+
+                    // 4. Generación de Resumen / Referencia
                     let refText = '';
-                    const refMatch = fullText.match(/Referencia:\s*([^\n\r]+?)(?=\s*(?:CIUDAD|BUENOS|A:|Con Copia|$))/i);
-                    if (refMatch && refMatch[1]) {
+                    const refMatch = fullText.match(/Referencia:\s*([^\n\r]+)/i);
+                    if (refMatch) {
                         refText = refMatch[1].trim();
                     } else {
-                        const altRef = fullText.match(/Referencia:\s*([^\n\r]+)/i);
-                        refText = altRef ? altRef[1].trim() : (cleanedText.length > 180 ? cleanedText.substring(0, 180) + '...' : cleanedText);
+                        refText = cleanedText.length > 200 ? cleanedText.substring(0, 200) + '...' : cleanedText;
                     }
 
-                    // Extracción inteligente del destinatario (1 o 2 se muestran; si son muchos, primero + DGSE#PNA y otros)
-                    let destinatarioExtraido = '';
-                    const destMatch = fullText.match(/A:\s*([^\n\r]+?)(?=\s*Con Copia|\s*De mi mayor|\s*Referencia|$)/i);
-                    if (destMatch && destMatch[1]) {
-                        let rawDest = destMatch[1].trim();
-                        let listItems = rawDest.split(/,\s*(?=[A-ZÁÉÍÓÚÑ])/);
-                        if (listItems.length <= 2) {
-                            destinatarioExtraido = rawDest;
-                        } else {
-                            let primerDest = listItems[0].trim();
-                            destinatarioExtraido = primerDest + ", DGSE#PNA y otros";
-                        }
-                    } else {
-                        destinatarioExtraido = 'DIRECCIÓN GENERAL DE SEGURIDAD';
-                    }
-
+                    // 5. Cargar datos extraídos en el formulario preliminar para revisión
                     document.getElementById('autoNroNota').value = detectedNroNota;
                     document.getElementById('autoFecha').value = new Date().toISOString().split('T')[0];
                     document.getElementById('autoPromotor').value = promotorExtraido;
@@ -560,7 +589,7 @@
                 } catch(err) {
                     console.error("Error leyendo PDF", err);
                     document.getElementById('pdfStatus').classList.remove('hidden');
-                    document.getElementById('pdfStatus').innerText = "Error al procesar el archivo PDF. Ingrese los datos manualmente.";
+                    document.getElementById('pdfStatus').innerText = "Error al procesar el archivo PDF. Intente nuevamente.";
                 }
             };
             reader.readAsArrayBuffer(file);
@@ -569,41 +598,62 @@
         async function confirmAutoSave() {
             const statusEl = document.getElementById('pdfStatus');
             statusEl.classList.remove('hidden');
-            statusEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Guardando archivo privadamente en Drive y sincronizando con el servidor...';
-            let fileId = null;
-            if (autoPdfFileBase64) {
-                try {
-                    let pureBase64 = '';
-                    if (typeof autoPdfFileBase64 === 'string') {
-                        pureBase64 = autoPdfFileBase64.includes(',') ? autoPdfFileBase64.split(',')[1] : autoPdfFileBase64;
-                    } else {
-                        const bytes = new Uint8Array(autoPdfFileBase64);
-                        let binary = '';
-                        for (let i = 0; i < bytes.byteLength; i++) {
-                            binary += String.fromCharCode(bytes[i]);
-                        }
-                        pureBase64 = btoa(binary);
-                    }
-                    const resp = await fetch(HARDCODED_SCRIPT_URL, {
-                        method: 'POST',
-                        body: JSON.stringify({
-                            action: 'uploadPDF',
-                            token: authToken,
-                            base64Data: pureBase64,
-                            mimeType: 'application/pdf',
-                            fileName: currentFileName
-                        })
-                    });
-                    const resJson = await resp.json();
-                    if (resJson.status === 'success' && resJson.fileId) {
-                        fileId = resJson.fileId;
-                    }
-                } catch(err) {
-                    console.error("Error al subir el archivo PDF a Drive:", err);
-                }
+
+            if (!autoPdfFileBase64) {
+                statusEl.innerText = 'Seleccione un archivo PDF antes de guardar la nota.';
+                alert('Seleccione un archivo PDF antes de guardar la nota.');
+                return;
             }
+            if (!authToken) {
+                statusEl.innerText = 'La sesión no es válida. Inicie sesión nuevamente.';
+                alert('La sesión no es válida. Inicie sesión nuevamente.');
+                return;
+            }
+
+            statusEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Subiendo archivo a Drive...';
+            const notaId = pendingAutoNotaId || Date.now();
+            const uploadKey = pendingUploadKey || ('dgse-nota-' + notaId);
+            let pureBase64 = '';
+            let uploadResult;
+
+            try {
+                if (typeof autoPdfFileBase64 === 'string') {
+                    pureBase64 = autoPdfFileBase64.includes(',') ? autoPdfFileBase64.split(',')[1] : autoPdfFileBase64;
+                } else {
+                    const bytes = new Uint8Array(autoPdfFileBase64);
+                    let binary = '';
+                    const chunkSize = 0x8000;
+                    for (let i = 0; i < bytes.length; i += chunkSize) {
+                        binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunkSize));
+                    }
+                    pureBase64 = btoa(binary);
+                }
+
+                const uploadResp = await fetch(HARDCODED_SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'uploadPDF',
+                        token: authToken,
+                        base64Data: pureBase64,
+                        mimeType: 'application/pdf',
+                        fileName: currentFileName,
+                        uploadKey: uploadKey
+                    })
+                });
+                uploadResult = await uploadResp.json();
+                if (!uploadResp.ok || uploadResult.status !== 'success' || !uploadResult.fileId) {
+                    throw new Error(uploadResult.message || 'Drive no confirmó el guardado del PDF.');
+                }
+            } catch (err) {
+                console.error('Error al subir el PDF a Drive:', err);
+                statusEl.innerText = 'No se pudo confirmar el guardado del PDF. La nota no fue guardada; puede reintentar.';
+                alert('No se pudo guardar el PDF en Google Drive. No se guardó el registro. Detalle: ' + (err.message || err));
+                return;
+            }
+
+            statusEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Guardando registro de la nota...';
             const newNota = {
-                id: Date.now(),
+                id: notaId,
                 fecha: document.getElementById('autoFecha').value,
                 promotor: document.getElementById('autoPromotor').value,
                 nroNota: document.getElementById('autoNroNota').value,
@@ -611,20 +661,33 @@
                 accion: document.getElementById('autoAccion').value,
                 limite: document.getElementById('autoLimite').value,
                 estado: 'Pendiente',
-                fileId: fileId
+                adjuntoNotaId: uploadResult.fileId,
+                adjuntoNota: null
             };
-            notas.unshift(newNota);
+            const updatedNotas = [newNota, ...notas.filter(n => String(n.id) !== String(notaId))];
+
             try {
-                await fetch(HARDCODED_SCRIPT_URL, {
+                const saveResp = await fetch(HARDCODED_SCRIPT_URL, {
                     method: 'POST',
-                    body: JSON.stringify({ action: 'saveNotas', token: authToken, notas: notas })
+                    body: JSON.stringify({ action: 'saveNotas', token: authToken, notas: updatedNotas })
                 });
+                const saveResult = await saveResp.json();
+                if (!saveResp.ok || saveResult.status !== 'success') {
+                    throw new Error(saveResult.message || 'El servidor no confirmó el guardado del registro.');
+                }
+
+                notas = updatedNotas;
                 clearAutoForm();
-                toggleAutoUploadSection();
+                if (!document.getElementById('autoUploadSection').classList.contains('hidden')) toggleAutoUploadSection();
                 renderTable();
                 updateEstadisticas();
-            } catch(e) {
-                alert('Error al guardar el registro en el servidor central.');
+                statusEl.innerText = 'Nota y PDF guardados correctamente.';
+                pendingAutoNotaId = null;
+                pendingUploadKey = null;
+            } catch (err) {
+                console.error('Error al guardar el registro en el servidor:', err);
+                statusEl.innerText = 'El PDF quedó cargado, pero no se confirmó el registro. Reintente guardar; se reutilizará el mismo archivo.';
+                alert('No se pudo confirmar el guardado de la nota. No cierre el formulario; vuelva a intentar. Detalle: ' + (err.message || err));
             }
         }
 
@@ -633,6 +696,7 @@
             document.getElementById('pdfStatus').classList.add('hidden');
             document.getElementById('pdfFileInput').value = '';
             autoPdfFileBase64 = null;
+            currentFileName = '';
         }
 
         function openModal(id = null) {
@@ -674,7 +738,9 @@
             if (id) {
                 const idx = notas.findIndex(n => n.id === parseInt(id));
                 if (idx !== -1) {
-                    notaObj.fileId = notas[idx].fileId;
+                    notaObj.adjuntoNota = notas[idx].adjuntoNota;
+                    notaObj.adjuntoNotaId = notas[idx].adjuntoNotaId;
+                    notaObj.adjuntosRespuesta = notas[idx].adjuntosRespuesta || [];
                     notas[idx] = notaObj;
                 }
             } else {
@@ -701,6 +767,43 @@
             }
         }
 
+        async function openPrivatePDF(fileId) {
+            // Abrir la pestaña durante el clic para evitar bloqueos del navegador mientras se consulta el servidor.
+            const pdfWindow = window.open('', '_blank');
+            try {
+                const response = await fetch(HARDCODED_SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'getPDF', token: authToken, fileId: fileId })
+                });
+                const result = await response.json();
+                if (!response.ok || result.status !== 'success' || !result.base64Data) {
+                    throw new Error(result.message || 'No se pudo recuperar el PDF.');
+                }
+
+                const binary = atob(result.base64Data);
+                const bytes = new Uint8Array(binary.length);
+                for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+                const blob = new Blob([bytes], { type: result.mimeType || 'application/pdf' });
+                const objectUrl = URL.createObjectURL(blob);
+
+                if (pdfWindow && !pdfWindow.closed) {
+                    pdfWindow.location.href = objectUrl;
+                } else {
+                    const link = document.createElement('a');
+                    link.href = objectUrl;
+                    link.download = result.fileName || 'documento.pdf';
+                    document.body.appendChild(link);
+                    link.click();
+                    link.remove();
+                }
+                setTimeout(() => URL.revokeObjectURL(objectUrl), 60000);
+            } catch (err) {
+                if (pdfWindow && !pdfWindow.closed) pdfWindow.close();
+                console.error('Error al recuperar el PDF privado:', err);
+                alert('No se pudo visualizar el PDF. Verifique su sesión y sus permisos. ' + (err.message || err));
+            }
+        }
+
         function renderTable() {
             const body = document.getElementById('tableBody');
             body.innerHTML = '';
@@ -718,18 +821,24 @@
                         <button onclick="deleteNota(${n.id})" class="text-red-600 hover:text-red-800" title="Eliminar"><i class="fa-solid fa-trash"></i></button>
                     `;
                 }
-                
-                let adjuntoLink = n.fileId ? `<a href="${HARDCODED_SCRIPT_URL}?action=viewPDF&fileId=${n.fileId}&token=${authToken}" target="_blank" rel="noopener noreferrer" class="bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 px-2.5 py-1 rounded-md text-xs font-bold inline-flex items-center gap-1 shadow-sm"><i class="fa-solid fa-file-pdf text-red-600"></i> Ver PDF</a>` : '<span class="text-slate-400 font-bold">-</span>';
+
+                let adjuntoLink = '-';
+                if (n.adjuntoNotaId) {
+                    adjuntoLink = `<button type="button" onclick="openPrivatePDF('${n.adjuntoNotaId}')" class="text-blue-600 hover:text-blue-800 font-bold flex items-center gap-1"><i class="fa-solid fa-file-pdf text-red-600 text-sm"></i> Ver PDF</button>`;
+                } else if (n.adjuntoNota) {
+                    // Compatibilidad con registros antiguos que ya guardaban una URL de Drive.
+                    adjuntoLink = `<a href="${n.adjuntoNota}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 font-bold flex items-center gap-1"><i class="fa-solid fa-file-pdf text-red-600 text-sm"></i> Ver PDF</a>`;
+                }
 
                 body.innerHTML += `
                     <tr class="border-b hover:bg-slate-50 transition">
-                        <td class="p-3 whitespace-nowrap">${n.fecha || '-'}</td>
-                        <td class="p-3 font-bold text-slate-800 whitespace-nowrap">${n.promotor || '-'}</td>
-                        <td class="p-3 text-blue-900 font-bold whitespace-nowrap">${n.nroNota || '-'}</td>
+                        <td class="p-3">${n.fecha || '-'}</td>
+                        <td class="p-3 font-bold text-slate-800">${n.promotor || '-'}</td>
+                        <td class="p-3 text-blue-900 font-bold">${n.nroNota || '-'}</td>
                         <td class="p-3 max-w-xs truncate">${n.referencia || '-'}</td>
                         <td class="p-3 font-medium text-slate-700">${n.accion || '-'}</td>
-                        <td class="p-3 whitespace-nowrap">${n.limite || '-'}</td>
-                        <td class="p-3 whitespace-nowrap"><span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-bold">${n.estado || 'Pendiente'}</span></td>
+                        <td class="p-3">${n.limite || '-'}</td>
+                        <td class="p-3"><span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-bold">${n.estado || 'Pendiente'}</span></td>
                         <td class="p-3 whitespace-nowrap">${adjuntoLink}</td>
                         <td class="p-3 text-center whitespace-nowrap">${accionesHtml}</td>
                     </tr>
@@ -738,6 +847,7 @@
             document.getElementById('metricTotal').innerText = notas.length;
         }
 
+        // EXPEDIENTES
         function openExpedienteModal() { document.getElementById('expedienteModal').classList.remove('hidden'); }
         function closeExpedienteModal() { document.getElementById('expedienteModal').classList.add('hidden'); }
         async function saveExpediente(e) {
@@ -781,6 +891,7 @@
             }
         }
 
+        // VIAJES
         function openViajeModal() { document.getElementById('viajeModal').classList.remove('hidden'); }
         function closeViajeModal() { document.getElementById('viajeModal').classList.add('hidden'); }
         async function saveViaje(e) {
@@ -830,6 +941,7 @@
             document.getElementById('statTotalViajes').innerText = viajes.length;
         }
 
+        // GESTIÓN DE PERSONAL
         async function openUsersModal() {
             document.getElementById('usersModal').classList.remove('hidden');
             const resp = await fetch(HARDCODED_SCRIPT_URL, {
@@ -877,6 +989,7 @@
             }
         }
 
+        // AUDITORÍA
         async function openAuditModal() {
             document.getElementById('auditModal').classList.remove('hidden');
             const resp = await fetch(HARDCODED_SCRIPT_URL, {
