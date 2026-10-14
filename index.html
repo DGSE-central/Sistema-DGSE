@@ -17,6 +17,7 @@
     </style>
 </head>
 <body class="bg-slate-100 min-h-screen text-slate-800 font-sans pb-12" onload="initApp()">
+
     <!-- PANTALLA DE LOGIN -->
     <div id="loginScreen" class="fixed inset-0 bg-slate-900 z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl text-center border border-slate-700 relative">
@@ -43,6 +44,7 @@
             </form>
         </div>
     </div>
+
     <!-- APLICACIÓN PRINCIPAL -->
     <div id="appScreen" class="hidden">
         <header class="bg-slate-900 text-white shadow-lg sticky top-0 z-30">
@@ -68,6 +70,7 @@
                 </div>
             </div>
         </header>
+
         <main class="max-w-7xl mx-auto px-4 mt-6">
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 mb-6">
                 <div class="flex border-b border-slate-200 overflow-x-auto">
@@ -85,6 +88,7 @@
                     </button>
                 </div>
             </div>
+
             <!-- SOLAPA 1: REGISTRO DE NOTAS -->
             <div id="registroTab" class="tab-content">
                 <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 mb-6">
@@ -104,6 +108,7 @@
                             </button>
                         </div>
                     </div>
+
                     <!-- CARGA AUTOMÁTICA INTELIGENTE (PDF.JS) -->
                     <div id="autoUploadSection" class="hidden my-6 p-6 bg-slate-50 border-2 border-blue-200 rounded-2xl transition">
                         <div class="flex justify-between items-center mb-4">
@@ -159,6 +164,7 @@
                             </div>
                         </div>
                     </div>
+
                     <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
                         <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
                             <p class="text-xs text-slate-500 uppercase font-semibold">Total Registros</p>
@@ -166,6 +172,7 @@
                         </div>
                     </div>
                 </div>
+
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
                     <table class="w-full text-left text-xs md:text-sm">
                         <thead class="bg-slate-800 text-white uppercase text-xs">
@@ -185,6 +192,7 @@
                     </table>
                 </div>
             </div>
+
             <!-- SOLAPA 2: EXPEDIENTES GDE -->
             <div id="expedientesTab" class="tab-content hidden">
                 <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 mb-6 flex justify-between items-center">
@@ -211,6 +219,7 @@
                     </table>
                 </div>
             </div>
+
             <!-- SOLAPA 3: CONTROL DE VIAJES -->
             <div id="viajesTab" class="tab-content hidden">
                 <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 mb-6 flex justify-between items-center">
@@ -237,6 +246,7 @@
                     </table>
                 </div>
             </div>
+
             <!-- SOLAPA 4: ESTADÍSTICAS DGSE -->
             <div id="estadisticasTab" class="tab-content hidden">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
@@ -256,6 +266,7 @@
             </div>
         </main>
     </div>
+
     <!-- MODAL GESTIÓN DE PERSONAL -->
     <div id="usersModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
         <div class="bg-white rounded-2xl w-full max-w-lg p-6 shadow-2xl relative">
@@ -292,6 +303,7 @@
             </div>
         </div>
     </div>
+
     <!-- MODAL AUDITORÍA -->
     <div id="auditModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
         <div class="bg-white rounded-2xl w-full max-w-2xl p-6 shadow-2xl relative">
@@ -307,6 +319,7 @@
             <div class="flex justify-end mt-4"><button onclick="closeAuditModal()" class="px-3 py-1.5 border rounded-lg text-xs">Cerrar</button></div>
         </div>
     </div>
+
     <!-- MODAL NOTA -->
     <div id="itemModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
         <div class="bg-white rounded-2xl w-full max-w-2xl p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
@@ -325,6 +338,7 @@
             </form>
         </div>
     </div>
+
     <!-- MODAL EXPEDIENTE -->
     <div id="expedienteModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
         <div class="bg-white rounded-2xl w-full max-w-lg p-6 shadow-2xl relative">
@@ -345,6 +359,7 @@
             </form>
         </div>
     </div>
+
     <!-- MODAL VIAJE -->
     <div id="viajeModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
         <div class="bg-white rounded-2xl w-full max-w-lg p-6 shadow-2xl relative">
@@ -366,9 +381,11 @@
             </form>
         </div>
     </div>
+
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-        const HARDCODED_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyOlBJWZ7ykIjXCfwbE8BY4AVkbjuQLgB8WO2w3kF0MthTvtyLBwDaTp1HRd1cVIoNp/exec";
+        const HARDCODED_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyRG_eJe4ey8V68XAXOaXE_B2g2rhJyT2J4Ecn-Wd7AKmJBNrocNITwAKpXqqDTI4wX/exec";
+
         let currentUser = JSON.parse(sessionStorage.getItem('activeUser')) || null;
         let authToken = sessionStorage.getItem('authToken') || '';
         let notas = [];
@@ -376,6 +393,7 @@
         let viajes = [];
         let autoPdfFileBase64 = null;
         let currentFileName = '';
+
         function togglePasswordVisibility(inputId, iconId) {
             const input = document.getElementById(inputId);
             const icon = document.getElementById(iconId);
@@ -389,6 +407,7 @@
                 icon.classList.add("fa-eye");
             }
         }
+
         async function initApp() {
             if (currentUser && authToken) {
                 document.getElementById('loginScreen').classList.add('hidden');
@@ -406,6 +425,7 @@
                 document.getElementById('appScreen').classList.add('hidden');
             }
         }
+
         async function handleLogin(e) {
             e.preventDefault();
             const u = document.getElementById('loginUser').value;
@@ -429,12 +449,14 @@
                 alert('Error de conexión con el servidor.');
             }
         }
+
         function handleLogout() {
             sessionStorage.clear();
             currentUser = null;
             authToken = '';
             initApp();
         }
+
         async function loadServerData() {
             try {
                 const response = await fetch(HARDCODED_SCRIPT_URL, {
@@ -455,15 +477,18 @@
                 console.error('Error al cargar datos del servidor', e);
             }
         }
+
         function applyRolePermissions() {
             if (currentUser && currentUser.role === 'Consulta') {
                 document.getElementById('btnNuevaNotaModal')?.classList.add('hidden');
                 document.getElementById('btnAutoUpload')?.classList.add('hidden');
             }
         }
+
         function toggleAutoUploadSection() {
             document.getElementById('autoUploadSection').classList.toggle('hidden');
         }
+
         async function handleFileSelect(file) {
             if (!file || file.type !== 'application/pdf') return;
             currentFileName = file.name;
@@ -497,6 +522,7 @@
                         const promMatch = fullText.match(/([A-Z0-9]+#(?:PNA|MSG|APN))/i);
                         promotorExtraido = promMatch ? promMatch[1] : 'SGEN#PNA';
                     }
+
                     let refText = '';
                     const refMatch = fullText.match(/Referencia:\s*([^\n\r]+?)(?=\s*(?:CIUDAD|BUENOS|A:|Con Copia|$))/i);
                     if (refMatch && refMatch[1]) {
@@ -505,6 +531,7 @@
                         const altRef = fullText.match(/Referencia:\s*([^\n\r]+)/i);
                         refText = altRef ? altRef[1].trim() : (cleanedText.length > 180 ? cleanedText.substring(0, 180) + '...' : cleanedText);
                     }
+
                     // Extracción inteligente del destinatario (1 o 2 se muestran; si son muchos, primero + DGSE#PNA y otros)
                     let destinatarioExtraido = '';
                     const destMatch = fullText.match(/A:\s*([^\n\r]+?)(?=\s*Con Copia|\s*De mi mayor|\s*Referencia|$)/i);
@@ -520,11 +547,13 @@
                     } else {
                         destinatarioExtraido = 'DIRECCIÓN GENERAL DE SEGURIDAD';
                     }
+
                     document.getElementById('autoNroNota').value = detectedNroNota;
                     document.getElementById('autoFecha').value = new Date().toISOString().split('T')[0];
                     document.getElementById('autoPromotor').value = promotorExtraido;
                     document.getElementById('autoReferencia').value = refText;
                     document.getElementById('autoAccion').value = destinatarioExtraido;
+
                     document.getElementById('parsedResultForm').classList.remove('hidden');
                     document.getElementById('pdfStatus').classList.remove('hidden');
                     document.getElementById('pdfStatus').innerHTML = '<i class="fa-solid fa-circle-check text-emerald-600 mr-1.5"></i> PDF analizado correctamente. Verifique y guarde los datos.';
@@ -536,6 +565,7 @@
             };
             reader.readAsArrayBuffer(file);
         }
+
         async function confirmAutoSave() {
             const statusEl = document.getElementById('pdfStatus');
             statusEl.classList.remove('hidden');
@@ -597,12 +627,14 @@
                 alert('Error al guardar el registro en el servidor central.');
             }
         }
+
         function clearAutoForm() {
             document.getElementById('parsedResultForm').classList.add('hidden');
             document.getElementById('pdfStatus').classList.add('hidden');
             document.getElementById('pdfFileInput').value = '';
             autoPdfFileBase64 = null;
         }
+
         function openModal(id = null) {
             document.getElementById('notaId').value = id || '';
             if (id) {
@@ -626,6 +658,7 @@
             document.getElementById('itemModal').classList.remove('hidden');
         }
         function closeModal() { document.getElementById('itemModal').classList.add('hidden'); }
+
         async function saveNotaModal(e) {
             e.preventDefault();
             const id = document.getElementById('notaId').value;
@@ -655,6 +688,7 @@
             renderTable();
             updateEstadisticas();
         }
+
         async function deleteNota(id) {
             if (confirm('¿Desea eliminar este registro?')) {
                 notas = notas.filter(item => item.id !== id);
@@ -666,6 +700,7 @@
                 updateEstadisticas();
             }
         }
+
         function renderTable() {
             const body = document.getElementById('tableBody');
             body.innerHTML = '';
@@ -685,6 +720,7 @@
                 }
                 
                 let adjuntoLink = n.fileId ? `<a href="${HARDCODED_SCRIPT_URL}?action=viewPDF&fileId=${n.fileId}&token=${authToken}" target="_blank" rel="noopener noreferrer" class="bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 px-2.5 py-1 rounded-md text-xs font-bold inline-flex items-center gap-1 shadow-sm"><i class="fa-solid fa-file-pdf text-red-600"></i> Ver PDF</a>` : '<span class="text-slate-400 font-bold">-</span>';
+
                 body.innerHTML += `
                     <tr class="border-b hover:bg-slate-50 transition">
                         <td class="p-3 whitespace-nowrap">${n.fecha || '-'}</td>
@@ -701,6 +737,7 @@
             });
             document.getElementById('metricTotal').innerText = notas.length;
         }
+
         function openExpedienteModal() { document.getElementById('expedienteModal').classList.remove('hidden'); }
         function closeExpedienteModal() { document.getElementById('expedienteModal').classList.add('hidden'); }
         async function saveExpediente(e) {
@@ -743,6 +780,7 @@
                 updateEstadisticas();
             }
         }
+
         function openViajeModal() { document.getElementById('viajeModal').classList.remove('hidden'); }
         function closeViajeModal() { document.getElementById('viajeModal').classList.add('hidden'); }
         async function saveViaje(e) {
@@ -785,11 +823,13 @@
                 updateEstadisticas();
             }
         }
+
         function updateEstadisticas() {
             document.getElementById('statTotalNotas').innerText = notas.length;
             document.getElementById('statTotalExp').innerText = expedientes.length;
             document.getElementById('statTotalViajes').innerText = viajes.length;
         }
+
         async function openUsersModal() {
             document.getElementById('usersModal').classList.remove('hidden');
             const resp = await fetch(HARDCODED_SCRIPT_URL, {
@@ -836,6 +876,7 @@
                 openUsersModal();
             }
         }
+
         async function openAuditModal() {
             document.getElementById('auditModal').classList.remove('hidden');
             const resp = await fetch(HARDCODED_SCRIPT_URL, {
@@ -852,11 +893,13 @@
             }
         }
         function closeAuditModal() { document.getElementById('auditModal').classList.add('hidden'); }
+
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.getElementById(tabId).classList.remove('hidden');
             document.querySelectorAll('header button, .flex button').forEach(btn => btn.classList.remove('tab-active'));
         }
+
         function exportCSV() {
             let csv = 'Fecha,Promotor,NroNota,Referencia,Estado\n';
             notas.forEach(n => { csv += `"${n.fecha}","${n.promotor}","${n.nroNota}","${n.referencia}","${n.estado}"\n`; });
@@ -869,3 +912,4 @@
     </script>
 </body>
 </html>
+
