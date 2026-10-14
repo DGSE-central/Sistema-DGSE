@@ -500,10 +500,15 @@
             // Convertir archivo a Data URL / Base64 para guardado
             const reader = new FileReader();
             reader.onload = async function(e) {
-                autoPdfFileBase64 = e.target.result;
-                const typedarray = new Uint8Array(e.target.result);
+                // Mantener un ArrayBuffer independiente para la subida. PDF.js puede
+                // transferir/desconectar el buffer que recibe, por lo que nunca debe
+                // compartirlo con autoPdfFileBase64.
+                const originalBuffer = e.target.result;
+                autoPdfFileBase64 = originalBuffer.slice(0);
+                const pdfJsBuffer = originalBuffer.slice(0);
+                const typedarray = new Uint8Array(pdfJsBuffer);
                 try {
-                    const pdf = await pdfjsLib.getDocument(typedarray).promise;
+                    const pdf = await pdfjsLib.getDocument({ data: typedarray }).promise;
                     let fullText = '';
                     let recipientHeaderLines = [];
                     for (let i = 1; i <= pdf.numPages; i++) {
