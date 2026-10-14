@@ -384,7 +384,7 @@
 
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-        const HARDCODED_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyVTZYo16J4Fy_vJBMWMuQ4yDqR8CaId_YG2ok6-tC-hZOLf8jf1YbW8kOOY1HvfPaw/exec";
+        const HARDCODED_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbynsH2AVERa-v4xWCnfKDtenU1U_ERUlQZUN7XTMrtUhj-yFxrtmRZ9hf4KiDQK4lnz/exec";
 
         let currentUser = JSON.parse(sessionStorage.getItem('activeUser')) || null;
         let authToken = sessionStorage.getItem('authToken') || '';
@@ -534,14 +534,16 @@
 
                     let destinatarioExtraido = '';
                     if (fullText.includes('DGSE#PNA') || fullText.includes('DGSE')) {
-                        destinatarioExtraido = 'DIRECTOR GENERAL DE SEGURIDAD (DGSE#PNA)';
+                        destinatarioExtraido = 'DIRECTOR GENERAL DE SEGURIDAD';
                     } else if (fullText.includes('SUBPREFECTO NACIONAL NAVAL')) {
                         destinatarioExtraido = 'SEÑOR SUBPREFECTO NACIONAL NAVAL';
-                    } else if (fullText.includes('PREFECTO NACIONAL NAVAL')) {
-                        destinatarioExtraido = 'SEÑOR PREFECTO NACIONAL NAVAL';
                     } else {
-                        const destMatch = fullText.match(/A:\s*([^\n\r\.\(\)]+)/i);
-                        destinatarioExtraido = destMatch ? destMatch[1].trim() : 'DIRECCIÓN GENERAL DE SEGURIDAD';
+                        const destMatch = fullText.match(/A:\s*([A-ZÁÉÍÓÚÑ\s,\(\)#-]+?)(?=\s*Con Copia|\s*De mi mayor|\s*Referencia|$)/i);
+                        if (destMatch && destMatch[1]) {
+                            destinatarioExtraido = destMatch[1].split(',')[0].trim();
+                        } else {
+                            destinatarioExtraido = 'DIRECCIÓN GENERAL DE SEGURIDAD';
+                        }
                     }
 
                     document.getElementById('autoNroNota').value = detectedNroNota;
