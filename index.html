@@ -92,7 +92,10 @@
                 </div>
                 <div>
                     <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Contraseña</label>
-                    <input type="password" id="loginPass" required placeholder="••••••••" class="w-full border p-2.5 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <div class="flex gap-2">
+                        <input type="password" id="loginPass" required autocomplete="current-password" placeholder="Ingrese su contraseña" class="w-full min-w-0 border p-2.5 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <button type="button" onclick="togglePasswordVisibility('loginPass', this)" class="border rounded-lg px-3 text-slate-600 hover:bg-slate-100" aria-label="Mostrar u ocultar contraseña" title="Mostrar u ocultar contraseña"><i class="fa-solid fa-eye"></i></button>
+                    </div>
                 </div>
                 <button type="submit" class="w-full bg-blue-700 hover:bg-blue-600 text-white font-bold py-2.5 rounded-lg transition shadow">
                     Ingresar al Sistema
@@ -121,6 +124,9 @@
                         <i class="fa-brands fa-google-drive mr-1.5"></i> Drive
                     </button>
 
+                    <button onclick="openChangePasswordModal(false)" id="btnMiContrasena" class="bg-blue-900 hover:bg-blue-800 border border-blue-700 text-blue-100 font-medium px-3 py-1.5 rounded-lg text-xs transition flex items-center shadow" title="Cambiar mi contraseña">
+                        <i class="fa-solid fa-key mr-1.5"></i> Mi contraseña
+                    </button>
                     <!-- Botón Auditoría (Solo Admin) -->
                     <button onclick="openAuditModal()" id="btnAuditLog" class="bg-indigo-900 hover:bg-indigo-800 border border-indigo-700 text-indigo-200 font-medium px-3 py-1.5 rounded-lg text-xs transition flex items-center shadow hidden" title="Ver Historial de Modificaciones">
                         <i class="fa-solid fa-clock-rotate-left mr-1.5 text-indigo-400"></i> Auditoría
@@ -137,6 +143,9 @@
             </div>
         </header>
 
+        <div id="passwordExpiryWarning" class="hidden max-w-7xl mx-auto mt-3 px-4">
+            <div class="rounded-lg border border-amber-300 bg-amber-50 text-amber-900 px-4 py-3 text-sm flex gap-2 items-start"><i class="fa-solid fa-triangle-exclamation mt-0.5"></i><div id="passwordExpiryWarningText">Su contraseña está próxima a vencer.</div><button type="button" onclick="openChangePasswordModal(false)" class="ml-auto underline font-semibold whitespace-nowrap">Cambiar ahora</button></div>
+        </div>
         <main class="max-w-7xl mx-auto px-4 mt-6">
 
             <!-- NAVEGACIÓN POR SOLAPAS -->
@@ -662,6 +671,30 @@
         </div>
     </div>
 
+    <!-- MODAL CAMBIO DE CONTRASEÑA: obligatorio en primer acceso, restablecimiento o vencimiento -->
+    <div id="changePasswordModal" class="fixed inset-0 bg-slate-950/80 z-[70] flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl border border-slate-200">
+            <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2"><i class="fa-solid fa-shield-halved text-blue-700"></i> <span id="changePasswordTitle">Cambiar contraseña</span></h2>
+            <p id="changePasswordMessage" class="text-sm text-slate-600 mt-2 mb-4">Ingrese su contraseña actual y elija una nueva clave segura.</p>
+            <form onsubmit="submitChangePassword(event)" class="space-y-3">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Contraseña actual o temporal</label>
+                    <div class="flex gap-2"><input id="currentPassword" type="password" autocomplete="current-password" required class="w-full min-w-0 border p-2.5 rounded-lg text-sm"><button type="button" onclick="togglePasswordVisibility('currentPassword', this)" class="border rounded-lg px-3 text-slate-600" title="Mostrar u ocultar contraseña"><i class="fa-solid fa-eye"></i></button></div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Nueva contraseña (mínimo 12 caracteres)</label>
+                    <div class="flex gap-2"><input id="replacementPassword" type="password" minlength="12" autocomplete="new-password" required class="w-full min-w-0 border p-2.5 rounded-lg text-sm"><button type="button" onclick="togglePasswordVisibility('replacementPassword', this)" class="border rounded-lg px-3 text-slate-600" title="Mostrar u ocultar contraseña"><i class="fa-solid fa-eye"></i></button></div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Repetir nueva contraseña</label>
+                    <div class="flex gap-2"><input id="confirmReplacementPassword" type="password" minlength="12" autocomplete="new-password" required class="w-full min-w-0 border p-2.5 rounded-lg text-sm"><button type="button" onclick="togglePasswordVisibility('confirmReplacementPassword', this)" class="border rounded-lg px-3 text-slate-600" title="Mostrar u ocultar contraseña"><i class="fa-solid fa-eye"></i></button></div>
+                </div>
+                <p class="text-[11px] text-slate-500">Use una clave única, difícil de adivinar y que no comparta con otros servicios. Vencerá a los 90 días.</p>
+                <div class="flex justify-end gap-2 pt-2"><button id="cancelChangePasswordButton" type="button" onclick="closeChangePasswordModal()" class="px-4 py-2 border rounded-lg text-xs font-semibold">Cancelar</button><button id="submitChangePasswordButton" type="submit" class="px-4 py-2 bg-blue-700 hover:bg-blue-600 text-white rounded-lg text-xs font-bold">Guardar contraseña</button></div>
+            </form>
+        </div>
+    </div>
+
     <!-- MODAL GESTIÓN DE ACCESOS / PERSONAL (SOLO ADMINISTRADOR) -->
     <div id="usersModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
         <div class="bg-white rounded-2xl w-full max-w-xl p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
@@ -677,8 +710,9 @@
                         <input type="text" id="newUser" required placeholder="Ej. jperez" class="w-full border p-2 rounded-lg text-xs">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">Contraseña</label>
-                        <input type="password" id="newPass" minlength="10" autocomplete="new-password" required placeholder="••••••••" class="w-full border p-2 rounded-lg text-xs">
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Contraseña temporal</label>
+                        <div class="flex gap-1"><input type="password" id="newPass" minlength="12" autocomplete="new-password" placeholder="Vacío = no modificar" class="w-full min-w-0 border p-2 rounded-lg text-xs"><button type="button" onclick="togglePasswordVisibility('newPass', this)" class="border rounded-lg px-2 text-slate-600" title="Mostrar u ocultar contraseña"><i class="fa-solid fa-eye"></i></button></div>
+                        <p class="text-[10px] text-slate-500 mt-1">Si lo deja vacío al modificar, se conserva la clave. Para altas, se asignará la temporal por defecto.</p>
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 mb-1">Rol / Permisos</label>
@@ -960,7 +994,7 @@
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
         // Endpoint del backend seguro. No contiene contraseñas ni secretos.
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx2Y6aqMqO1xxIAJw6j9kFxM3gB7dxQ1F-Nv90bESHo9uddNbw7Ra6kKhDMAIs8RWTd/exec';
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyesWAu_J0nOPTLLBvhT31G6R45VmeFEPQB9SeAAwWhh4jiTtGbvkM6l_2BiLESl4dg/exec';
         let authToken = sessionStorage.getItem('dgse_auth_token') || '';
         let dataLoaded = false;
         let activePdfObjectUrl = null;
@@ -1041,6 +1075,7 @@
         let usersDB = {};
         let auditLogDB = [];
         let currentUser = null;
+        let passwordChangeMandatory = false;
         let notas = [];
         let expedientesDB = [];
         let viajesDB = [];
@@ -1059,6 +1094,46 @@
 
         // La auditoría autoritativa se registra en Apps Script; no se guarda en el navegador.
         function registrarAuditoria(accion, modulo, detalle) { /* El backend registra las operaciones al persistir. */ }
+
+        function togglePasswordVisibility(inputId, button) {
+            const input = document.getElementById(inputId);
+            if (!input) return;
+            input.type = input.type === 'password' ? 'text' : 'password';
+            const icon = button && button.querySelector('i');
+            if (icon) { icon.classList.toggle('fa-eye'); icon.classList.toggle('fa-eye-slash'); }
+        }
+
+        function openChangePasswordModal(mandatory) {
+            passwordChangeMandatory = !!mandatory;
+            document.getElementById('changePasswordModal').classList.remove('hidden');
+            document.getElementById('changePasswordTitle').textContent = mandatory ? 'Cambio de contraseña obligatorio' : 'Cambiar mi contraseña';
+            document.getElementById('changePasswordMessage').textContent = mandatory ? 'Por seguridad, debe establecer una contraseña personal antes de utilizar el sistema.' : 'Ingrese su contraseña actual y elija una nueva clave segura.';
+            document.getElementById('cancelChangePasswordButton').classList.toggle('hidden', mandatory);
+            if (mandatory) document.getElementById('currentPassword').value = document.getElementById('loginPass').value || '';
+        }
+
+        function closeChangePasswordModal() {
+            if (passwordChangeMandatory) return;
+            document.getElementById('changePasswordModal').classList.add('hidden');
+        }
+
+        async function submitChangePassword(e) {
+            e.preventDefault();
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('replacementPassword').value;
+            const confirmPassword = document.getElementById('confirmReplacementPassword').value;
+            if (newPassword.length < 12 || !/[a-z]/.test(newPassword) || !/[A-Z]/.test(newPassword) || !/[0-9]/.test(newPassword) || !/[^A-Za-z0-9]/.test(newPassword)) { alert('Use al menos 12 caracteres e incluya mayúsculas, minúsculas, números y un símbolo.'); return; }
+            if (newPassword !== confirmPassword) { alert('Las nuevas contraseñas no coinciden.'); return; }
+            if (newPassword === currentPassword) { alert('La nueva contraseña debe ser distinta de la actual.'); return; }
+            try {
+                const result = await serverRequest({ action: 'changePassword', token: authToken, currentPassword, newPassword });
+                passwordChangeMandatory = false;
+                document.getElementById('changePasswordModal').classList.add('hidden');
+                ['currentPassword','replacementPassword','confirmReplacementPassword','loginPass'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+                alert('Contraseña actualizada correctamente. Vencerá en 90 días.');
+                await checkAuth();
+            } catch (error) { alert(error.message || 'No se pudo cambiar la contraseña.'); }
+        }
 
         async function loadServerData() {
             const result = await serverRequest({ action: 'getInitialData', token: authToken });
@@ -1084,6 +1159,17 @@
                 document.getElementById('loginScreen').classList.add('hidden');
                 document.getElementById('appScreen').classList.remove('hidden');
                 document.getElementById('userInfo').textContent = `${currentUser.name} (${currentUser.role})`;
+                const warning = document.getElementById('passwordExpiryWarning');
+                const warningText = document.getElementById('passwordExpiryWarningText');
+                const daysLeft = Number(currentUser.daysUntilExpiry);
+                if (Number.isFinite(daysLeft) && daysLeft >= 0 && daysLeft <= 14) {
+                    warning.classList.remove('hidden');
+                    warningText.textContent = daysLeft === 0 ? 'Su contraseña vence hoy. Cámbiela para evitar perder el acceso.' : `Su contraseña vence en ${daysLeft} día(s). Cámbiela antes del vencimiento.`;
+                    if (!sessionStorage.getItem('dgse_password_expiry_alert_' + currentUser.name)) {
+                        alert(warningText.textContent);
+                        sessionStorage.setItem('dgse_password_expiry_alert_' + currentUser.name, '1');
+                    }
+                } else { warning.classList.add('hidden'); }
                 const esConsulta = currentUser.role === 'Consulta';
                 ['btnNuevaNotaModal','btnAutoUpload','btnNuevoExpediente','btnNuevoViaje'].forEach(id => { const el=document.getElementById(id); if(el) el.classList.toggle('hidden', esConsulta); });
                 ['btnGestionUsuarios','btnAuditLog'].forEach(id => { const el=document.getElementById(id); if(el) el.classList.toggle('hidden', currentUser.role !== 'Administrador'); });
@@ -1108,6 +1194,12 @@
                 currentUser = result.user;
                 sessionStorage.setItem('dgse_auth_token', authToken);
                 sessionStorage.setItem('activeUser', JSON.stringify(currentUser));
+                if (result.mustChangePassword) {
+                    document.getElementById('loginScreen').classList.add('hidden');
+                    document.getElementById('appScreen').classList.add('hidden');
+                    openChangePasswordModal(true);
+                    return;
+                }
                 document.getElementById('loginPass').value = '';
                 await checkAuth();
             } catch (error) { alert(error.message || 'Usuario o contraseña incorrectos.'); }
@@ -1134,13 +1226,15 @@
             try {
                 const result = await serverRequest({ action: 'getUsers', token: authToken });
                 usersDB = {};
-                (result.users || []).forEach(user => usersDB[user.username] = { role: user.role });
+                (result.users || []).forEach(user => usersDB[user.username] = { role: user.role, mustChangePassword: !!user.mustChangePassword, daysUntilExpiry: user.daysUntilExpiry });
                 body.innerHTML = '';
                 Object.keys(usersDB).sort().forEach(u => {
                     const tr = document.createElement('tr'); tr.className = 'border-b';
-                    tr.innerHTML = `<td class="p-2.5 font-bold"></td><td class="p-2.5 text-slate-500">Contraseña protegida en el servidor</td><td class="p-2.5"><span class="bg-slate-100 border px-2 py-0.5 rounded text-[11px]"></span></td><td class="p-2.5 text-center"><button class="text-red-600 hover:text-red-800" title="Eliminar"><i class="fa-solid fa-user-xmark"></i></button></td>`;
-                    tr.children[0].textContent = u.toUpperCase(); tr.children[2].firstElementChild.textContent = usersDB[u].role;
-                    tr.querySelector('button').addEventListener('click', () => deleteUser(u)); body.appendChild(tr);
+                    const status = usersDB[u].mustChangePassword ? 'Debe cambiar clave' : (Number.isFinite(Number(usersDB[u].daysUntilExpiry)) ? `Vence en ${usersDB[u].daysUntilExpiry} día(s)` : 'Clave configurada');
+                    tr.innerHTML = `<td class="p-2.5 font-bold"></td><td class="p-2.5 text-slate-500"></td><td class="p-2.5"><span class="bg-slate-100 border px-2 py-0.5 rounded text-[11px]"></span></td><td class="p-2.5 text-center whitespace-nowrap"><button class="text-amber-700 hover:text-amber-900 mr-2" title="Restablecer contraseña temporal"><i class="fa-solid fa-key"></i></button><button class="text-red-600 hover:text-red-800" title="Eliminar"><i class="fa-solid fa-user-xmark"></i></button></td>`;
+                    tr.children[0].textContent = u.toUpperCase(); tr.children[1].textContent = status; tr.children[2].firstElementChild.textContent = usersDB[u].role;
+                    tr.querySelectorAll('button')[0].addEventListener('click', () => resetUserPassword(u));
+                    tr.querySelectorAll('button')[1].addEventListener('click', () => deleteUser(u)); body.appendChild(tr);
                 });
                 if (!body.children.length) body.innerHTML = '<tr><td colspan="4" class="p-3 text-center text-slate-400">No hay usuarios.</td></tr>';
             } catch (error) { body.innerHTML = `<tr><td colspan="4" class="p-3 text-red-600">${escapeHtml(error.message)}</td></tr>`; }
@@ -1150,12 +1244,25 @@
             e.preventDefault();
             if (!currentUser || currentUser.role !== 'Administrador') return;
             const username = document.getElementById('newUser').value.toLowerCase().trim();
-            const password = document.getElementById('newPass').value;
+            let password = document.getElementById('newPass').value;
             const role = document.getElementById('newRole').value;
             try {
+                const existing = Object.prototype.hasOwnProperty.call(usersDB, username);
+                if (!existing && !password) password = 'DGSE-Inicio-2026!';
                 await serverRequest({ action: 'saveUser', token: authToken, user: { username, password, role } });
                 document.getElementById('newUser').value = ''; document.getElementById('newPass').value = '';
-                await renderUsersTable(); alert('Usuario guardado en el servidor.');
+                await renderUsersTable();
+                alert(!existing && password === 'DGSE-Inicio-2026!' ? 'Usuario creado. Contraseña temporal: DGSE-Inicio-2026! Debe cambiarla obligatoriamente al ingresar.' : 'Usuario guardado en el servidor.');
+            } catch (error) { alert(error.message); }
+        }
+
+        async function resetUserPassword(username) {
+            if (!currentUser || currentUser.role !== 'Administrador') return;
+            if (!confirm(`Se restablecerá la contraseña de ${username.toUpperCase()} a la clave temporal DGSE-Inicio-2026! y deberá cambiarla al ingresar. ¿Continuar?`)) return;
+            try {
+                await serverRequest({ action: 'resetUserPassword', token: authToken, username });
+                await renderUsersTable();
+                alert(`Contraseña restablecida para ${username.toUpperCase()}. Clave temporal: DGSE-Inicio-2026!`);
             } catch (error) { alert(error.message); }
         }
 
