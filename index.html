@@ -14,6 +14,28 @@
         .row-contestado { background-color: #f0fdf4; }
         .row-archivado { background-color: #f3f4f6; }
         .tab-active { border-bottom: 3px solid #2563eb; color: #2563eb; font-weight: 700; }
+        /* Adaptación móvil sin alterar la estructura funcional de los módulos. */
+        .table-scroll { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .table-scroll table { min-width: 720px; }
+        .form-control { width: 100%; min-width: 0; }
+        @media (max-width: 640px) {
+            body { padding-bottom: 1rem; }
+            header .max-w-7xl { align-items: flex-start; gap: .75rem; flex-direction: column; }
+            header .max-w-7xl > div:last-child { width: 100%; flex-wrap: wrap; gap: .5rem; }
+            #userInfo { max-width: 100%; overflow-wrap: anywhere; }
+            main.max-w-7xl { padding-left: .5rem; padding-right: .5rem; margin-top: .5rem; }
+            main .rounded-2xl.p-6 { padding: .875rem; }
+            main .text-xl { font-size: 1rem; line-height: 1.4; }
+            main .flex.justify-between.items-center { align-items: flex-start; flex-wrap: wrap; }
+            #accionesNotasArea { width: 100%; flex-wrap: wrap; }
+            #accionesNotasArea button { flex: 1 1 42%; justify-content: center; }
+            main .overflow-x-auto { max-width: calc(100vw - 1rem); }
+            .modal-panel { width: 100%; max-height: 94dvh; overflow-y: auto; padding: 1rem; }
+            #privatePdfViewerModal { padding: .25rem; }
+            #privatePdfOpenTab { font-size: .75rem; padding: .4rem .5rem; }
+            #privatePdfViewerModal .font-bold { font-size: .875rem; }
+            .stats-grid { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body class="bg-slate-100 min-h-screen text-slate-800 font-sans pb-12" onload="initApp()">
@@ -173,7 +195,7 @@
                     </div>
                 </div>
 
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto table-scroll">
                     <table class="w-full text-left text-xs md:text-sm">
                         <thead class="bg-slate-800 text-white uppercase text-xs">
                             <tr>
@@ -203,13 +225,14 @@
                         <i class="fa-solid fa-plus mr-1"></i> Nuevo Expediente
                     </button>
                 </div>
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto table-scroll">
                     <table class="w-full text-left text-xs md:text-sm">
                         <thead class="bg-slate-800 text-white uppercase text-xs">
                             <tr>
                                 <th class="p-3">Nro. Expediente GDE</th>
                                 <th class="p-3">Iniciador</th>
                                 <th class="p-3">Asunto</th>
+                                <th class="p-3">Tipo</th>
                                 <th class="p-3">Ubicación Actual</th>
                                 <th class="p-3">Estado</th>
                                 <th class="p-3 text-center">Acciones</th>
@@ -230,7 +253,7 @@
                         <i class="fa-solid fa-plus mr-1"></i> Registrar Viaje
                     </button>
                 </div>
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto table-scroll">
                     <table class="w-full text-left text-xs md:text-sm">
                         <thead class="bg-slate-800 text-white uppercase text-xs">
                             <tr>
@@ -249,7 +272,8 @@
 
             <!-- SOLAPA 4: ESTADÍSTICAS DGSE -->
             <div id="estadisticasTab" class="tab-content hidden">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div class="mb-4 rounded-xl border border-indigo-100 bg-indigo-50 p-3 text-xs text-indigo-900">Las estadísticas se calculan con las fechas disponibles en cada registro. En registros antiguos sin fecha de alta, se utiliza la fecha documental cuando existe.</div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 stats-grid">
                     <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
                         <h3 class="text-sm font-bold text-slate-600 uppercase mb-2">Total Notas Registradas</h3>
                         <p id="statTotalNotas" class="text-3xl font-extrabold text-blue-600">0</p>
@@ -263,13 +287,30 @@
                         <p id="statTotalViajes" class="text-3xl font-extrabold text-emerald-600">0</p>
                     </div>
                 </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 stats-grid">
+                    <div class="bg-white p-4 rounded-xl shadow-sm border"><h3 class="text-xs font-bold text-slate-500 uppercase mb-2">Ingresos de hoy</h3><div class="flex justify-between text-sm"><span>Notas</span><strong id="statHoyNotas">0</strong></div><div class="flex justify-between text-sm"><span>Expedientes</span><strong id="statHoyExp">0</strong></div><div class="flex justify-between text-sm"><span>Viajes</span><strong id="statHoyViajes">0</strong></div></div>
+                    <div class="bg-white p-4 rounded-xl shadow-sm border"><h3 class="text-xs font-bold text-slate-500 uppercase mb-2">Ingresos del mes</h3><div class="flex justify-between text-sm"><span>Notas</span><strong id="statMesNotas">0</strong></div><div class="flex justify-between text-sm"><span>Expedientes</span><strong id="statMesExp">0</strong></div><div class="flex justify-between text-sm"><span>Viajes</span><strong id="statMesViajes">0</strong></div></div>
+                    <div class="bg-white p-4 rounded-xl shadow-sm border"><h3 class="text-xs font-bold text-slate-500 uppercase mb-2">Ingresos del año</h3><div class="flex justify-between text-sm"><span>Notas</span><strong id="statAnioNotas">0</strong></div><div class="flex justify-between text-sm"><span>Expedientes</span><strong id="statAnioExp">0</strong></div><div class="flex justify-between text-sm"><span>Viajes</span><strong id="statAnioViajes">0</strong></div></div>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    <div class="bg-white p-5 rounded-xl border shadow-sm">
+                        <h3 class="font-bold text-slate-800 mb-3">Expedientes por tipo</h3>
+                        <div id="statsExpTipos" class="space-y-2 text-sm"></div>
+                    </div>
+                    <div class="bg-white p-5 rounded-xl border shadow-sm">
+                        <h3 class="font-bold text-slate-800 mb-3">Respuesta de notas</h3>
+                        <div id="statsNotasRespuesta" class="space-y-2 text-sm"></div>
+                        <h4 class="font-bold text-slate-700 mt-4 mb-2 text-sm">Destinatarios con más respuestas registradas</h4>
+                        <div id="statsDestinosRespuesta" class="space-y-2 text-sm"></div>
+                    </div>
+                </div>
             </div>
         </main>
     </div>
 
     <!-- MODAL GESTIÓN DE PERSONAL -->
     <div id="usersModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
-        <div class="bg-white rounded-2xl w-full max-w-lg p-6 shadow-2xl relative">
+        <div class="bg-white rounded-2xl w-full max-w-lg p-6 shadow-2xl relative modal-panel">
             <h2 class="text-lg font-bold mb-4 text-slate-800 flex items-center gap-2">
                 <i class="fa-solid fa-users-gear text-blue-600"></i> Gestión de Personal
             </h2>
@@ -306,9 +347,9 @@
 
     <!-- MODAL AUDITORÍA -->
     <div id="auditModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
-        <div class="bg-white rounded-2xl w-full max-w-2xl p-6 shadow-2xl relative">
+        <div class="bg-white rounded-2xl w-full max-w-2xl p-6 shadow-2xl relative modal-panel">
             <h2 class="text-lg font-bold mb-4 text-slate-800"><i class="fa-solid fa-clock-rotate-left mr-2"></i> Auditoría Centralizada</h2>
-            <div class="max-h-96 overflow-y-auto border rounded-xl">
+            <div class="max-h-96 overflow-auto border rounded-xl table-scroll">
                 <table class="w-full text-left text-xs">
                     <thead class="bg-indigo-900 text-white">
                         <tr><th class="p-2">Fecha</th><th class="p-2">Usuario</th><th class="p-2">Acción</th><th class="p-2">Detalles</th></tr>
@@ -322,7 +363,7 @@
 
     <!-- MODAL NOTA -->
     <div id="itemModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
-        <div class="bg-white rounded-2xl w-full max-w-2xl p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+        <div class="bg-white rounded-2xl w-full max-w-2xl p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto modal-panel">
             <h2 id="modalTitle" class="text-xl font-bold mb-4 text-slate-800">Nota</h2>
             <form onsubmit="saveNotaModal(event)" class="space-y-4">
                 <input type="hidden" id="notaId">
@@ -331,6 +372,7 @@
                 <div><label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Nro Nota</label><input type="text" id="nroNota" required class="w-full border p-2 rounded-lg text-sm"></div>
                 <div><label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Referencia / Resumen</label><textarea id="referencia" required rows="2" class="w-full border p-2 rounded-lg text-sm"></textarea></div>
                 <div><label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Destinatario / Derivación</label><input type="text" id="accion" class="w-full border p-2 rounded-lg text-sm"></div>
+                <div><label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Estado de respuesta</label><select id="notaEstado" class="w-full border p-2 rounded-lg text-sm"><option value="Pendiente">Pendiente de respuesta</option><option value="Contestada">Contestada / Respondida</option><option value="Archivada">Archivada</option></select></div>
                 <div class="flex justify-end space-x-3 pt-4">
                     <button type="button" onclick="closeModal()" class="px-4 py-2 border rounded-lg text-sm">Cancelar</button>
                     <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium">Guardar</button>
@@ -341,13 +383,24 @@
 
     <!-- MODAL EXPEDIENTE -->
     <div id="expedienteModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
-        <div class="bg-white rounded-2xl w-full max-w-lg p-6 shadow-2xl relative">
+        <div class="bg-white rounded-2xl w-full max-w-lg p-6 shadow-2xl relative modal-panel">
             <h2 class="text-xl font-bold mb-4 text-slate-800">Nuevo Expediente GDE</h2>
             <form onsubmit="saveExpediente(event)" class="space-y-3">
+                <div class="rounded-lg border border-amber-200 bg-amber-50 p-3">
+                    <label class="block text-xs font-bold text-amber-900 mb-1"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Carga inteligente desde PDF (opcional)</label>
+                    <input type="file" id="expSmartPdf" accept="application/pdf" class="w-full text-xs" onchange="handleSmartDocument(this.files[0], 'expediente')">
+                    <p class="text-[11px] text-amber-800 mt-1">Se completarán los campos detectables; revisalos antes de guardar.</p>
+                    <p id="expSmartStatus" class="hidden text-xs mt-1"></p>
+                </div>
                 <input type="text" id="expNro" required placeholder="Nro. Expediente GDE" class="w-full border p-2 rounded text-xs">
                 <input type="text" id="expIniciador" required placeholder="Iniciador" class="w-full border p-2 rounded text-xs">
                 <textarea id="expAsunto" required placeholder="Asunto" rows="2" class="w-full border p-2 rounded text-xs"></textarea>
                 <input type="text" id="expUbicacion" placeholder="Ubicación Actual" class="w-full border p-2 rounded text-xs">
+                <select id="expTipo" class="w-full border p-2 rounded text-xs bg-white">
+                    <option value="Otros">Tipo de expediente: Otros</option>
+                    <option value="Viajes">Viajes / Comisiones</option>
+                    <option value="Licitación">Licitación / Contrataciones</option>
+                </select>
                 <select id="expEstado" class="w-full border p-2 rounded text-xs bg-white">
                     <option value="En Trámite">En Trámite</option>
                     <option value="Finalizado">Finalizado</option>
@@ -362,9 +415,15 @@
 
     <!-- MODAL VIAJE -->
     <div id="viajeModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
-        <div class="bg-white rounded-2xl w-full max-w-lg p-6 shadow-2xl relative">
+        <div class="bg-white rounded-2xl w-full max-w-lg p-6 shadow-2xl relative modal-panel">
             <h2 class="text-xl font-bold mb-4 text-slate-800">Registrar Viaje / Comisión</h2>
             <form onsubmit="saveViaje(event)" class="space-y-3">
+                <div class="rounded-lg border border-emerald-200 bg-emerald-50 p-3">
+                    <label class="block text-xs font-bold text-emerald-900 mb-1"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Carga inteligente desde PDF (opcional)</label>
+                    <input type="file" id="viajeSmartPdf" accept="application/pdf" class="w-full text-xs" onchange="handleSmartDocument(this.files[0], 'viaje')">
+                    <p class="text-[11px] text-emerald-800 mt-1">Los datos detectados se cargarán en el formulario para revisión manual.</p>
+                    <p id="viajeSmartStatus" class="hidden text-xs mt-1"></p>
+                </div>
                 <input type="date" id="viajeFecha" required class="w-full border p-2 rounded text-xs">
                 <input type="text" id="viajePersonal" required placeholder="Personal Comisionado" class="w-full border p-2 rounded text-xs">
                 <input type="text" id="viajeDestino" required placeholder="Destino" class="w-full border p-2 rounded text-xs">
@@ -398,7 +457,7 @@
 
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-        const HARDCODED_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyjb3GzVCXyX9R1n0ErDKDAFb92aMXpLTqgQxvF9yZrd4q7kSxG7PO_pVVO5_s9YqKv/exec";
+        const HARDCODED_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwLNA8EqgZBznrz1cdZuxShtc6Cb1zebRBBIw60usbP1_ePkS1lQXY-ghCBJoLd-UHX/exec";
 
         let currentUser = JSON.parse(sessionStorage.getItem('activeUser')) || null;
         let authToken = sessionStorage.getItem('authToken') || '';
@@ -693,6 +752,7 @@
                 accion: document.getElementById('autoAccion').value,
                 limite: document.getElementById('autoLimite').value,
                 estado: 'Pendiente',
+                fechaRegistro: new Date().toISOString(),
                 adjuntoNotaId: uploadResult.fileId,
                 adjuntoNota: null
             };
@@ -742,6 +802,7 @@
                     document.getElementById('nroNota').value = n.nroNota || '';
                     document.getElementById('referencia').value = n.referencia || '';
                     document.getElementById('accion').value = n.accion || '';
+                    document.getElementById('notaEstado').value = n.estado || 'Pendiente';
                 }
             } else {
                 document.getElementById('modalTitle').innerText = 'Nueva Nota';
@@ -750,6 +811,7 @@
                 document.getElementById('nroNota').value = '';
                 document.getElementById('referencia').value = '';
                 document.getElementById('accion').value = '';
+                document.getElementById('notaEstado').value = 'Pendiente';
             }
             document.getElementById('itemModal').classList.remove('hidden');
         }
@@ -758,6 +820,7 @@
         async function saveNotaModal(e) {
             e.preventDefault();
             const id = document.getElementById('notaId').value;
+            const notasAnteriores = [...notas];
             const notaObj = {
                 id: id ? parseInt(id) : Date.now(),
                 fecha: document.getElementById('fecha').value,
@@ -765,7 +828,8 @@
                 nroNota: document.getElementById('nroNota').value,
                 referencia: document.getElementById('referencia').value,
                 accion: document.getElementById('accion').value,
-                estado: 'Pendiente'
+                estado: document.getElementById('notaEstado').value || 'Pendiente',
+                fechaRegistro: id ? ((notas.find(n => String(n.id) === String(id)) || {}).fechaRegistro || '') : new Date().toISOString()
             };
             if (id) {
                 const idx = notas.findIndex(n => n.id === parseInt(id));
@@ -778,24 +842,40 @@
             } else {
                 notas.unshift(notaObj);
             }
-            await fetch(HARDCODED_SCRIPT_URL, {
-                method: 'POST',
-                body: JSON.stringify({ action: 'saveNotas', token: authToken, notas: notas })
-            });
-            closeModal();
-            renderTable();
-            updateEstadisticas();
+            try {
+                const response = await fetch(HARDCODED_SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'saveNotas', token: authToken, notas: notas })
+                });
+                const result = await response.json();
+                if (!response.ok || result.status !== 'success') throw new Error(result.message || 'El servidor no confirmó el guardado.');
+                closeModal();
+                renderTable();
+                updateEstadisticas();
+            } catch (err) {
+                notas = notasAnteriores;
+                renderTable(); updateEstadisticas();
+                alert('No se pudo guardar la nota; no se confirmó el cambio. ' + (err.message || err));
+            }
         }
 
         async function deleteNota(id) {
             if (confirm('¿Desea eliminar este registro?')) {
-                notas = notas.filter(item => item.id !== id);
-                await fetch(HARDCODED_SCRIPT_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: 'saveNotas', token: authToken, notas: notas })
-                });
-                renderTable();
-                updateEstadisticas();
+                const notasAnteriores = [...notas];
+                notas = notas.filter(item => String(item.id) !== String(id));
+                try {
+                    const response = await fetch(HARDCODED_SCRIPT_URL, {
+                        method: 'POST',
+                        body: JSON.stringify({ action: 'saveNotas', token: authToken, notas: notas })
+                    });
+                    const result = await response.json();
+                    if (!response.ok || result.status !== 'success') throw new Error(result.message || 'El servidor no confirmó la eliminación.');
+                    renderTable(); updateEstadisticas();
+                } catch (err) {
+                    notas = notasAnteriores;
+                    renderTable(); updateEstadisticas();
+                    alert('No se pudo eliminar la nota; se restauró la lista en pantalla. ' + (err.message || err));
+                }
             }
         }
 
@@ -888,47 +968,121 @@
             document.getElementById('metricTotal').innerText = notas.length;
         }
 
+        // CARGA INTELIGENTE PARA EXPEDIENTES Y VIAJES: solo propone valores; el usuario debe revisarlos.
+        async function handleSmartDocument(file, kind) {
+            const statusId = kind === 'expediente' ? 'expSmartStatus' : 'viajeSmartStatus';
+            const status = document.getElementById(statusId);
+            status.classList.remove('hidden');
+            if (!file) { status.textContent = ''; return; }
+            if (file.type !== 'application/pdf') { status.textContent = 'Seleccioná un archivo PDF.'; return; }
+            status.textContent = 'Analizando PDF…';
+            try {
+                const buffer = await file.arrayBuffer();
+                const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(buffer.slice(0)) }).promise;
+                let text = '';
+                for (let p = 1; p <= pdf.numPages; p++) {
+                    const page = await pdf.getPage(p);
+                    const content = await page.getTextContent();
+                    const byY = new Map();
+                    content.items.forEach(item => {
+                        const y = Math.round(item.transform && item.transform[5] ? item.transform[5] : 0);
+                        if (!byY.has(y)) byY.set(y, []);
+                        byY.get(y).push({ x: item.transform && item.transform[4] ? item.transform[4] : 0, text: item.str });
+                    });
+                    text += Array.from(byY.entries()).sort((a,b) => b[0]-a[0]).map(entry => entry[1].sort((a,b) => a.x-b.x).map(item => item.text).join(' ').replace(/\s+/g, ' ').trim()).filter(Boolean).join('\n') + '\n';
+                }
+                const normalized = text.split('\n').map(line => line.replace(/[\t\r]+/g, ' ').replace(/ {2,}/g, ' ').trim()).join('\n');
+                const field = (patterns) => {
+                    for (const pattern of patterns) {
+                        const match = normalized.match(pattern);
+                        if (match && match[1]) return match[1].split(/\n|\s{3,}/)[0].trim().replace(/[.;,]+$/, '');
+                    }
+                    return '';
+                };
+                if (kind === 'expediente') {
+                    const nro = (normalized.match(/\bEX-\d{4}-\d+-[A-Z0-9#-]+\b/i) || [])[0] || '';
+                    const iniciador = field([/(?:Iniciador|Iniciado por|Solicitante)\s*:\s*([^\n]+)/i]);
+                    const asunto = field([/(?:Asunto|Referencia|Objeto)\s*:\s*([^\n]+)/i]);
+                    const ubicacion = field([/(?:Ubicación actual|Repartición actual|Pase a|Sector actual)\s*:\s*([^\n]+)/i]);
+                    if (nro) document.getElementById('expNro').value = nro;
+                    if (iniciador) document.getElementById('expIniciador').value = iniciador;
+                    if (asunto) document.getElementById('expAsunto').value = asunto;
+                    if (ubicacion) document.getElementById('expUbicacion').value = ubicacion;
+                    if (/licitaci[oó]n|contrataci[oó]n|compulsa/i.test(normalized)) document.getElementById('expTipo').value = 'Licitación';
+                    else if (/viaje|comisi[oó]n de servicio|comisionado/i.test(normalized)) document.getElementById('expTipo').value = 'Viajes';
+                    status.textContent = 'Análisis finalizado. Revisá y corregí los campos antes de guardar; los datos no detectados quedan sin modificar.';
+                } else {
+                    const dateIso = (normalized.match(/\b(20\d{2})[-/](\d{1,2})[-/](\d{1,2})\b/) || []);
+                    const dateLocal = (normalized.match(/\b(\d{1,2})[/-](\d{1,2})[/-](20\d{2})\b/) || []);
+                    let date = '';
+                    if (dateIso.length) date = `${dateIso[1]}-${String(dateIso[2]).padStart(2,'0')}-${String(dateIso[3]).padStart(2,'0')}`;
+                    else if (dateLocal.length) date = `${dateLocal[3]}-${String(dateLocal[2]).padStart(2,'0')}-${String(dateLocal[1]).padStart(2,'0')}`;
+                    const personal = field([/(?:Personal comisionado|Comisionado[s]?|Personal afectado|Agente[s]?)\s*:\s*([^\n]+)/i]);
+                    const destino = field([/(?:Destino|Lugar de comisión|Lugar de destino)\s*:\s*([^\n]+)/i]);
+                    const motivo = field([/(?:Motivo|Objeto del viaje|Finalidad|Comisión)\s*:\s*([^\n]+)/i]);
+                    if (date) document.getElementById('viajeFecha').value = date;
+                    if (personal) document.getElementById('viajePersonal').value = personal;
+                    if (destino) document.getElementById('viajeDestino').value = destino;
+                    if (motivo) document.getElementById('viajeMotivo').value = motivo;
+                    status.textContent = 'Análisis finalizado. Revisá y corregí los campos antes de guardar; si el PDF es escaneado, puede requerir OCR/manual.';
+                }
+            } catch (err) {
+                console.error('Error analizando documento para carga inteligente:', err);
+                status.textContent = 'No se pudo extraer el texto. Completá los campos manualmente; el PDF puede ser escaneado o estar protegido.';
+            }
+        }
+
         // EXPEDIENTES
         function openExpedienteModal() { document.getElementById('expedienteModal').classList.remove('hidden'); }
         function closeExpedienteModal() { document.getElementById('expedienteModal').classList.add('hidden'); }
         async function saveExpediente(e) {
             e.preventDefault();
-            expedientes.unshift({
+            const nuevoExpediente = {
                 id: Date.now(),
-                nro: document.getElementById('expNro').value,
-                iniciador: document.getElementById('expIniciador').value,
-                asunto: document.getElementById('expAsunto').value,
-                ubicacion: document.getElementById('expUbicacion').value,
-                estado: document.getElementById('expEstado').value
-            });
-            await fetch(HARDCODED_SCRIPT_URL, {
-                method: 'POST',
-                body: JSON.stringify({ action: 'saveExpedientes', token: authToken, expedientes: expedientes })
-            });
-            closeExpedienteModal();
-            renderExpedientes();
-            updateEstadisticas();
+                nro: document.getElementById('expNro').value.trim(),
+                iniciador: document.getElementById('expIniciador').value.trim(),
+                asunto: document.getElementById('expAsunto').value.trim(),
+                ubicacion: document.getElementById('expUbicacion').value.trim(),
+                tipo: document.getElementById('expTipo').value || 'Otros',
+                estado: document.getElementById('expEstado').value,
+                fechaRegistro: new Date().toISOString()
+            };
+            const nuevos = [nuevoExpediente, ...expedientes];
+            try {
+                const resp = await fetch(HARDCODED_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'saveExpedientes', token: authToken, expedientes: nuevos }) });
+                const result = await resp.json();
+                if (!resp.ok || result.status !== 'success') throw new Error(result.message || 'No se confirmó el guardado.');
+                expedientes = nuevos;
+                closeExpedienteModal();
+                document.querySelector('#expedienteModal form').reset();
+                document.getElementById('expTipo').value = 'Otros';
+                renderExpedientes(); updateEstadisticas();
+            } catch (err) { alert('No se pudo guardar el expediente. No se actualizará la lista local. ' + (err.message || err)); }
         }
         function renderExpedientes() {
             const body = document.getElementById('tableExpedientesBody');
-            body.innerHTML = expedientes.length === 0 ? `<tr><td colspan="6" class="p-4 text-center text-slate-400">No hay expedientes.</td></tr>` : '';
+            body.innerHTML = expedientes.length === 0 ? `<tr><td colspan="7" class="p-4 text-center text-slate-400">No hay expedientes.</td></tr>` : '';
             expedientes.forEach(ex => {
                 let accionesExp = `<span class="text-slate-400">-</span>`;
                 if (currentUser && currentUser.role === 'Administrador') {
                     accionesExp = `<button onclick="deleteExpediente(${ex.id})" class="text-red-600 hover:text-red-800"><i class="fa-solid fa-trash"></i></button>`;
                 }
-                body.innerHTML += `<tr class="border-b"><td class="p-3 font-bold text-amber-700">${ex.nro}</td><td class="p-3">${ex.iniciador}</td><td class="p-3">${ex.asunto}</td><td class="p-3">${ex.ubicacion}</td><td class="p-3">${ex.estado}</td><td class="p-3 text-center">${accionesExp}</td></tr>`;
+                body.innerHTML += `<tr class="border-b"><td class="p-3 font-bold text-amber-700">${escapeHtml(ex.nro || '')}</td><td class="p-3">${escapeHtml(ex.iniciador || '')}</td><td class="p-3">${escapeHtml(ex.asunto || '')}</td><td class="p-3">${escapeHtml(getExpedienteTipo(ex))}</td><td class="p-3">${escapeHtml(ex.ubicacion || '')}</td><td class="p-3">${escapeHtml(ex.estado || '')}</td><td class="p-3 text-center">${accionesExp}</td></tr>`;
             });
         }
         async function deleteExpediente(id) {
             if (confirm('¿Eliminar expediente?')) {
-                expedientes = expedientes.filter(x => x.id !== id);
-                await fetch(HARDCODED_SCRIPT_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: 'saveExpedientes', token: authToken, expedientes: expedientes })
-                });
-                renderExpedientes();
-                updateEstadisticas();
+                const anteriores = [...expedientes];
+                expedientes = expedientes.filter(x => String(x.id) !== String(id));
+                try {
+                    const resp = await fetch(HARDCODED_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'saveExpedientes', token: authToken, expedientes: expedientes }) });
+                    const result = await resp.json();
+                    if (!resp.ok || result.status !== 'success') throw new Error(result.message || 'El servidor no confirmó la eliminación.');
+                    renderExpedientes(); updateEstadisticas();
+                } catch (err) {
+                    expedientes = anteriores; renderExpedientes(); updateEstadisticas();
+                    alert('No se pudo eliminar el expediente. ' + (err.message || err));
+                }
             }
         }
 
@@ -937,21 +1091,25 @@
         function closeViajeModal() { document.getElementById('viajeModal').classList.add('hidden'); }
         async function saveViaje(e) {
             e.preventDefault();
-            viajes.unshift({
+            const nuevoViaje = {
                 id: Date.now(),
                 fecha: document.getElementById('viajeFecha').value,
-                personal: document.getElementById('viajePersonal').value,
-                destino: document.getElementById('viajeDestino').value,
-                motivo: document.getElementById('viajeMotivo').value,
-                estado: document.getElementById('viajeEstado').value
-            });
-            await fetch(HARDCODED_SCRIPT_URL, {
-                method: 'POST',
-                body: JSON.stringify({ action: 'saveViajes', token: authToken, viajes: viajes })
-            });
-            closeViajeModal();
-            renderViajes();
-            updateEstadisticas();
+                personal: document.getElementById('viajePersonal').value.trim(),
+                destino: document.getElementById('viajeDestino').value.trim(),
+                motivo: document.getElementById('viajeMotivo').value.trim(),
+                estado: document.getElementById('viajeEstado').value,
+                fechaRegistro: new Date().toISOString()
+            };
+            const nuevos = [nuevoViaje, ...viajes];
+            try {
+                const resp = await fetch(HARDCODED_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'saveViajes', token: authToken, viajes: nuevos }) });
+                const result = await resp.json();
+                if (!resp.ok || result.status !== 'success') throw new Error(result.message || 'No se confirmó el guardado.');
+                viajes = nuevos;
+                closeViajeModal();
+                document.querySelector('#viajeModal form').reset();
+                renderViajes(); updateEstadisticas();
+            } catch (err) { alert('No se pudo guardar el viaje. No se actualizará la lista local. ' + (err.message || err)); }
         }
         function renderViajes() {
             const body = document.getElementById('tableViajesBody');
@@ -966,20 +1124,82 @@
         }
         async function deleteViaje(id) {
             if (confirm('¿Eliminar viaje?')) {
-                viajes = viajes.filter(x => x.id !== id);
-                await fetch(HARDCODED_SCRIPT_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: 'saveViajes', token: authToken, viajes: viajes })
-                });
-                renderViajes();
-                updateEstadisticas();
+                const anteriores = [...viajes];
+                viajes = viajes.filter(x => String(x.id) !== String(id));
+                try {
+                    const resp = await fetch(HARDCODED_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'saveViajes', token: authToken, viajes: viajes }) });
+                    const result = await resp.json();
+                    if (!resp.ok || result.status !== 'success') throw new Error(result.message || 'El servidor no confirmó la eliminación.');
+                    renderViajes(); updateEstadisticas();
+                } catch (err) {
+                    viajes = anteriores; renderViajes(); updateEstadisticas();
+                    alert('No se pudo eliminar el viaje. ' + (err.message || err));
+                }
             }
         }
 
+        function dateForStats(item, fallbackField) {
+            const raw = item.fechaRegistro || item.createdAt || item[fallbackField] || '';
+            if (!raw) return null;
+            // Interpretar fechas YYYY-MM-DD como fecha local para evitar desfases de zona horaria.
+            const dateOnly = String(raw).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+            const d = dateOnly ? new Date(Number(dateOnly[1]), Number(dateOnly[2]) - 1, Number(dateOnly[3])) : new Date(raw);
+            return Number.isNaN(d.getTime()) ? null : d;
+        }
+        function getExpedienteTipo(expediente) {
+            if (expediente.tipo) return expediente.tipo;
+            const source = [expediente.nro, expediente.asunto, expediente.iniciador].join(' ').toLowerCase();
+            if (/licitaci[oó]n|contrataci[oó]n|compulsa/.test(source)) return 'Licitación';
+            if (/viaje|comisi[oó]n|vi[aá]tico/.test(source)) return 'Viajes';
+            return 'Otros';
+        }
         function updateEstadisticas() {
             document.getElementById('statTotalNotas').innerText = notas.length;
-            document.getElementById('statTotalExp').innerText = expedientes.length;
+            document.getElementById('statTotalExp').innerText = expedientes.filter(e => String(e.estado || '').toLowerCase() !== 'finalizado').length;
             document.getElementById('statTotalViajes').innerText = viajes.length;
+            const now = new Date();
+            const sameDay = d => d && d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate();
+            const sameMonth = d => d && d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+            const sameYear = d => d && d.getFullYear() === now.getFullYear();
+            const counts = {
+                notas: notas.map(x => dateForStats(x, 'fecha')),
+                expedientes: expedientes.map(x => dateForStats(x, 'fechaRegistro')),
+                viajes: viajes.map(x => dateForStats(x, 'fechaRegistro') || dateForStats(x, 'fecha'))
+            };
+            const setPeriodCounts = (period, predicate) => {
+                document.getElementById(period + 'Notas').innerText = counts.notas.filter(predicate).length;
+                document.getElementById(period + 'Exp').innerText = counts.expedientes.filter(predicate).length;
+                document.getElementById(period + 'Viajes').innerText = counts.viajes.filter(predicate).length;
+            };
+            setPeriodCounts('statHoy', sameDay);
+            setPeriodCounts('statMes', sameMonth);
+            setPeriodCounts('statAnio', sameYear);
+            const expTypes = { 'Viajes / Comisiones': 0, 'Licitación / Contrataciones': 0, 'Otros': 0 };
+            expedientes.forEach(e => {
+                const t = String(getExpedienteTipo(e) || 'Otros').toLowerCase();
+                if (t.includes('viaje')) expTypes['Viajes / Comisiones']++;
+                else if (t.includes('licit')) expTypes['Licitación / Contrataciones']++;
+                else expTypes['Otros']++;
+            });
+            document.getElementById('statsExpTipos').innerHTML = Object.entries(expTypes).map(([k,v]) => `<div class="flex justify-between border-b pb-1"><span>${k}</span><strong>${v}</strong></div>`).join('');
+            const isAnswered = n => /contestad|respondid/i.test(String(n.estado || ''));
+            const answered = notas.filter(isAnswered).length;
+            const pending = notas.filter(n => /pendiente/i.test(String(n.estado || '')) || !n.estado).length;
+            const archived = notas.filter(n => /archivad/i.test(String(n.estado || ''))).length;
+            const percent = notas.length ? Math.round(answered * 100 / notas.length) : 0;
+            document.getElementById('statsNotasRespuesta').innerHTML = `<div class="flex justify-between"><span>Total de notas</span><strong>${notas.length}</strong></div><div class="flex justify-between"><span>Contestadas / respondidas</span><strong>${answered} (${percent}%)</strong></div><div class="flex justify-between"><span>Pendientes</span><strong>${pending}</strong></div><div class="flex justify-between"><span>Archivadas</span><strong>${archived}</strong></div>`;
+            const destinations = {};
+            notas.filter(isAnswered).forEach(n => {
+                const dest = String(n.accion || '').trim() || 'Destinatario no informado';
+                destinations[dest] = (destinations[dest] || 0) + 1;
+            });
+            const topDestinations = Object.entries(destinations).sort((a,b) => b[1] - a[1]).slice(0, 10);
+            document.getElementById('statsDestinosRespuesta').innerHTML = topDestinations.length
+                ? topDestinations.map(([name,count]) => `<div class="flex justify-between gap-3 border-b pb-1"><span class="break-words">${escapeHtml(name)}</span><strong>${count}</strong></div>`).join('')
+                : '<p class="text-slate-500 text-xs">Todavía no hay notas marcadas como contestadas.</p>';
+        }
+        function escapeHtml(value) {
+            return String(value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
         }
 
         // GESTIÓN DE PERSONAL
