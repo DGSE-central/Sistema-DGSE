@@ -996,6 +996,7 @@
         // Endpoint del backend seguro. No contiene contraseñas ni secretos.
         const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyesWAu_J0nOPTLLBvhT31G6R45VmeFEPQB9SeAAwWhh4jiTtGbvkM6l_2BiLESl4dg/exec';
         let authToken = sessionStorage.getItem('dgse_auth_token') || '';
+        let tableRevisions = { Notas: '', Expedientes: '', Viajes: '' };
         let dataLoaded = false;
         let activePdfObjectUrl = null;
 
@@ -1018,7 +1019,7 @@
                 body: JSON.stringify(payload)
             });
             const result = await response.json();
-            if (!response.ok || result.status !== 'success') throw new Error(result.message || 'El servidor rechazó la operación.');
+            if (!response.ok || result.status !== 'success') { const error = new Error(result.message || 'El servidor rechazó la operación.'); error.code = result.code || ''; throw error; }
             return result;
         }
 
@@ -1027,11 +1028,23 @@
             const action = tableName === 'Notas' ? 'saveNotas' : tableName === 'Expedientes' ? 'saveExpedientes' : 'saveViajes';
             const field = tableName === 'Notas' ? 'notas' : tableName === 'Expedientes' ? 'expedientes' : 'viajes';
             try {
-                await serverRequest({ action, token: authToken, [field]: data });
+                const result = await serverRequest({ action, token: authToken, [field]: data, revision: tableRevisions[tableName] });
+                if (result.revision) tableRevisions[tableName] = result.revision;
                 return true;
             } catch (error) {
                 console.error('Error guardando ' + tableName, error);
-                alert('No se pudo guardar en el servidor: ' + error.message + '. Los cambios todavía están en memoria; vuelva a intentar antes de cerrar.');
+                if (error.code === 'DATA_CONFLICT') {
+                    alert('Otro usuario modificó ' + tableName + ' desde que cargaste los datos. Para evitar sobrescribir su trabajo, se actualizará la pantalla con la versión del servidor. Revisá y volvé a aplicar tus cambios.');
+                    try {
+                        await loadServerData();
+                        if (typeof renderTable === 'function') renderTable();
+                        if (typeof renderExpedientesTable === 'function') renderExpedientesTable();
+                        if (typeof renderViajesTable === 'function') renderViajesTable();
+                        updateEstadisticas();
+                    } catch (refreshError) { alert('No se pudo actualizar la pantalla automáticamente. Recargá el sistema antes de volver a guardar.'); }
+                } else {
+                    alert('No se pudo guardar en el servidor: ' + error.message + '. No cierres la pantalla hasta confirmar si el cambio se guardó.');
+                }
                 return false;
             }
         }
@@ -1064,6 +1077,16 @@
                 alert('No se pudo visualizar el PDF: ' + error.message);
             }
         }
+        // Delegación segura: los identificadores y nombres de archivos viajan en atributos de datos escapados, no dentro de código JavaScript inline.
+        document.addEventListener('click', function(event) {
+            const button = event.target.closest('button[data-action][data-file-id]');
+            if (!button) return;
+            const fileId = button.dataset.fileId || '';
+            const fileName = button.dataset.fileName || 'Documento PDF';
+            if (button.dataset.action === 'open-pdf') openPrivatePDF(fileId, fileName);
+            else if (button.dataset.action === 'download-pdf') descargarInformeExpediente(fileId, fileName);
+        });
+
         function closePrivatePDFViewer() {
             const frame = document.getElementById('privatePdfFrame');
             if (frame) frame.src = 'about:blank';
@@ -1090,6 +1113,13 @@
 
         function escapeHtml(value) {
             return String(value == null ? '' : value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+        }
+
+        function csvSafeCell(value) {
+            let text = String(value == null ? '' : value).replace(/\r?\n/g, ' ');
+            // Neutraliza fórmulas al abrir el CSV en Excel/Calc.
+            if (/^[\s]*[=+@\-]/.test(text) || /^[\t\r]/.test(text)) text = "'" + text;
+            return '"' + text.replace(/"/g, '""') + '"';
         }
 
         // La auditoría autoritativa se registra en Apps Script; no se guarda en el navegador.
@@ -1140,6 +1170,7 @@
             notas = Array.isArray(result.notas) ? result.notas : [];
             expedientesDB = Array.isArray(result.expedientes) ? result.expedientes : [];
             viajesDB = Array.isArray(result.viajes) ? result.viajes : [];
+            tableRevisions = Object.assign({ Notas: '', Expedientes: '', Viajes: '' }, result.revisions || {});
             currentUser = result.user || currentUser;
             if (currentUser) sessionStorage.setItem('activeUser', JSON.stringify(currentUser));
             dataLoaded = true;
@@ -1305,7 +1336,7 @@
         function formatFechaLatina(fechaStr) {
             if (!fechaStr) return '-';
             const partes = String(fechaStr).split('-');
-            return partes.length === 3 ? `${partes[2]}/${partes[1]}/${partes[0]}` : fechaStr;
+            return partes.length === 3 && partes.every(x => /^\d{1,4}$/.test(x)) ? `${partes[2]}/${partes[1]}/${partes[0]}` : escapeHtml(fechaStr);
         }
         function toggleAutoUploadSection() { document.getElementById('autoUploadSection').classList.toggle('hidden'); }
         function populatePromotoresOptions() {
@@ -1999,25 +2030,26 @@
 
                 let adjuntosHtml = '-';
                 if (n.adjuntoNotaId) {
-                    const nombrePDF = String(n.adjuntoNotaNombre || (n.nroNota + '.pdf')).replace(/[&<>"']/g, '');
-                    adjuntosHtml = `<button type="button" onclick="openPrivatePDF('${n.adjuntoNotaId}', '${nombrePDF.replace(/\\/g, '')}')" class="text-blue-600 hover:text-blue-800 font-bold flex items-center gap-1"><i class="fa-solid fa-file-pdf"></i> Ver PDF</button>`;
-                } else if (n.adjuntoNota && /^https?:|^data:/i.test(n.adjuntoNota)) {
-                    adjuntosHtml = `<a href="${n.adjuntoNota}" target="_blank" rel="noopener" class="text-blue-600 hover:text-blue-800 font-bold">Adjunto legado</a>`;
+                    const nombrePDF = String(n.adjuntoNotaNombre || (n.nroNota + '.pdf'));
+                    adjuntosHtml = `<button type="button" data-action="open-pdf" data-file-id="${escapeHtml(n.adjuntoNotaId)}" data-file-name="${escapeHtml(nombrePDF)}" class="text-blue-600 hover:text-blue-800 font-bold flex items-center gap-1"><i class="fa-solid fa-file-pdf"></i> Ver PDF</button>`;
+                } else if (n.adjuntoNota && /^https?:\/\//i.test(String(n.adjuntoNota))) {
+                    let legacyUrl = ''; try { const parsedLegacyUrl = new URL(String(n.adjuntoNota)); if (['http:', 'https:'].includes(parsedLegacyUrl.protocol)) legacyUrl = parsedLegacyUrl.href; } catch (_) {}
+                    if (legacyUrl) adjuntosHtml = `<a href="${escapeHtml(legacyUrl)}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 font-bold">Adjunto legado</a>`;
                 }
 
                 body.innerHTML += `
                     <tr class="${rowClass} border-b transition">
                         <td class="p-3 whitespace-nowrap font-medium">${formatFechaLatina(n.fecha)}</td>
-                        <td class="p-3 font-bold text-slate-700">${n.promotor || '-'}</td>
-                        <td class="p-3 font-bold text-blue-900">${n.nroNota}</td>
-                        <td class="p-3 font-medium text-slate-800 max-w-xs truncate" title="${n.referencia}">${n.referencia}</td>
-                        <td class="p-3 font-semibold text-slate-700">${n.accion || '-'}</td>
+                        <td class="p-3 font-bold text-slate-700">${escapeHtml(n.promotor || '-') }</td>
+                        <td class="p-3 font-bold text-blue-900">${escapeHtml(n.nroNota || '-')}</td>
+                        <td class="p-3 font-medium text-slate-800 max-w-xs truncate" title="${escapeHtml(n.referencia || '')}">${escapeHtml(n.referencia || '-') }</td>
+                        <td class="p-3 font-semibold text-slate-700">${escapeHtml(n.accion || '-') }</td>
                         <td class="p-3 whitespace-nowrap">
                             <span class="font-semibold text-slate-700">${formatFechaLatina(n.limite)}</span>
                             ${alertaBadge}
                         </td>
-                        <td class="p-3"><span class="px-2 py-1 rounded-full text-[11px] font-bold border ${badgeClass}">${n.estado}</span></td>
-                        <td class="p-3 text-slate-600">${n.respuesta || '-'}</td>
+                        <td class="p-3"><span class="px-2 py-1 rounded-full text-[11px] font-bold border ${badgeClass}">${escapeHtml(n.estado || '-') }</span></td>
+                        <td class="p-3 text-slate-600">${escapeHtml(n.respuesta || '-') }</td>
                         <td class="p-3 whitespace-nowrap">${adjuntosHtml}</td>
                         <td class="p-3 text-center whitespace-nowrap">${currentUser && ["Administrador","Operador"].includes(currentUser.role) ? `<button onclick="editNota(${n.id})" class="text-blue-600 hover:text-blue-800 mr-2" title="Editar"><i class="fa-solid fa-pen-to-square"></i></button><button onclick="deleteNota(${n.id})" class="text-red-600 hover:text-red-800" title="Eliminar"><i class="fa-solid fa-trash"></i></button>` : '<span class="text-slate-400">Consulta</span>'}</td>
                     </tr>
@@ -2113,7 +2145,7 @@
                 const n = notas.find(item => item.id === id);
                 notas = notas.filter(item => item.id !== id);
                 void persistTable('Notas', notas);
-                if (n) registrarAuditoria('Eliminó', 'Notas', `Nota Nro: ${n.nroNota}`);
+                if (n) registrarAuditoria('Eliminó', 'Notas', `Nota Nro: ${escapeHtml(n.nroNota || '-')}`);
                 populatePromotoresOptions();
                 renderTable();
             }
@@ -2122,7 +2154,7 @@
         function exportCSV() {
             let csv = 'Fecha,Promotor,NroNota,Referencia,Destinatario,Limite,Estado,Observaciones\n';
             notas.forEach(n => {
-                csv += `"${n.fecha}","${n.promotor}","${n.nroNota}","${n.referencia.replace(/"/g, '""')}","${n.accion}","${n.limite}","${n.estado}","${(n.respuesta || '').replace(/"/g, '""')}"\n`;
+                csv += [n.fecha, n.promotor, n.nroNota || '-', n.referencia, n.accion, n.limite, n.estado, n.respuesta || ''].map(csvSafeCell).join(',') + '\n';
             });
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
@@ -2206,13 +2238,13 @@
                 body.innerHTML += `
                     <tr class="border-b hover:bg-slate-50 transition">
                         <td class="p-3 whitespace-nowrap font-medium">${formatFechaLatina(exp.fecha)}</td>
-                        <td class="p-3 font-bold text-amber-900">${exp.nroExpediente}</td>
-                        <td class="p-3 font-semibold text-slate-700">${exp.iniciador}</td>
-                        <td class="p-3 text-slate-800 max-w-xs truncate" title="${exp.extracto}">${exp.extracto}</td>
+                        <td class="p-3 font-bold text-amber-900">${escapeHtml(exp.nroExpediente || '-') }</td>
+                        <td class="p-3 font-semibold text-slate-700">${escapeHtml(exp.iniciador || '-') }</td>
+                        <td class="p-3 text-slate-800 max-w-xs truncate" title="${escapeHtml(exp.extracto || '')}">${escapeHtml(exp.extracto || '-') }</td>
                         <td class="p-3">-</td>
-                        <td class="p-3"><span class="px-2 py-1 rounded-full text-[11px] font-bold border ${badgeClass}">${exp.estado}</span>${alertaAntiguedad}</td>
-                        <td class="p-3 font-semibold text-slate-700">${exp.pase || '-'}</td>
-                        <td class="p-3 text-slate-600">${exp.observaciones || '-'}</td>
+                        <td class="p-3"><span class="px-2 py-1 rounded-full text-[11px] font-bold border ${badgeClass}">${escapeHtml(exp.estado || '-') }</span>${alertaAntiguedad}</td>
+                        <td class="p-3 font-semibold text-slate-700">${escapeHtml(exp.pase || '-') }</td>
+                        <td class="p-3 text-slate-600">${escapeHtml(exp.observaciones || '-') }</td>
                         <td class="p-3 text-center whitespace-nowrap">${currentUser && ["Administrador","Operador"].includes(currentUser.role) ? `<button onclick="openExpedienteHistorial(${exp.id})" class="text-amber-600 hover:text-amber-800 mr-2" title="Historial e informes"><i class="fa-solid fa-clock-rotate-left"></i></button><button onclick="editExpediente(${exp.id})" class="text-blue-600 hover:text-blue-800 mr-2" title="Editar"><i class="fa-solid fa-pen-to-square"></i></button><button onclick="deleteExpediente(${exp.id})" class="text-red-600 hover:text-red-800" title="Eliminar"><i class="fa-solid fa-trash"></i></button>` : '<span class="text-slate-400">Consulta</span>'}</td>
                     </tr>
                 `;
@@ -2302,7 +2334,7 @@
             if (!entries.length) { target.innerHTML = '<p class="text-sm text-slate-500 border rounded-lg p-4">Todavía no hay reingresos registrados. El primer registro puede agregarse arriba; la fecha inicial del expediente se conserva en sus datos generales.</p>'; return; }
             target.innerHTML = entries.map((entry, idx) => {
                 const docs = Array.isArray(entry.informes) ? entry.informes : [];
-                const docsHtml = docs.length ? docs.map((doc, i) => `<div class="flex flex-wrap items-center justify-between gap-2 border rounded-lg p-2"><span class="text-xs break-all">${escapeHtml(doc.fileName || doc.nombre || ('Informe PDF ' + (i+1)))}</span><span class="flex gap-2"><button type="button" onclick="openPrivatePDF('${String(doc.fileId || doc.id || '').replace(/'/g, '')}','${String(doc.fileName || doc.nombre || 'Informe PDF').replace(/'/g, '')}')" class="text-blue-700 text-xs font-bold">Visualizar</button><button type="button" onclick="descargarInformeExpediente('${String(doc.fileId || doc.id || '').replace(/'/g, '')}','${String(doc.fileName || doc.nombre || 'informe.pdf').replace(/'/g, '')}')" class="text-emerald-700 text-xs font-bold">Descargar</button></span></div>`).join('') : '<p class="text-xs text-slate-500">Este ingreso no tiene PDF adjuntos.</p>';
+                const docsHtml = docs.length ? docs.map((doc, i) => { const docId = String(doc.fileId || doc.id || ''); const docName = String(doc.fileName || doc.nombre || ('Informe PDF ' + (i+1))); return `<div class="flex flex-wrap items-center justify-between gap-2 border rounded-lg p-2"><span class="text-xs break-all">${escapeHtml(docName)}</span><span class="flex gap-2"><button type="button" data-action="open-pdf" data-file-id="${escapeHtml(docId)}" data-file-name="${escapeHtml(docName)}" class="text-blue-700 text-xs font-bold">Visualizar</button><button type="button" data-action="download-pdf" data-file-id="${escapeHtml(docId)}" data-file-name="${escapeHtml(docName)}" class="text-emerald-700 text-xs font-bold">Descargar</button></span></div>`; }).join('') : '<p class="text-xs text-slate-500">Este ingreso no tiene PDF adjuntos.</p>';
                 return `<article class="border rounded-xl p-3"><div class="flex flex-wrap justify-between gap-2"><h3 class="font-bold text-sm">Ingreso ${entries.length-idx} · ${escapeHtml(entry.fecha || 'Fecha no indicada')}</h3><span class="text-xs text-slate-500">${escapeHtml(entry.usuario || 'Usuario no registrado')}</span></div><p class="text-xs text-slate-600 mt-1">Procedencia: ${escapeHtml(entry.procedencia || 'No indicada')}</p><p class="text-sm mt-2 whitespace-pre-wrap">${escapeHtml(entry.detalle || 'Sin observaciones')}</p><div class="mt-3 space-y-2">${docsHtml}</div></article>`;
             }).join('');
         }
@@ -2332,7 +2364,7 @@
                 exp.adjuntosIF.push(...informes);
                 const saved = await persistTable('Expedientes', expedientesDB);
                 if (!saved) { exp.historialIngresos.pop(); exp.adjuntosIF.splice(Math.max(0, exp.adjuntosIF.length-informes.length), informes.length); throw new Error('No se confirmó el guardado en el servidor. Revise la conexión antes de reintentar.'); }
-                registrarAuditoria('Registró ingreso', 'Expedientes', `Expediente: ${exp.nroExpediente}; fecha: ${entry.fecha}; informes: ${informes.length}`);
+                registrarAuditoria('Registró ingreso', 'Expedientes', `Expediente: ${escapeHtml(exp.nroExpediente || '-') }; fecha: ${entry.fecha}; informes: ${informes.length}`);
                 renderExpedienteHistorial(exp); renderExpedientesTable(); input.value = '';
                 alert('Ingreso registrado correctamente' + (informes.length ? ` con ${informes.length} PDF adjunto(s).` : '.'));
             } catch (err) { alert('No se pudo completar el ingreso: ' + err.message); }
@@ -2371,7 +2403,7 @@
                 const exp = expedientesDB.find(x => x.id === id);
                 expedientesDB = expedientesDB.filter(x => x.id !== id);
                 void persistTable('Expedientes', expedientesDB);
-                if (exp) registrarAuditoria('Eliminó', 'Expedientes', `Expediente: ${exp.nroExpediente}`);
+                if (exp) registrarAuditoria('Eliminó', 'Expedientes', `Expediente: ${escapeHtml(exp.nroExpediente || '-') }`);
                 renderExpedientesTable();
             }
         }
@@ -2379,7 +2411,7 @@
         function exportExpedientesCSV() {
             let csv = 'Fecha,NroExpediente,Iniciador,Extracto,Estado,Pase,Observaciones\n';
             expedientesDB.forEach(e => {
-                csv += `"${e.fecha}","${e.nroExpediente}","${e.iniciador}","${e.extracto.replace(/"/g, '""')}","${e.estado}","${e.pase}","${(e.observaciones || '').replace(/"/g, '""')}"\n`;
+                csv += [e.fecha, e.nroExpediente, e.iniciador, e.extracto, e.estado, e.pase, e.observaciones || ''].map(csvSafeCell).join(',') + '\n';
             });
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
@@ -2396,13 +2428,13 @@
             div.id = `personaRow_${rowId}`;
             div.innerHTML = `
                 <div>
-                    <input type="text" placeholder="Grado (Ej. Prefecto)" value="${gradoVal}" class="input-grado w-full border p-1.5 rounded text-xs uppercase font-semibold">
+                    <input type="text" placeholder="Grado (Ej. Prefecto)" value="${escapeHtml(gradoVal)}" class="input-grado w-full border p-1.5 rounded text-xs uppercase font-semibold">
                 </div>
                 <div>
-                    <input type="text" placeholder="Apellido y Nombre" value="${apellidoVal}" class="input-apellido w-full border p-1.5 rounded text-xs uppercase font-semibold">
+                    <input type="text" placeholder="Apellido y Nombre" value="${escapeHtml(apellidoVal)}" class="input-apellido w-full border p-1.5 rounded text-xs uppercase font-semibold">
                 </div>
                 <div class="flex items-center gap-1">
-                    <input type="text" placeholder="Destino específico" value="${destinoVal}" class="input-destino w-full border p-1.5 rounded text-xs">
+                    <input type="text" placeholder="Destino específico" value="${escapeHtml(destinoVal)}" class="input-destino w-full border p-1.5 rounded text-xs">
                     <button type="button" onclick="document.getElementById('personaRow_${rowId}').remove()" class="text-red-500 hover:text-red-700 px-2 py-1"><i class="fa-solid fa-trash"></i></button>
                 </div>
             `;
@@ -2494,9 +2526,9 @@
 
                 if (v.personas && v.personas.length > 0) {
                     v.personas.forEach(p => {
-                        personasGradoHtml += `<div class="py-1 font-semibold text-slate-700">${p.grado || '-'}</div>`;
-                        personasApellidoHtml += `<div class="py-1 font-bold text-slate-900">${p.apellido || '-'}</div>`;
-                        destinosHtml += `<div class="py-1 text-slate-600">${p.destino || '-'}</div>`;
+                        personasGradoHtml += `<div class="py-1 font-semibold text-slate-700">${escapeHtml(p.grado || '-') }</div>`;
+                        personasApellidoHtml += `<div class="py-1 font-bold text-slate-900">${escapeHtml(p.apellido || '-') }</div>`;
+                        destinosHtml += `<div class="py-1 text-slate-600">${escapeHtml(p.destino || '-') }</div>`;
                     });
                 } else {
                     personasGradoHtml = '-';
@@ -2509,14 +2541,14 @@
                         <td class="p-3">${personasGradoHtml}</td>
                         <td class="p-3">${personasApellidoHtml}</td>
                         <td class="p-3">${destinosHtml}</td>
-                        <td class="p-3 font-semibold text-slate-800">${v.evento || '-'}</td>
+                        <td class="p-3 font-semibold text-slate-800">${escapeHtml(v.evento || '-') }</td>
                         <td class="p-3 whitespace-nowrap">${formatFechaLatina(v.salida)}</td>
                         <td class="p-3 whitespace-nowrap">${formatFechaLatina(v.llegada)}</td>
-                        <td class="p-3 font-medium text-slate-700">${v.lugar || '-'}</td>
-                        <td class="p-3 text-slate-600">${v.invita || '-'}</td>
-                        <td class="p-3 text-slate-600">${v.calidad || '-'}</td>
-                        <td class="p-3 text-slate-600">${v.gastosCargo || '-'}</td>
-                        <td class="p-3 whitespace-nowrap"><span class="px-2 py-1 rounded-full text-[11px] font-bold border ${badgeClass}">${v.estado}</span></td>
+                        <td class="p-3 font-medium text-slate-700">${escapeHtml(v.lugar || '-') }</td>
+                        <td class="p-3 text-slate-600">${escapeHtml(v.invita || '-') }</td>
+                        <td class="p-3 text-slate-600">${escapeHtml(v.calidad || '-') }</td>
+                        <td class="p-3 text-slate-600">${escapeHtml(v.gastosCargo || '-') }</td>
+                        <td class="p-3 whitespace-nowrap"><span class="px-2 py-1 rounded-full text-[11px] font-bold border ${badgeClass}">${escapeHtml(v.estado || '-') }</span></td>
                         <td class="p-3 text-center whitespace-nowrap">${currentUser && ["Administrador","Operador"].includes(currentUser.role) ? `<button onclick="editViaje(${v.id})" class="text-blue-600 hover:text-blue-800 mr-2" title="Editar"><i class="fa-solid fa-pen-to-square"></i></button><button onclick="deleteViaje(${v.id})" class="text-red-600 hover:text-red-800" title="Eliminar"><i class="fa-solid fa-trash"></i></button>` : '<span class="text-slate-400">Consulta</span>'}</td>
                     </tr>
                 `;
@@ -2630,7 +2662,7 @@
             viajesDB.forEach(v => {
                 if (v.personas && v.personas.length > 0) {
                     v.personas.forEach(p => {
-                        csv += `"${p.grado}","${p.apellido}","${p.destino}","${v.evento}","${v.salida}","${v.llegada}","${v.lugar}","${v.invita}","${v.calidad}","${v.gastosCargo}","${v.estado}"\n`;
+                        csv += [p.grado, p.apellido, p.destino, v.evento, v.salida, v.llegada, v.lugar, v.invita, v.calidad, v.gastosCargo, v.estado].map(csvSafeCell).join(',') + '\n';
                     });
                 }
             });
@@ -2643,4 +2675,5 @@
     </script>
 </body>
 </html>
+
 
