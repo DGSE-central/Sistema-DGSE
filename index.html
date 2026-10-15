@@ -9,6 +9,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Dependencias de Estadísticas: gráficos y mapa -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
         .row-pendiente { background-color: #fefce8; }
         .row-pendiente:hover { background-color: #fef9c3; }
@@ -19,6 +23,7 @@
         .row-archivado { background-color: #f3f4f6; }
         .row-archivado:hover { background-color: #e5e7eb; }
 
+        #map { height: 420px; width: 100%; border-radius: 0.75rem; z-index: 1; background-color: #f1f5f9; }
         .tab-active {
             border-bottom: 3px solid #2563eb;
             color: #2563eb;
@@ -522,20 +527,98 @@
 
             <!-- SOLAPA 4: ESTADÍSTICAS DGSE -->
             <div id="estadisticasTab" class="tab-content hidden">
-                <div class="mb-4 rounded-xl border border-indigo-100 bg-indigo-50 p-3 text-xs text-indigo-900">Las estadísticas se calculan con las fechas disponibles en cada registro. En registros antiguos sin fecha de alta, se utiliza la fecha documental cuando existe.</div>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 stats-grid">
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200"><h3 class="text-sm font-bold text-slate-600 uppercase mb-2">Total Notas Registradas</h3><p id="statTotalNotas" class="text-3xl font-extrabold text-blue-600">0</p></div>
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200"><h3 class="text-sm font-bold text-slate-600 uppercase mb-2">Expedientes Activos</h3><p id="statTotalExp" class="text-3xl font-extrabold text-amber-600">0</p></div>
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200"><h3 class="text-sm font-bold text-slate-600 uppercase mb-2">Viajes Comisionados</h3><p id="statTotalViajes" class="text-3xl font-extrabold text-emerald-600">0</p></div>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 stats-grid">
-                    <div class="bg-white p-4 rounded-xl shadow-sm border"><h3 class="text-xs font-bold text-slate-500 uppercase mb-2">Ingresos de hoy</h3><div class="flex justify-between text-sm"><span>Notas</span><strong id="statHoyNotas">0</strong></div><div class="flex justify-between text-sm"><span>Expedientes</span><strong id="statHoyExp">0</strong></div><div class="flex justify-between text-sm"><span>Viajes</span><strong id="statHoyViajes">0</strong></div></div>
-                    <div class="bg-white p-4 rounded-xl shadow-sm border"><h3 class="text-xs font-bold text-slate-500 uppercase mb-2">Ingresos del mes</h3><div class="flex justify-between text-sm"><span>Notas</span><strong id="statMesNotas">0</strong></div><div class="flex justify-between text-sm"><span>Expedientes</span><strong id="statMesExp">0</strong></div><div class="flex justify-between text-sm"><span>Viajes</span><strong id="statMesViajes">0</strong></div></div>
-                    <div class="bg-white p-4 rounded-xl shadow-sm border"><h3 class="text-xs font-bold text-slate-500 uppercase mb-2">Ingresos del año</h3><div class="flex justify-between text-sm"><span>Notas</span><strong id="statAnioNotas">0</strong></div><div class="flex justify-between text-sm"><span>Expedientes</span><strong id="statAnioExp">0</strong></div><div class="flex justify-between text-sm"><span>Viajes</span><strong id="statAnioViajes">0</strong></div></div>
-                </div>
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                    <div class="bg-white p-5 rounded-xl border shadow-sm"><h3 class="font-bold text-slate-800 mb-3">Expedientes por tipo</h3><div id="statsExpTipos" class="space-y-2 text-sm"></div></div>
-                    <div class="bg-white p-5 rounded-xl border shadow-sm"><h3 class="font-bold text-slate-800 mb-3">Respuesta de notas</h3><div id="statsNotasRespuesta" class="space-y-2 text-sm"></div><h4 class="font-bold text-slate-700 mt-4 mb-2 text-sm">Destinatarios con más respuestas registradas</h4><div id="statsDestinosRespuesta" class="space-y-2 text-sm"></div></div>
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 mb-6">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-6">
+                        <div>
+                            <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                                <i class="fa-solid fa-chart-line text-indigo-600"></i> Estadísticas y Reportes de Gestión DGSE
+                            </h2>
+                            <p class="text-xs text-slate-500 mt-1">Indicadores de notas, expedientes y comisiones; evolución por período, respuestas, dependencias y mapa geográfico.</p>
+                        </div>
+                        <button onclick="updateEstadisticas()" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold text-xs px-3.5 py-2 rounded-lg border border-indigo-200 transition flex items-center gap-1.5 shadow-sm">
+                            <i class="fa-solid fa-rotate-right"></i> Actualizar métricas
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
+                        <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-center gap-4">
+                            <div class="p-3 bg-blue-600 text-white rounded-lg shadow"><i class="fa-solid fa-envelope-open-text text-xl"></i></div>
+                            <div><p class="text-xs uppercase font-bold text-blue-800">Total notas</p><p id="statTotalNotas" class="text-2xl font-black text-blue-950 mt-0.5">0</p></div>
+                        </div>
+                        <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-center gap-4">
+                            <div class="p-3 bg-amber-600 text-white rounded-lg shadow"><i class="fa-solid fa-folder-tree text-xl"></i></div>
+                            <div><p class="text-xs uppercase font-bold text-amber-800">Expedientes activos</p><p id="statTotalExp" class="text-2xl font-black text-amber-950 mt-0.5">0</p></div>
+                        </div>
+                        <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex items-center gap-4">
+                            <div class="p-3 bg-emerald-600 text-white rounded-lg shadow"><i class="fa-solid fa-plane text-xl"></i></div>
+                            <div><p class="text-xs uppercase font-bold text-emerald-800">Comisiones / viajes</p><p id="statTotalViajes" class="text-2xl font-black text-emerald-950 mt-0.5">0</p></div>
+                        </div>
+                        <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-4 flex items-center gap-4">
+                            <div class="p-3 bg-indigo-600 text-white rounded-lg shadow"><i class="fa-solid fa-earth-americas text-xl"></i></div>
+                            <div><p class="text-xs uppercase font-bold text-indigo-800">Países detectados</p><p id="statPaisesUnicos" class="text-2xl font-black text-indigo-950 mt-0.5">0</p></div>
+                        </div>
+                    </div>
+
+                    <div class="mb-8 rounded-xl border border-indigo-200 bg-indigo-50/50 p-5">
+                        <h3 class="font-bold text-sm uppercase text-slate-800 mb-2 flex items-center gap-2"><i class="fa-solid fa-calendar-days text-indigo-600"></i> Ingresos por período</h3>
+                        <p class="text-xs text-slate-500 mb-4">Se utilizan las fechas disponibles en cada registro. Para notas respondidas, al no existir una fecha independiente de respuesta, se cuenta la fecha documental de las notas cuyo estado figura como contestado/respondido.</p>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="bg-white rounded-xl border border-blue-200 p-4">
+                                <h4 class="text-xs font-bold uppercase text-blue-800 mb-3">Notas ingresadas</h4>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex justify-between"><span>Hoy</span><strong id="statNotasDia">0</strong></div>
+                                    <div class="flex justify-between"><span>Este mes</span><strong id="statNotasMes">0</strong></div>
+                                    <div class="flex justify-between"><span>Este año</span><strong id="statNotasAnio">0</strong></div>
+                                </div>
+                            </div>
+                            <div class="bg-white rounded-xl border border-emerald-200 p-4">
+                                <h4 class="text-xs font-bold uppercase text-emerald-800 mb-3">Notas contestadas / respondidas*</h4>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex justify-between"><span>Hoy*</span><strong id="statRespondidasDia">0</strong></div>
+                                    <div class="flex justify-between"><span>Este mes*</span><strong id="statRespondidasMes">0</strong></div>
+                                    <div class="flex justify-between"><span>Este año*</span><strong id="statRespondidasAnio">0</strong></div>
+                                </div>
+                            </div>
+                            <div class="bg-white rounded-xl border border-amber-200 p-4">
+                                <h4 class="text-xs font-bold uppercase text-amber-800 mb-3">Ingresos de expedientes (incluye reingresos)</h4>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex justify-between"><span>Hoy</span><strong id="statExpDia">0</strong></div>
+                                    <div class="flex justify-between"><span>Este mes</span><strong id="statExpMes">0</strong></div>
+                                    <div class="flex justify-between"><span>Este año</span><strong id="statExpAnio">0</strong></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                            <div class="bg-white rounded-xl border p-4"><h4 class="text-xs font-bold uppercase text-slate-600 mb-3">Ingresos de hoy</h4><div class="flex justify-between text-sm"><span>Notas</span><strong id="statHoyNotas">0</strong></div><div class="flex justify-between text-sm"><span>Ingresos de expedientes</span><strong id="statHoyExp">0</strong></div><div class="flex justify-between text-sm"><span>Viajes</span><strong id="statHoyViajes">0</strong></div></div>
+                            <div class="bg-white rounded-xl border p-4"><h4 class="text-xs font-bold uppercase text-slate-600 mb-3">Ingresos del mes</h4><div class="flex justify-between text-sm"><span>Notas</span><strong id="statMesNotas">0</strong></div><div class="flex justify-between text-sm"><span>Ingresos de expedientes</span><strong id="statMesExp">0</strong></div><div class="flex justify-between text-sm"><span>Viajes</span><strong id="statMesViajes">0</strong></div></div>
+                            <div class="bg-white rounded-xl border p-4"><h4 class="text-xs font-bold uppercase text-slate-600 mb-3">Ingresos del año</h4><div class="flex justify-between text-sm"><span>Notas</span><strong id="statAnioNotas">0</strong></div><div class="flex justify-between text-sm"><span>Ingresos de expedientes</span><strong id="statAnioExp">0</strong></div><div class="flex justify-between text-sm"><span>Viajes</span><strong id="statAnioViajes">0</strong></div></div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                        <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 shadow-sm">
+                            <div class="flex justify-between items-center mb-3"><h3 class="font-bold text-xs uppercase text-slate-700 flex items-center gap-2"><i class="fa-solid fa-chart-bar text-blue-600"></i> Notas por promotor / origen</h3><span class="text-[11px] font-semibold text-slate-400">Volumen acumulado</span></div>
+                            <div class="relative h-64"><canvas id="chartNotasPromotor"></canvas></div>
+                        </div>
+                        <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 shadow-sm">
+                            <div class="flex justify-between items-center mb-3"><h3 class="font-bold text-xs uppercase text-slate-700 flex items-center gap-2"><i class="fa-solid fa-plane-circle-check text-emerald-600"></i> Comisiones: exterior vs. Argentina</h3><span class="text-[11px] font-semibold text-slate-400">Total acumulado</span></div>
+                            <div class="relative h-64"><canvas id="chartViajesUbicacion"></canvas></div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                        <div class="bg-white p-5 rounded-xl border shadow-sm"><h3 class="font-bold text-slate-800 mb-3">Expedientes por tipo</h3><div id="statsExpTipos" class="space-y-2 text-sm"></div></div>
+                        <div class="bg-white p-5 rounded-xl border shadow-sm">
+                            <h3 class="font-bold text-slate-800 mb-3">Respuesta de notas</h3><div id="statsNotasRespuesta" class="space-y-2 text-sm"></div>
+                            <h4 class="font-bold text-slate-700 mt-4 mb-2 text-sm">Destinatarios con más respuestas registradas</h4><div id="statsDestinosRespuesta" class="space-y-2 text-sm"></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-100 p-5 rounded-xl border border-slate-300 shadow-sm text-slate-800">
+                        <h3 class="font-bold text-sm text-slate-800 flex items-center gap-2"><i class="fa-solid fa-map-location-dot text-indigo-600"></i> Mapa interactivo de comisiones por país</h3>
+                        <p class="text-xs text-slate-600 mt-1 mb-3">Países de destino detectados en los datos de viajes y personal asociado. El mapa utiliza ubicaciones aproximadas por país.</p>
+                        <div id="map" class="shadow-md border border-slate-300"></div>
+                    </div>
                 </div>
             </div>
 
@@ -961,6 +1044,10 @@
         let notas = [];
         let expedientesDB = [];
         let viajesDB = [];
+        let mapInstance = null;
+        let mapMarkersLayer = null;
+        let chartNotasInstance = null;
+        let chartViajesInstance = null;
 
         let autoPdfFileBase64 = null;
         let currentFileName = '';
@@ -1130,56 +1217,235 @@
                 const btn=document.getElementById('tabBtn'+name); if (!btn) return;
                 btn.className = tabId===ids[i] ? 'tab-active px-6 py-4 text-sm font-semibold flex items-center gap-2 focus:outline-none transition whitespace-nowrap' : 'px-6 py-4 text-sm font-semibold text-slate-500 flex items-center gap-2 hover:text-slate-700 focus:outline-none transition whitespace-nowrap';
             });
+            if (tabId === 'estadisticasTab') {
+                updateEstadisticas();
+                setTimeout(() => {
+                    if (chartNotasInstance) chartNotasInstance.resize();
+                    if (chartViajesInstance) chartViajesInstance.resize();
+                    inicializarMapaEstadisticas();
+                }, 150);
+            }
         }
 
         function dateForStats(item, fallbackField) {
+            if (!item) return null;
             const raw = item.fechaRegistro || item.createdAt || item[fallbackField] || '';
             if (!raw) return null;
             const dateOnly = String(raw).match(/^(\d{4})-(\d{2})-(\d{2})$/);
-            const d = dateOnly ? new Date(Number(dateOnly[1]), Number(dateOnly[2]) - 1, Number(dateOnly[3])) : new Date(raw);
+            const d = dateOnly
+                ? new Date(Number(dateOnly[1]), Number(dateOnly[2]) - 1, Number(dateOnly[3]))
+                : new Date(raw);
             return Number.isNaN(d.getTime()) ? null : d;
         }
+
         function getExpedienteTipo(expediente) {
-            if (expediente.tipo) return expediente.tipo;
-            const source = [expediente.nroExpediente, expediente.extracto, expediente.iniciador].join(' ').toLowerCase();
+            if (expediente && expediente.tipo) return expediente.tipo;
+            const source = [
+                expediente && expediente.nroExpediente,
+                expediente && expediente.extracto,
+                expediente && expediente.iniciador,
+                expediente && expediente.pase
+            ].join(' ').toLowerCase();
             if (/licitaci[oó]n|contrataci[oó]n|compulsa/.test(source)) return 'Licitación';
             if (/viaje|comisi[oó]n|vi[aá]tico/.test(source)) return 'Viajes';
             return 'Otros';
         }
+
         function updateEstadisticas() {
             const el = id => document.getElementById(id);
             if (!el('statTotalNotas')) return;
-            el('statTotalNotas').textContent = notas.length;
-            el('statTotalExp').textContent = expedientesDB.filter(e => String(e.estado || '').toLowerCase() !== 'finalizado').length;
-            el('statTotalViajes').textContent = viajesDB.length;
+
+            const notasList = Array.isArray(notas) ? notas : [];
+            const expedientesList = Array.isArray(expedientesDB) ? expedientesDB : [];
+            const viajesList = Array.isArray(viajesDB) ? viajesDB : [];
+            const activeExpedientes = expedientesList.filter(e => !/finalizado|archivado/i.test(String(e.estado || '')));
+
+            el('statTotalNotas').textContent = notasList.length;
+            el('statTotalExp').textContent = activeExpedientes.length;
+            el('statTotalViajes').textContent = viajesList.length;
+
             const now = new Date();
             const sameDay = d => d && d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate();
             const sameMonth = d => d && d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
             const sameYear = d => d && d.getFullYear() === now.getFullYear();
             const counts = {
-                notas: notas.map(x => dateForStats(x, 'fecha')),
-                expedientes: expedientesDB.map(x => dateForStats(x, 'fecha')),
-                viajes: viajesDB.map(x => dateForStats(x, 'fechaRegistro') || dateForStats(x, 'salida'))
+                notas: notasList.map(x => dateForStats(x, 'fecha')),
+                expedientes: expedientesList.flatMap(x => {
+                    const ingresos = Array.isArray(x.historialIngresos) ? x.historialIngresos : [];
+                    return ingresos.length
+                        ? ingresos.map(ingreso => dateForStats(ingreso, 'fecha')).filter(Boolean)
+                        : [dateForStats(x, 'fecha')];
+                }),
+                viajes: viajesList.map(x => dateForStats(x, 'fechaRegistro') || dateForStats(x, 'salida') || dateForStats(x, 'fechaPartida'))
             };
-            const setPeriodCounts = (period, predicate) => {
-                el(period + 'Notas').textContent = counts.notas.filter(predicate).length;
-                el(period + 'Exp').textContent = counts.expedientes.filter(predicate).length;
-                el(period + 'Viajes').textContent = counts.viajes.filter(predicate).length;
+            const count = (arr, predicate) => arr.filter(predicate).length;
+            const setText = (id, value) => { if (el(id)) el(id).textContent = String(value); };
+            const setPeriodCounts = (prefix, predicate) => {
+                setText(prefix + 'Notas', count(counts.notas, predicate));
+                setText(prefix + 'Exp', count(counts.expedientes, predicate));
+                setText(prefix + 'Viajes', count(counts.viajes, predicate));
             };
-            setPeriodCounts('statHoy', sameDay); setPeriodCounts('statMes', sameMonth); setPeriodCounts('statAnio', sameYear);
+            setPeriodCounts('statHoy', sameDay);
+            setPeriodCounts('statMes', sameMonth);
+            setPeriodCounts('statAnio', sameYear);
+
+            const periodCount = (items, predicate) => items.filter(predicate).length;
+            const answeredFn = n => /contestad|respondid/i.test(String(n.estado || ''));
+            const answeredNotes = notasList.filter(answeredFn);
+            setText('statNotasDia', periodCount(counts.notas, sameDay));
+            setText('statNotasMes', periodCount(counts.notas, sameMonth));
+            setText('statNotasAnio', periodCount(counts.notas, sameYear));
+            setText('statRespondidasDia', answeredNotes.filter(n => sameDay(dateForStats(n, 'fecha'))).length);
+            setText('statRespondidasMes', answeredNotes.filter(n => sameMonth(dateForStats(n, 'fecha'))).length);
+            setText('statRespondidasAnio', answeredNotes.filter(n => sameYear(dateForStats(n, 'fecha'))).length);
+            setText('statExpDia', periodCount(counts.expedientes, sameDay));
+            setText('statExpMes', periodCount(counts.expedientes, sameMonth));
+            setText('statExpAnio', periodCount(counts.expedientes, sameYear));
+
             const expTypes = { 'Viajes / Comisiones': 0, 'Licitación / Contrataciones': 0, 'Otros': 0 };
-            expedientesDB.forEach(e => { const t = String(getExpedienteTipo(e) || 'Otros').toLowerCase(); if (t.includes('viaje')) expTypes['Viajes / Comisiones']++; else if (t.includes('licit')) expTypes['Licitación / Contrataciones']++; else expTypes['Otros']++; });
-            el('statsExpTipos').innerHTML = Object.entries(expTypes).map(([k,v]) => `<div class="flex justify-between border-b pb-1"><span>${escapeHtml(k)}</span><strong>${v}</strong></div>`).join('');
-            const isAnswered = n => /contestad|respondid/i.test(String(n.estado || ''));
-            const answered = notas.filter(isAnswered).length;
-            const pending = notas.filter(n => /pendiente/i.test(String(n.estado || '')) || !n.estado).length;
-            const archived = notas.filter(n => /archivad/i.test(String(n.estado || ''))).length;
-            const percent = notas.length ? Math.round(answered * 100 / notas.length) : 0;
-            el('statsNotasRespuesta').innerHTML = `<div class="flex justify-between"><span>Total de notas</span><strong>${notas.length}</strong></div><div class="flex justify-between"><span>Contestadas / respondidas</span><strong>${answered} (${percent}%)</strong></div><div class="flex justify-between"><span>Pendientes</span><strong>${pending}</strong></div><div class="flex justify-between"><span>Archivadas</span><strong>${archived}</strong></div>`;
+            expedientesList.forEach(e => {
+                const t = String(getExpedienteTipo(e) || 'Otros').toLowerCase();
+                if (t.includes('viaje') || t.includes('comisi')) expTypes['Viajes / Comisiones']++;
+                else if (t.includes('licit') || t.includes('contrat')) expTypes['Licitación / Contrataciones']++;
+                else expTypes['Otros']++;
+            });
+            if (el('statsExpTipos')) {
+                el('statsExpTipos').innerHTML = Object.entries(expTypes)
+                    .map(([name, value]) => `<div class="flex justify-between border-b pb-1"><span>${escapeHtml(name)}</span><strong>${value}</strong></div>`).join('');
+            }
+
+            const pending = notasList.filter(n => /pendiente|en espera/i.test(String(n.estado || '')) || !n.estado).length;
+            const archived = notasList.filter(n => /archivad/i.test(String(n.estado || ''))).length;
+            const answeredPercent = notasList.length ? Math.round(answeredNotes.length * 100 / notasList.length) : 0;
+            if (el('statsNotasRespuesta')) {
+                el('statsNotasRespuesta').innerHTML =
+                    `<div class="flex justify-between"><span>Total de notas</span><strong>${notasList.length}</strong></div>` +
+                    `<div class="flex justify-between"><span>Contestadas / respondidas</span><strong>${answeredNotes.length} (${answeredPercent}%)</strong></div>` +
+                    `<div class="flex justify-between"><span>Pendientes / en espera</span><strong>${pending}</strong></div>` +
+                    `<div class="flex justify-between"><span>Archivadas</span><strong>${archived}</strong></div>`;
+            }
             const destinations = {};
-            notas.filter(isAnswered).forEach(n => { const dest = String(n.accion || '').trim() || 'Destinatario no informado'; destinations[dest] = (destinations[dest] || 0) + 1; });
-            const topDestinations = Object.entries(destinations).sort((a,b) => b[1] - a[1]).slice(0,10);
-            el('statsDestinosRespuesta').innerHTML = topDestinations.length ? topDestinations.map(([name,count]) => `<div class="flex justify-between gap-3 border-b pb-1"><span class="break-words">${escapeHtml(name)}</span><strong>${count}</strong></div>`).join('') : '<p class="text-slate-500 text-xs">Todavía no hay notas marcadas como contestadas.</p>';
+            answeredNotes.forEach(n => {
+                const dest = String(n.accion || n.destinatario || '').trim() || 'Destinatario no informado';
+                destinations[dest] = (destinations[dest] || 0) + 1;
+            });
+            const topDestinations = Object.entries(destinations).sort((a, b) => b[1] - a[1]).slice(0, 10);
+            if (el('statsDestinosRespuesta')) {
+                el('statsDestinosRespuesta').innerHTML = topDestinations.length
+                    ? topDestinations.map(([name, amount]) => `<div class="flex justify-between gap-3 border-b pb-1"><span class="break-words">${escapeHtml(name)}</span><strong>${amount}</strong></div>`).join('')
+                    : '<p class="text-slate-500 text-xs">Todavía no hay notas marcadas como contestadas/respondidas.</p>';
+            }
+
+            // Los gráficos solo se regeneran si Chart.js está disponible.
+            if (typeof Chart !== 'undefined' && el('chartNotasPromotor') && el('chartViajesUbicacion')) {
+                const promoters = {};
+                notasList.forEach(n => {
+                    const promoter = String(n.promotor || '').trim().toUpperCase() || 'SIN DEFINIR';
+                    promoters[promoter] = (promoters[promoter] || 0) + 1;
+                });
+                const promoterEntries = Object.entries(promoters).sort((a, b) => b[1] - a[1]);
+                const notesCanvas = el('chartNotasPromotor');
+                if (chartNotasInstance) chartNotasInstance.destroy();
+                chartNotasInstance = new Chart(notesCanvas.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: promoterEntries.length ? promoterEntries.map(x => x[0]) : ['Sin datos'],
+                        datasets: [{ label: 'Cantidad de notas', data: promoterEntries.length ? promoterEntries.map(x => x[1]) : [0], backgroundColor: '#3b82f6', borderRadius: 6 }]
+                    },
+                    options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, ticks: { precision: 0 } } } }
+                });
+
+                let exterior = 0, argentina = 0;
+                viajesList.forEach(v => {
+                    const place = String(v.lugar || v.destino || '').toLowerCase();
+                    if (/argentina|buenos aires|caba|c[oó]rdoba|mendoza|rosario|mar del plata|ushuaia|salta|neuqu[eé]n/.test(place)) argentina++;
+                    else if (place) exterior++;
+                    else exterior++;
+                });
+                if (chartViajesInstance) chartViajesInstance.destroy();
+                chartViajesInstance = new Chart(el('chartViajesUbicacion').getContext('2d'), {
+                    type: 'bar',
+                    data: { labels: ['Al exterior', 'En Argentina'], datasets: [{ label: 'Comisiones', data: [exterior, argentina], backgroundColor: ['#0284c7', '#10b981'], borderRadius: 8, barThickness: 45 }] },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
+                });
+            }
+
+            // El mapa se inicializa cuando la solapa está visible.
+            if (el('estadisticasTab') && !el('estadisticasTab').classList.contains('hidden')) {
+                setTimeout(() => inicializarMapaEstadisticas(), 80);
+            }
+        }
+
+        function inicializarMapaEstadisticas() {
+            const mapElement = document.getElementById('map');
+            if (!mapElement || typeof L === 'undefined') return;
+            if (!mapInstance) {
+                mapInstance = L.map('map', { scrollWheelZoom: false }).setView([20, 0], 2);
+                mapMarkersLayer = L.layerGroup().addTo(mapInstance);
+                fetch('https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json')
+                    .then(response => {
+                        if (!response.ok) throw new Error('No se pudo cargar la cartografía base.');
+                        return response.json();
+                    })
+                    .then(geoData => {
+                        L.geoJSON(geoData, {
+                            style: { fillColor: '#e2e8f0', weight: 1, opacity: 1, color: '#94a3b8', fillOpacity: 0.9 }
+                        }).addTo(mapInstance);
+                        dibujarMarcadoresMapa();
+                    })
+                    .catch(() => dibujarMarcadoresMapa());
+            } else {
+                mapInstance.invalidateSize();
+                dibujarMarcadoresMapa();
+            }
+        }
+
+        function dibujarMarcadoresMapa() {
+            if (!mapInstance || typeof L === 'undefined') return;
+            if (!mapMarkersLayer) mapMarkersLayer = L.layerGroup().addTo(mapInstance);
+            mapMarkersLayer.clearLayers();
+
+            const countries = {
+                'estados unidos': { lat: 38.8951, lon: -77.0364, nombre: 'Estados Unidos' },
+                'eeuu': { lat: 38.8951, lon: -77.0364, nombre: 'Estados Unidos' },
+                'usa': { lat: 38.8951, lon: -77.0364, nombre: 'Estados Unidos' },
+                'españa': { lat: 40.4168, lon: -3.7038, nombre: 'España' },
+                'brasil': { lat: -15.7975, lon: -47.8919, nombre: 'Brasil' },
+                'chile': { lat: -33.4489, lon: -70.6693, nombre: 'Chile' },
+                'uruguay': { lat: -34.9011, lon: -56.1645, nombre: 'Uruguay' },
+                'francia': { lat: 48.8566, lon: 2.3522, nombre: 'Francia' },
+                'italia': { lat: 41.9028, lon: 12.4964, nombre: 'Italia' },
+                'reino unido': { lat: 51.5074, lon: -0.1278, nombre: 'Reino Unido' }
+            };
+            const commissions = {};
+            const detectedCountries = new Set();
+            (Array.isArray(viajesDB) ? viajesDB : []).forEach(v => {
+                const place = String(v.lugar || v.destino || '').toLowerCase();
+                Object.keys(countries).forEach(key => {
+                    if (!place.includes(key)) return;
+                    const country = countries[key];
+                    detectedCountries.add(country.nombre);
+                    if (!commissions[country.nombre]) commissions[country.nombre] = { ...country, oficiales: [] };
+                    const people = Array.isArray(v.personas) ? v.personas : [];
+                    if (people.length) {
+                        people.forEach(person => {
+                            const name = `${person.grado || ''} ${person.apellido || person.nombre || ''}`.trim();
+                            commissions[country.nombre].oficiales.push(`${escapeHtml(name || 'Personal sin identificar')} — ${escapeHtml(v.evento || 'Misión')}`);
+                        });
+                    } else {
+                        commissions[country.nombre].oficiales.push(escapeHtml(v.evento || 'Comisión registrada'));
+                    }
+                });
+            });
+
+            const counter = document.getElementById('statPaisesUnicos');
+            if (counter) counter.textContent = detectedCountries.size;
+            Object.values(commissions).forEach(country => {
+                const peopleHtml = country.oficiales.length ? country.oficiales.join('<br>• ') : 'Personal en comisión';
+                const popup = `<div style="font-family:sans-serif;padding:4px;color:#0f172a;"><h4 style="margin:0 0 6px;font-size:13px;font-weight:bold;color:#1e1b4b;">📍 ${escapeHtml(country.nombre)}</h4><p style="margin:0;font-size:11px;color:#334155;"><strong>Personal / misión:</strong><br>• ${peopleHtml}</p></div>`;
+                L.circleMarker([country.lat, country.lon], { radius: 10, fillColor: '#4f46e5', color: '#ffffff', weight: 2, opacity: 1, fillOpacity: 1 })
+                    .addTo(mapMarkersLayer).bindPopup(popup);
+            });
         }
 
         function handleFileSelect(file) {
