@@ -695,6 +695,22 @@
         </div>
     </div>
 
+    <!-- MODAL DE ASIGNACIÓN MANUAL DE CONTRASEÑA PROVISORIA (SOLO ADMINISTRADOR) -->
+    <div id="resetUserPasswordModal" class="fixed inset-0 bg-slate-950/80 z-[80] flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl border border-slate-200">
+            <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2"><i class="fa-solid fa-key text-amber-600"></i> Asignar contraseña provisoria</h2>
+            <p class="text-sm text-slate-600 mt-2 mb-4">El administrador debe definir manualmente la contraseña provisoria para <strong id="resetPasswordTargetLabel"></strong>. No se generará ninguna clave automática. El usuario deberá cambiarla al iniciar sesión.</p>
+            <form onsubmit="submitAdminPasswordReset(event)" class="space-y-3">
+                <div>
+                    <label for="adminTemporaryPassword" class="block text-xs font-semibold text-slate-600 mb-1">Nueva contraseña provisoria (mínimo 12 caracteres)</label>
+                    <div class="flex gap-2"><input id="adminTemporaryPassword" type="password" minlength="12" maxlength="200" autocomplete="new-password" required class="w-full min-w-0 border p-2.5 rounded-lg text-sm"><button type="button" onclick="togglePasswordVisibility('adminTemporaryPassword', this)" class="border rounded-lg px-3 text-slate-600" title="Mostrar u ocultar contraseña"><i class="fa-solid fa-eye"></i></button></div>
+                    <p class="text-[11px] text-slate-500 mt-1">Debe incluir mayúsculas, minúsculas, números y símbolos. No reutilice claves personales ni las envíe por canales compartidos.</p>
+                </div>
+                <div class="flex justify-end gap-2 pt-2"><button type="button" onclick="closeAdminPasswordReset()" class="px-4 py-2 border rounded-lg text-xs font-semibold">Cancelar</button><button type="submit" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-bold">Asignar y exigir cambio</button></div>
+            </form>
+        </div>
+    </div>
+
     <!-- MODAL GESTIÓN DE ACCESOS / PERSONAL (SOLO ADMINISTRADOR) -->
     <div id="usersModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
         <div class="bg-white rounded-2xl w-full max-w-xl p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
@@ -710,9 +726,9 @@
                         <input type="text" id="newUser" required placeholder="Ej. jperez" class="w-full border p-2 rounded-lg text-xs">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">Contraseña temporal</label>
-                        <div class="flex gap-1"><input type="password" id="newPass" minlength="12" autocomplete="new-password" placeholder="Vacío = no modificar" class="w-full min-w-0 border p-2 rounded-lg text-xs"><button type="button" onclick="togglePasswordVisibility('newPass', this)" class="border rounded-lg px-2 text-slate-600" title="Mostrar u ocultar contraseña"><i class="fa-solid fa-eye"></i></button></div>
-                        <p class="text-[10px] text-slate-500 mt-1">Si lo deja vacío al modificar, se conserva la clave. Para altas, se asignará la temporal por defecto.</p>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Clave provisoria asignada por el administrador</label>
+                        <div class="flex gap-1"><input type="password" id="newPass" minlength="12" autocomplete="new-password" placeholder="Obligatoria al crear usuario" class="w-full min-w-0 border p-2 rounded-lg text-xs"><button type="button" onclick="togglePasswordVisibility('newPass', this)" class="border rounded-lg px-2 text-slate-600" title="Mostrar u ocultar contraseña"><i class="fa-solid fa-eye"></i></button></div>
+                        <p class="text-[10px] text-slate-500 mt-1">El administrador debe asignar la clave provisoria manualmente al crear o restablecer una cuenta. No se genera ninguna clave automática. En una modificación, si lo deja vacío se conserva la clave actual. Toda clave provisoria obliga a cambiarla al iniciar sesión.</p>
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 mb-1">Rol / Permisos</label>
@@ -986,7 +1002,11 @@
                     <button type="button" onclick="closePrivatePDFViewer()" class="px-3 py-2 bg-slate-200 rounded-lg text-xs font-bold">Cerrar</button>
                 </div>
             </div>
-            <iframe id="privatePdfFrame" title="Visor privado de PDF" class="w-full flex-1" src="about:blank"></iframe>
+            <div id="privatePdfLoading" class="flex-1 flex flex-col items-center justify-center gap-3 text-slate-600 text-sm p-6">
+                <i class="fa-solid fa-spinner fa-spin text-2xl text-blue-600"></i>
+                <span id="privatePdfLoadingText">Cargando documento privado desde Google Drive…</span>
+            </div>
+            <iframe id="privatePdfFrame" title="Visor privado de PDF" class="hidden w-full flex-1" src="about:blank"></iframe>
         </div>
     </div>
 
@@ -1061,19 +1081,33 @@
 
         async function openPrivatePDF(fileId, fileName) {
             if (!fileId) { alert('Este registro no tiene un PDF vinculado.'); return; }
+            const modal = document.getElementById('privatePdfViewerModal');
+            const title = document.getElementById('privatePdfTitle');
+            const frame = document.getElementById('privatePdfFrame');
+            const loading = document.getElementById('privatePdfLoading');
+            const loadingText = document.getElementById('privatePdfLoadingText');
+            title.textContent = fileName || 'Documento PDF';
+            loadingText.textContent = 'Cargando documento privado desde Google Drive…';
+            loading.classList.remove('hidden');
+            frame.classList.add('hidden');
+            frame.src = 'about:blank';
+            modal.classList.remove('hidden');
             try {
                 const result = await serverRequest({ action: 'getPDF', token: authToken, fileId });
+                // Decodifica una sola vez en el navegador y conserva el archivo privado detrás del backend autenticado.
                 const binary = atob(result.base64Data);
                 const bytes = new Uint8Array(binary.length);
                 for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
                 const blob = new Blob([bytes], { type: 'application/pdf' });
                 if (activePdfObjectUrl) URL.revokeObjectURL(activePdfObjectUrl);
                 activePdfObjectUrl = URL.createObjectURL(blob);
-                document.getElementById('privatePdfTitle').textContent = fileName || result.fileName || 'Documento PDF';
-                document.getElementById('privatePdfFrame').src = activePdfObjectUrl + '#toolbar=1&navpanes=1&view=FitH';
+                title.textContent = fileName || result.fileName || 'Documento PDF';
+                frame.src = activePdfObjectUrl + '#toolbar=1&navpanes=1&view=FitH';
                 document.getElementById('privatePdfOpenTab').href = activePdfObjectUrl;
-                document.getElementById('privatePdfViewerModal').classList.remove('hidden');
+                loading.classList.add('hidden');
+                frame.classList.remove('hidden');
             } catch (error) {
+                loadingText.textContent = 'No se pudo cargar el PDF.';
                 alert('No se pudo visualizar el PDF: ' + error.message);
             }
         }
@@ -1091,6 +1125,10 @@
             const frame = document.getElementById('privatePdfFrame');
             if (frame) frame.src = 'about:blank';
             document.getElementById('privatePdfViewerModal').classList.add('hidden');
+            const loading = document.getElementById('privatePdfLoading');
+            const frameEl = document.getElementById('privatePdfFrame');
+            if (loading) loading.classList.remove('hidden');
+            if (frameEl) frameEl.classList.add('hidden');
             if (activePdfObjectUrl) { URL.revokeObjectURL(activePdfObjectUrl); activePdfObjectUrl = null; }
         }
 
@@ -1107,7 +1145,7 @@
         let chartNotasInstance = null;
         let chartViajesInstance = null;
 
-        let autoPdfFileBase64 = null;
+        let autoPdfFile = null;
         let currentFileName = '';
         let globalExtractedText = '';
 
@@ -1165,8 +1203,7 @@
             } catch (error) { alert(error.message || 'No se pudo cambiar la contraseña.'); }
         }
 
-        async function loadServerData() {
-            const result = await serverRequest({ action: 'getInitialData', token: authToken });
+        function applyServerData(result) {
             notas = Array.isArray(result.notas) ? result.notas : [];
             expedientesDB = Array.isArray(result.expedientes) ? result.expedientes : [];
             viajesDB = Array.isArray(result.viajes) ? result.viajes : [];
@@ -1174,6 +1211,33 @@
             currentUser = result.user || currentUser;
             if (currentUser) sessionStorage.setItem('activeUser', JSON.stringify(currentUser));
             dataLoaded = true;
+        }
+
+        async function loadServerData() {
+            const result = await serverRequest({ action: 'getInitialData', token: authToken });
+            applyServerData(result);
+        }
+
+        function showAuthenticatedApp() {
+            if (!currentUser) throw new Error('No se pudo validar el usuario de la sesión.');
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('appScreen').classList.remove('hidden');
+            document.getElementById('userInfo').textContent = `${currentUser.name} (${currentUser.role})`;
+            const warning = document.getElementById('passwordExpiryWarning');
+            const warningText = document.getElementById('passwordExpiryWarningText');
+            const daysLeft = Number(currentUser.daysUntilExpiry);
+            if (Number.isFinite(daysLeft) && daysLeft >= 0 && daysLeft <= 14) {
+                warning.classList.remove('hidden');
+                warningText.textContent = daysLeft === 0 ? 'Su contraseña vence hoy. Cámbiela para evitar perder el acceso.' : `Su contraseña vence en ${daysLeft} día(s). Cámbiela antes del vencimiento.`;
+                if (!sessionStorage.getItem('dgse_password_expiry_alert_' + currentUser.name)) {
+                    alert(warningText.textContent);
+                    sessionStorage.setItem('dgse_password_expiry_alert_' + currentUser.name, '1');
+                }
+            } else { warning.classList.add('hidden'); }
+            const esConsulta = currentUser.role === 'Consulta';
+            ['btnNuevaNotaModal','btnAutoUpload','btnNuevoExpediente','btnNuevoViaje'].forEach(id => { const el=document.getElementById(id); if(el) el.classList.toggle('hidden', esConsulta); });
+            ['btnGestionUsuarios','btnAuditLog'].forEach(id => { const el=document.getElementById(id); if(el) el.classList.toggle('hidden', currentUser.role !== 'Administrador'); });
+            populatePromotoresOptions(); renderTable(); renderExpedientesTable(); renderViajesTable();
         }
 
         async function checkAuth() {
@@ -1186,25 +1250,7 @@
             }
             try {
                 await loadServerData();
-                if (!currentUser) throw new Error('No se pudo validar el usuario de la sesión.');
-                document.getElementById('loginScreen').classList.add('hidden');
-                document.getElementById('appScreen').classList.remove('hidden');
-                document.getElementById('userInfo').textContent = `${currentUser.name} (${currentUser.role})`;
-                const warning = document.getElementById('passwordExpiryWarning');
-                const warningText = document.getElementById('passwordExpiryWarningText');
-                const daysLeft = Number(currentUser.daysUntilExpiry);
-                if (Number.isFinite(daysLeft) && daysLeft >= 0 && daysLeft <= 14) {
-                    warning.classList.remove('hidden');
-                    warningText.textContent = daysLeft === 0 ? 'Su contraseña vence hoy. Cámbiela para evitar perder el acceso.' : `Su contraseña vence en ${daysLeft} día(s). Cámbiela antes del vencimiento.`;
-                    if (!sessionStorage.getItem('dgse_password_expiry_alert_' + currentUser.name)) {
-                        alert(warningText.textContent);
-                        sessionStorage.setItem('dgse_password_expiry_alert_' + currentUser.name, '1');
-                    }
-                } else { warning.classList.add('hidden'); }
-                const esConsulta = currentUser.role === 'Consulta';
-                ['btnNuevaNotaModal','btnAutoUpload','btnNuevoExpediente','btnNuevoViaje'].forEach(id => { const el=document.getElementById(id); if(el) el.classList.toggle('hidden', esConsulta); });
-                ['btnGestionUsuarios','btnAuditLog'].forEach(id => { const el=document.getElementById(id); if(el) el.classList.toggle('hidden', currentUser.role !== 'Administrador'); });
-                populatePromotoresOptions(); renderTable(); renderExpedientesTable(); renderViajesTable();
+                showAuthenticatedApp();
             } catch (error) {
                 console.error(error);
                 authToken = ''; currentUser = null; dataLoaded = false;
@@ -1232,7 +1278,12 @@
                     return;
                 }
                 document.getElementById('loginPass').value = '';
-                await checkAuth();
+                if (Array.isArray(result.notas) && Array.isArray(result.expedientes) && Array.isArray(result.viajes)) {
+                    applyServerData(result);
+                    showAuthenticatedApp();
+                } else {
+                    await checkAuth();
+                }
             } catch (error) { alert(error.message || 'Usuario o contraseña incorrectos.'); }
         }
 
@@ -1275,25 +1326,48 @@
             e.preventDefault();
             if (!currentUser || currentUser.role !== 'Administrador') return;
             const username = document.getElementById('newUser').value.toLowerCase().trim();
-            let password = document.getElementById('newPass').value;
+            const password = document.getElementById('newPass').value;
             const role = document.getElementById('newRole').value;
+            const existing = Object.prototype.hasOwnProperty.call(usersDB, username);
+            if (!existing && !password) { alert('Debe asignar manualmente una contraseña provisoria para crear el usuario. No se generará una contraseña automática.'); document.getElementById('newPass').focus(); return; }
+            if (password && (password.length < 12 || !/[a-z]/.test(password) || !/[A-Z]/.test(password) || !/[0-9]/.test(password) || !/[^A-Za-z0-9]/.test(password))) { alert('La contraseña provisoria debe tener al menos 12 caracteres e incluir mayúsculas, minúsculas, números y un símbolo.'); document.getElementById('newPass').focus(); return; }
             try {
-                const existing = Object.prototype.hasOwnProperty.call(usersDB, username);
-                if (!existing && !password) password = 'DGSE-Inicio-2026!';
                 await serverRequest({ action: 'saveUser', token: authToken, user: { username, password, role } });
                 document.getElementById('newUser').value = ''; document.getElementById('newPass').value = '';
                 await renderUsersTable();
-                alert(!existing && password === 'DGSE-Inicio-2026!' ? 'Usuario creado. Contraseña temporal: DGSE-Inicio-2026! Debe cambiarla obligatoriamente al ingresar.' : 'Usuario guardado en el servidor.');
+                alert(!existing ? 'Usuario creado. La contraseña provisoria fue asignada por usted y no se almacena en texto legible. Entréguela al usuario por un canal seguro; deberá cambiarla obligatoriamente al ingresar.' : (password ? 'Usuario actualizado. La contraseña provisoria asignada deberá cambiarse obligatoriamente al iniciar sesión.' : 'Usuario guardado. La contraseña actual se conservó.'));
             } catch (error) { alert(error.message); }
         }
 
-        async function resetUserPassword(username) {
+        let adminPasswordResetTarget = '';
+        function resetUserPassword(username) {
             if (!currentUser || currentUser.role !== 'Administrador') return;
-            if (!confirm(`Se restablecerá la contraseña de ${username.toUpperCase()} a la clave temporal DGSE-Inicio-2026! y deberá cambiarla al ingresar. ¿Continuar?`)) return;
+            adminPasswordResetTarget = String(username || '').toLowerCase().trim();
+            if (!adminPasswordResetTarget) return;
+            document.getElementById('resetPasswordTargetLabel').textContent = adminPasswordResetTarget.toUpperCase();
+            document.getElementById('adminTemporaryPassword').value = '';
+            document.getElementById('resetUserPasswordModal').classList.remove('hidden');
+            document.getElementById('adminTemporaryPassword').focus();
+        }
+
+        function closeAdminPasswordReset() {
+            document.getElementById('resetUserPasswordModal').classList.add('hidden');
+            document.getElementById('adminTemporaryPassword').value = '';
+            adminPasswordResetTarget = '';
+        }
+
+        async function submitAdminPasswordReset(e) {
+            e.preventDefault();
+            if (!currentUser || currentUser.role !== 'Administrador' || !adminPasswordResetTarget) return;
+            const temporaryPassword = document.getElementById('adminTemporaryPassword').value;
+            if (temporaryPassword.length < 12 || !/[a-z]/.test(temporaryPassword) || !/[A-Z]/.test(temporaryPassword) || !/[0-9]/.test(temporaryPassword) || !/[^A-Za-z0-9]/.test(temporaryPassword)) { alert('Use al menos 12 caracteres e incluya mayúsculas, minúsculas, números y un símbolo.'); return; }
+            if (!confirm(`¿Asignar la contraseña provisoria ingresada a ${adminPasswordResetTarget.toUpperCase()}? La clave anterior dejará de funcionar, se cerrarán sus sesiones y deberá cambiarla al ingresar.`)) return;
             try {
-                await serverRequest({ action: 'resetUserPassword', token: authToken, username });
+                await serverRequest({ action: 'resetUserPassword', token: authToken, username: adminPasswordResetTarget, temporaryPassword });
+                const target = adminPasswordResetTarget.toUpperCase();
+                closeAdminPasswordReset();
                 await renderUsersTable();
-                alert(`Contraseña restablecida para ${username.toUpperCase()}. Clave temporal: DGSE-Inicio-2026!`);
+                alert(`Se asignó la contraseña provisoria a ${target}. La clave no se devuelve ni se guarda en texto legible. Entréguela al usuario por un canal seguro; deberá cambiarla al iniciar sesión.`);
             } catch (error) { alert(error.message); }
         }
 
@@ -1587,17 +1661,20 @@
         }
 
         function handleFileSelect(file) {
-            if (!file || file.type !== 'application/pdf') return;
-
+            if (!file || (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf'))) return;
+            if (file.size > 10 * 1024 * 1024) {
+                alert('El PDF supera el tamaño máximo permitido de 10 MB.');
+                return;
+            }
             currentFileName = file.name;
+            autoPdfFile = file;
 
             const dropContent = document.getElementById('dropZoneContent');
             dropContent.innerHTML = `
                 <i class="fa-solid fa-file-pdf text-3xl text-green-600 mb-1"></i>
                 <p class="font-bold text-slate-800 text-xs">PDF Adjuntado:</p>
-                <p class="text-xs text-blue-700 font-semibold mt-0.5 bg-slate-50 py-0.5 px-2.5 rounded-full border border-blue-200 inline-block shadow-sm">${file.name}</p>
+                <p class="text-xs text-blue-700 font-semibold mt-0.5 bg-slate-50 py-0.5 px-2.5 rounded-full border border-blue-200 inline-block shadow-sm">${escapeHtml(file.name)}</p>
             `;
-
             processPDF(file);
         }
 
@@ -1605,52 +1682,41 @@
             const statusEl = document.getElementById('pdfStatus');
             statusEl.classList.remove('hidden', 'bg-red-100', 'text-red-800', 'bg-green-100', 'text-green-800');
             statusEl.classList.add('bg-blue-100', 'text-blue-800');
-            statusEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Leyendo datos y firma electrónica del PDF...';
+            statusEl.textContent = 'Leyendo datos y firma electrónica del PDF…';
 
-            const reader = new FileReader();
-            reader.onload = async function(e) {
-                autoPdfFileBase64 = e.target.result; 
-                
-                const base64Data = autoPdfFileBase64.split(',')[1];
-                const binaryString = atob(base64Data);
-                const len = binaryString.length;
-                const bytes = new Uint8Array(len);
-                for (let i = 0; i < len; i++) {
-                    bytes[i] = binaryString.charCodeAt(i);
+            try {
+                // ArrayBuffer evita la conversión inicial PDF -> Base64 -> binario, que duplicaba trabajo y memoria.
+                const bytes = new Uint8Array(await file.arrayBuffer());
+                const pdf = await pdfjsLib.getDocument({ data: bytes }).promise;
+                const textParts = [];
+                for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+                    const page = await pdf.getPage(pageNum);
+                    const content = await page.getTextContent();
+                    const items = content.items.map(item => ({ text: item.str, x: item.transform[4], y: item.transform[5] }));
+                    items.sort((a, b) => b.y - a.y);
+                    textParts.push(items.map(item => item.text).join(' '));
                 }
+                globalExtractedText = textParts.join(' ');
+                parseAllFieldsSmart(globalExtractedText, currentFileName);
+                statusEl.classList.replace('bg-blue-100', 'bg-green-100');
+                statusEl.classList.replace('text-blue-800', 'text-green-800');
+                statusEl.textContent = 'PDF leído; se extrajeron los campos disponibles. Revise los datos antes de guardar.';
+                document.getElementById('parsedResultForm').classList.remove('hidden');
+            } catch (err) {
+                console.error('Error procesando PDF:', err);
+                statusEl.classList.replace('bg-blue-100', 'bg-red-100');
+                statusEl.classList.replace('text-blue-800', 'text-red-800');
+                statusEl.textContent = 'No se pudo procesar el PDF. Verifique que el archivo no esté dañado o protegido.';
+            }
+        }
 
-                try {
-                    const pdf = await pdfjsLib.getDocument(bytes).promise;
-                    globalExtractedText = '';
-
-                    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-                        const page = await pdf.getPage(pageNum);
-                        const content = await page.getTextContent();
-
-                        let items = content.items.map(item => ({
-                            text: item.str,
-                            x: item.transform[4],
-                            y: item.transform[5]
-                        }));
-
-                        items.sort((a, b) => b.y - a.y);
-                        globalExtractedText += ' ' + items.map(i => i.text).join(' ');
-                    }
-
-                    parseAllFieldsSmart(globalExtractedText, currentFileName);
-
-                    statusEl.classList.replace('bg-blue-100', 'bg-green-100');
-                    statusEl.classList.replace('text-blue-800', 'text-green-800');
-                    statusEl.innerHTML = '<i class="fa-solid fa-circle-check mr-2"></i> Firma electrónica y campos extraídos del documento.';
-                    document.getElementById('parsedResultForm').classList.remove('hidden');
-
-                } catch (err) {
-                    statusEl.classList.replace('bg-blue-100', 'bg-red-100');
-                    statusEl.classList.replace('text-blue-800', 'text-red-800');
-                    statusEl.innerHTML = '<i class="fa-solid fa-circle-xmark mr-2"></i> No se pudo procesar el PDF.';
-                }
-            };
-            reader.readAsDataURL(file);
+        async function fileToDataURL(file) {
+            return await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = () => reject(new Error('No se pudo preparar el archivo ' + file.name + ' para subirlo.'));
+                reader.readAsDataURL(file);
+            });
         }
 
         function parsePlazoSmart(text, fechaBaseStr) {
@@ -1805,11 +1871,12 @@
             }
 
             let driveUrl = null;
-            if (autoPdfFileBase64) {
+            if (autoPdfFile) {
                 const statusEl = document.getElementById('pdfStatus');
                 statusEl.classList.remove('hidden');
-                statusEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Subiendo archivo PDF a Google Drive...';
-                driveUrl = await subirPDFAGoogleDrive(autoPdfFileBase64, currentFileName);
+                statusEl.textContent = 'Preparando y subiendo el PDF a Google Drive…';
+                const dataUrl = await fileToDataURL(autoPdfFile);
+                driveUrl = await subirPDFAGoogleDrive(dataUrl, currentFileName);
 
                 if (!driveUrl) {
                     alert('Error al subir el archivo a Google Drive. Verifique la URL del Web App.');
@@ -1867,7 +1934,7 @@
                 <p class="text-xs text-slate-400 mt-1">Lectura automática de firma electrónica GDE y datos clave</p>
             `;
 
-            autoPdfFileBase64 = null;
+            autoPdfFile = null;
             currentFileName = '';
         }
 
@@ -2675,5 +2742,6 @@
     </script>
 </body>
 </html>
+
 
 
