@@ -506,9 +506,12 @@
                         </div>
                     </div>
 
-                    <div class="relative mb-4">
-                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400"></i>
-                        <input type="text" id="searchViajesInput" oninput="renderViajesTable()" placeholder="Buscar por Grado, Apellido, Destino, Evento, Lugar, Invita, Calidad..." class="w-full pl-9 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    <div class="grid grid-cols-1 md:grid-cols-[1fr_220px] gap-3 mb-4">
+                        <div class="relative">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400"></i>
+                            <input type="text" id="searchViajesInput" oninput="renderViajesTable()" placeholder="Buscar por grado, apellido, destino, evento, lugar…" class="w-full pl-9 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                        </div>
+                        <select id="filterEstadoViajes" onchange="renderViajesTable()" class="border rounded-lg px-3 py-2 text-sm bg-white"><option value="">Todos los estados</option><option value="continua">Activos / Continúa</option><option value="proximo">Próximamente</option><option value="finalizado">Finalizados</option><option value="rechazado">Rechazados / Cancelados</option></select>
                     </div>
 
                     <div class="overflow-x-auto border rounded-xl">
@@ -659,8 +662,8 @@
             <!-- MÓDULO INFORMACIÓN GENERAL: MOI, correos e información institucional -->
             <section id="informacionTab" class="tab-content hidden">
                 <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 mb-5"><div class="mb-4"><h2 class="text-xl font-bold"><i class="fa-solid fa-circle-info text-sky-600"></i> Información de interés general</h2><p class="text-sm text-slate-500">MOI, correos, pases, cambios de jefatura, obra social y avisos para el personal.</p></div>
-                    <form id="infoForm" onsubmit="saveInformacionForm(event)" class="bg-slate-50 border rounded-xl p-4 grid grid-cols-1 md:grid-cols-3 gap-3 mb-5"><input type="hidden" id="infoId"><div><label class="block text-xs font-semibold mb-1">Título</label><input id="infoTitle" required maxlength="180" class="w-full border rounded-lg p-2 text-sm"></div><div><label class="block text-xs font-semibold mb-1">Tipo</label><select id="infoType" class="w-full border rounded-lg p-2 text-sm"><option>MOI</option><option>Correo</option><option>Obra social</option><option>Pase / cambio de destino</option><option>Cambio de jefatura</option><option>Evento</option><option>Información general</option></select></div><div><label class="block text-xs font-semibold mb-1">Fecha</label><input type="date" id="infoDate" class="w-full border rounded-lg p-2 text-sm"></div><div class="md:col-span-3"><label class="block text-xs font-semibold mb-1">Texto / resumen extraído del PDF</label><textarea id="infoBody" rows="4" maxlength="15000" class="w-full border rounded-lg p-2 text-sm" placeholder="Pegue información o seleccione un PDF para intentar extraer su texto…"></textarea></div><div class="md:col-span-2"><label class="block text-xs font-semibold mb-1">PDF (opcional)</label><input id="infoPdf" type="file" accept="application/pdf" class="w-full border rounded-lg p-2 text-sm" onchange="extractInfoPDF(this.files[0])"><p id="infoPdfStatus" class="text-xs text-slate-500 mt-1">El texto se puede extraer sin conservar el PDF original.</p><label class="inline-flex items-center gap-2 mt-2 text-xs"><input type="checkbox" id="infoKeepPdf"> Guardar también el PDF original privado en Drive</label></div><div class="flex items-end gap-2"><button type="submit" id="infoSaveBtn" class="bg-sky-700 text-white rounded-lg px-4 py-2 text-sm font-bold">Publicar información</button><button type="button" onclick="resetInfoForm()" class="border rounded-lg px-3 py-2 text-sm">Limpiar</button></div></form>
-                    <div class="flex flex-wrap gap-2 mb-3"><input id="infoSearch" oninput="renderInformacion()" placeholder="Buscar por título, tipo o texto…" class="border rounded-lg p-2 text-sm flex-1 min-w-[220px]"><select id="infoFilter" onchange="renderInformacion()" class="border rounded-lg p-2 text-sm"><option value="">Todos los tipos</option><option>MOI</option><option>Correo</option><option>Obra social</option><option>Pase / cambio de destino</option><option>Cambio de jefatura</option><option>Evento</option><option>Información general</option></select></div><div id="infoList" class="space-y-3"></div>
+                    <form id="infoForm" onsubmit="saveInformacionForm(event)" class="bg-slate-50 border rounded-xl p-4 grid grid-cols-1 md:grid-cols-3 gap-3 mb-5"><input type="hidden" id="infoId"><div><label class="block text-xs font-semibold mb-1">Título</label><input id="infoTitle" required maxlength="180" class="w-full border rounded-lg p-2 text-sm"></div><div><label class="block text-xs font-semibold mb-1">Tipo</label><select id="infoType" class="w-full border rounded-lg p-2 text-sm"><option value="CORREO">CORREO</option><option value="MOI">MOI</option><option value="REGLAMENTO">REGLAMENTO</option><option value="DIRECTIVAS">DIRECTIVAS</option><option value="OTROS">OTROS</option></select></div><div><label class="block text-xs font-semibold mb-1">Fecha</label><input type="date" id="infoDate" class="w-full border rounded-lg p-2 text-sm"></div><div class="md:col-span-3"><label class="block text-xs font-semibold mb-1">Texto / resumen extraído del PDF</label><textarea id="infoBody" rows="4" maxlength="15000" class="w-full border rounded-lg p-2 text-sm" placeholder="Pegue información o seleccione un PDF para intentar extraer su texto…"></textarea></div><div class="md:col-span-2"><label class="block text-xs font-semibold mb-1">PDF (opcional)</label><input id="infoPdf" type="file" accept="application/pdf" class="w-full border rounded-lg p-2 text-sm" onchange="extractInfoPDF(this.files[0])"><p id="infoPdfStatus" class="text-xs text-slate-500 mt-1">El texto se puede extraer sin conservar el PDF original.</p><label class="inline-flex items-center gap-2 mt-2 text-xs"><input type="checkbox" id="infoKeepPdf"> Guardar también el PDF original privado en Drive</label></div><div class="flex items-end gap-2"><button type="submit" id="infoSaveBtn" class="bg-sky-700 text-white rounded-lg px-4 py-2 text-sm font-bold">Publicar información</button><button type="button" onclick="resetInfoForm()" class="border rounded-lg px-3 py-2 text-sm">Limpiar</button></div></form>
+                    <div class="flex flex-wrap gap-2 mb-3"><input id="infoSearch" oninput="renderInformacion()" placeholder="Buscar por título, tipo o texto…" class="border rounded-lg p-2 text-sm flex-1 min-w-[220px]"><select id="infoFilter" onchange="renderInformacion()" class="border rounded-lg p-2 text-sm"><option value="">Todos los tipos</option><option value="CORREO">CORREO</option><option value="MOI">MOI</option><option value="REGLAMENTO">REGLAMENTO</option><option value="DIRECTIVAS">DIRECTIVAS</option><option value="OTROS">OTROS</option></select></div><div id="infoList" class="space-y-3"></div>
                 </div>
             </section>
         </main>
@@ -1048,7 +1051,7 @@
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
         // Endpoint del backend seguro. No contiene contraseñas ni secretos.
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw_IZoKo5trviRFeHugtSLrF9T5etvPWp2qg-hsSe5wptrV634tTrq5YTBM-fK7nCc1/exec';
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw5s3dsQMRSKAuqjAs_CwhS98tIG4vY_J_yUbQKDulu29BDWn0YVeGyfBSABch_DfgN/exec';
         let authToken = sessionStorage.getItem('dgse_auth_token') || '';
         let tableRevisions = { Notas: '', Expedientes: '', Viajes: '' };
         let dataLoaded = false;
@@ -1526,7 +1529,7 @@
         async function saveInformacionForm(e){e.preventDefault();if(!hasPermission('informacion','create')&&!hasPermission('informacion','edit')){alert('No tiene permiso para publicar información.');return;}const btn=document.getElementById('infoSaveBtn');btn.disabled=true;try{let pdf=null;if(infoPdfFile&&document.getElementById('infoKeepPdf').checked){const dataUrl=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=()=>reject(new Error('No se pudo leer el PDF'));r.readAsDataURL(infoPdfFile);});const up=await subirPDFAGoogleDrive(dataUrl,infoPdfFile.name,'informacion');pdf={fileId:up.fileId,fileName:up.fileName||infoPdfFile.name,mimeType:'application/pdf'};}const oldInfo=infoItems.find(x=>String(x.id)===String(document.getElementById('infoId').value));const item={id:document.getElementById('infoId').value||'info-'+Date.now(),titulo:document.getElementById('infoTitle').value.trim(),tipo:document.getElementById('infoType').value,fecha:document.getElementById('infoDate').value,texto:document.getElementById('infoBody').value.trim(),pdf:pdf||(oldInfo&&oldInfo.pdf)||null};await serverRequest({action:'saveInformacion',token:authToken,item});resetInfoForm();await loadInformacion();alert('Información publicada.');}catch(err){alert('No se pudo publicar la información: '+err.message);}finally{btn.disabled=false;}}
         function renderInformacion(){const q=(document.getElementById('infoSearch')?.value||'').toLowerCase(),f=document.getElementById('infoFilter')?.value||'';const list=infoItems.filter(x=>(!f||x.tipo===f)&&(!q||[x.titulo,x.tipo,x.texto].some(v=>String(v||'').toLowerCase().includes(q)))).sort((a,b)=>String(b.fecha||b.createdAt||'').localeCompare(String(a.fecha||a.createdAt||'')));document.getElementById('infoList').innerHTML=list.length?list.map(x=>`<article class="border rounded-xl p-4"><div class="flex flex-wrap justify-between gap-2"><h3 class="font-bold">${escapeHtml(x.titulo||'Sin título')}</h3><span class="text-xs rounded-full bg-sky-100 text-sky-800 px-2 py-1">${escapeHtml(x.tipo||'Información')}</span></div><p class="text-xs text-slate-500 mt-1">${escapeHtml(x.fecha||'')}</p><p class="text-sm mt-3 whitespace-pre-wrap break-words">${escapeHtml(x.texto||'Sin descripción')}</p>${x.pdf&&x.pdf.fileId?`<button data-action="open-pdf" data-file-id="${escapeHtml(x.pdf.fileId)}" data-file-name="${escapeHtml(x.pdf.fileName||'Información.pdf')}" class="text-blue-700 text-xs font-bold mt-3">Ver PDF original</button>`:''}${hasPermission('informacion','edit')?`<button onclick="editInfoItem('${escapeHtml(x.id)}')" class="text-amber-700 text-xs font-bold mt-3 ml-3">Editar</button>`:''}${hasPermission('informacion','delete')?`<button onclick="removeInfoItem('${escapeHtml(x.id)}')" class="text-red-700 text-xs font-bold mt-3 ml-3">Eliminar</button>`:''}</article>`).join(''):'<p class="text-sm text-slate-500 border rounded-lg p-4">No hay información publicada.</p>';const form=document.getElementById('infoForm');if(form)form.querySelectorAll('input,select,textarea,button').forEach(el=>{if(el.type!=='hidden')el.disabled=!hasPermission('informacion','create')&&!hasPermission('informacion','edit');});}
         async function removeInfoItem(id){if(!hasPermission('informacion','delete'))return;if(!confirm('¿Eliminar esta publicación de información?'))return;try{await serverRequest({action:'deleteInformacion',token:authToken,id});await loadInformacion();}catch(e){alert(e.message);}}
-        function editInfoItem(id){const x=infoItems.find(a=>String(a.id)===String(id));if(!x||!hasPermission('informacion','edit'))return;document.getElementById('infoForm').querySelectorAll('input,select,textarea,button').forEach(el=>{if(el.type!=='hidden')el.disabled=false;});document.getElementById('infoId').value=x.id;document.getElementById('infoTitle').value=x.titulo||'';document.getElementById('infoType').value=x.tipo||'Información general';document.getElementById('infoDate').value=x.fecha||'';document.getElementById('infoBody').value=x.texto||'';infoPdfFile=null;document.getElementById('infoKeepPdf').checked=false;document.getElementById('infoPdfStatus').textContent=x.pdf?'Ya tiene un PDF original vinculado; seleccione otro solo si desea adjuntar uno nuevo.':'No hay PDF original guardado.';}
+        function editInfoItem(id){const x=infoItems.find(a=>String(a.id)===String(id));if(!x||!hasPermission('informacion','edit'))return;document.getElementById('infoForm').querySelectorAll('input,select,textarea,button').forEach(el=>{if(el.type!=='hidden')el.disabled=false;});document.getElementById('infoId').value=x.id;document.getElementById('infoTitle').value=x.titulo||'';document.getElementById('infoType').value=['CORREO','MOI','REGLAMENTO','DIRECTIVAS','OTROS'].includes(String(x.tipo||'').toUpperCase())?String(x.tipo).toUpperCase():'OTROS';document.getElementById('infoDate').value=x.fecha||'';document.getElementById('infoBody').value=x.texto||'';infoPdfFile=null;document.getElementById('infoKeepPdf').checked=false;document.getElementById('infoPdfStatus').textContent=x.pdf?'Ya tiene un PDF original vinculado; seleccione otro solo si desea adjuntar uno nuevo.':'No hay PDF original guardado.';}
         async function openPermissionsEditor(username){if(!currentUser||currentUser.role!=='Administrador')return;if(String(username).toLowerCase()===String(currentUser.username).toLowerCase()){alert('Por seguridad, no puede modificar sus propios permisos.');return;}permissionEditorUser=username;const user=usersDB[username]||{};document.getElementById('permissionsUserLabel').textContent=username.toUpperCase();const rows=document.getElementById('permissionRows');rows.innerHTML=Object.entries(PERMISSION_MODULES).map(([module,label])=>`<tr class="border-t"><td class="p-2 font-semibold">${label}</td>${PERMISSION_ACTIONS.map(a=>`<td class="p-2 text-center"><input type="checkbox" data-module="${module}" data-action="${a}" ${user.permissions&&user.permissions[module]&&user.permissions[module][a]===true?'checked':''} ${module==='admin'?'disabled':''}></td>`).join('')}</tr>`).join('');document.getElementById('toggleUserEnabledBtn').textContent=user.enabled===false?'Habilitar cuenta':'Deshabilitar cuenta';document.getElementById('permissionsModal').classList.remove('hidden');}
         function closePermissionsEditor(){document.getElementById('permissionsModal').classList.add('hidden');permissionEditorUser='';}
         async function savePermissionEditor(){if(!permissionEditorUser)return;const permissions={};Object.keys(PERMISSION_MODULES).forEach(m=>{permissions[m]={};PERMISSION_ACTIONS.forEach(a=>{const el=document.querySelector(`#permissionRows input[data-module="${m}"][data-action="${a}"]`);permissions[m][a]=!!(el&&el.checked);});});try{await serverRequest({action:'saveUserPermissions',token:authToken,username:permissionEditorUser,permissions});await renderUsersTable();closePermissionsEditor();alert('Permisos actualizados. Las sesiones activas del usuario se invalidaron para aplicar los cambios.');}catch(e){alert(e.message);}}
@@ -1778,12 +1781,20 @@
                 {keys:['portugal','lisboa'],lat:38.7223,lon:-9.1393,name:'Portugal'}
             ];
             const norm = value => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
-            const statusColor = status => {
-                const s = norm(status);
-                if (/rechaz|cancelad|anulad/.test(s)) return '#dc2626';
-                if (/finaliz|termin|regres|cerrad|cumplid|realizad/.test(s)) return '#16a34a';
-                if (/activo|en curso|iniciado|viajando|comisionado|continua|en viaje/.test(s)) return '#2563eb';
-                return '#f59e0b';
+            const resolveTravelStatus = v => {
+                const raw = norm(v.estado || v.estatus || v.situacion || v.status || '');
+                // Los valores usados por el formulario incluyen explícitamente «Continúa».
+                if (/rechaz|cancelad|anulad/.test(raw)) return {label:v.estado||v.estatus||v.situacion||'Rechazado', color:'#dc2626', key:'rechazado'};
+                if (/continua|activo|en curso|iniciado|viajando|comisionado|en viaje|vigente/.test(raw)) return {label:v.estado||v.estatus||v.situacion, color:'#2563eb', key:'continua'};
+                if (/finaliz|termin|regres|cerrad|cumplid|realizad/.test(raw)) return {label:v.estado||v.estatus||v.situacion, color:'#16a34a', key:'finalizado'};
+                const today = new Date(); today.setHours(0,0,0,0);
+                const parseDate = value => { if(!value) return null; const d=new Date(String(value).slice(0,10)+'T00:00:00'); return Number.isNaN(d.getTime())?null:d; };
+                const start=parseDate(v.salida||v.fechaSalida||v.fecha_inicio||v.fechaInicio);
+                const end=parseDate(v.llegada||v.fechaLlegada||v.fecha_fin||v.fechaFin);
+                if(start && start<=today && (!end || end>=today)) return {label:v.estado||'Continúa',color:'#2563eb',key:'continua'};
+                if(start && start>today) return {label:v.estado||'Próximamente',color:'#f59e0b',key:'proximo'};
+                if(end && end<today) return {label:v.estado||'Finalizado',color:'#16a34a',key:'finalizado'};
+                return {label:v.estado||v.estatus||v.situacion||'Próximamente',color:'#f59e0b',key:'proximo'};
             };
             // Usar la tabla completa y los campos que realmente crea el formulario de viajes.
             const all = Array.isArray(viajesDB) ? viajesDB.filter(v => v && typeof v === 'object') : [];
@@ -1796,8 +1807,9 @@
                 let place = places.find(p => p.keys.some(k => searchable.includes(norm(k))));
                 const matched = !!place;
                 if (!place) place = {lat:-34.6037,lon:-58.3816,name:'Ubicación pendiente de georreferenciar'};
-                const status = String(v.estado || v.estatus || v.situacion || 'Próximamente').trim();
-                const color = statusColor(status);
+                const resolvedStatus = resolveTravelStatus(v);
+                const status = String(resolvedStatus.label || 'Próximamente').trim();
+                const color = resolvedStatus.color;
                 const people = Array.isArray(v.personas) ? v.personas : [];
                 const peopleText = people.length ? people.map(p => [p.grado,p.apellido].filter(Boolean).join(' ')).join(', ') : String(v.personal || 'Personal no consignado');
                 const label = raw || place.name;
@@ -1807,7 +1819,7 @@
                 const baseKey = place.name + '|' + norm(label); // Se conserva un grupo por destino para separar marcadores coincidentes.
                 const seen = offsetCounts[baseKey] || 0; offsetCounts[baseKey] = seen + 1;
                 const angle = seen * 2.399963229728653;
-                const spread = seen ? Math.min(2.4, 0.34 * Math.sqrt(seen)) : 0;
+                const spread = seen ? Math.min(5.5, 1.15 * Math.sqrt(seen)) : 0;
                 const markerLat = place.lat + Math.sin(angle) * spread;
                 const markerLon = place.lon + Math.cos(angle) * spread;
                 const marker = L.circleMarker([markerLat,markerLon], {radius:10,fillColor:color,color:'#ffffff',weight:2,opacity:1,fillOpacity:.98}).addTo(mapMarkersLayer).bindPopup(popup);
@@ -1818,7 +1830,7 @@
             const legendId = 'mapStatusLegend'; let legend = document.getElementById(legendId);
             if (!legend && mapInstance.getContainer().parentElement) { legend=document.createElement('div'); legend.id=legendId; legend.className='flex flex-wrap gap-3 text-xs mt-2'; legend.innerHTML='<strong id="mapMarkerCountLabel" class="text-slate-800">Viajes representados: 0</strong><span><b style="color:#2563eb">●</b> Activo / en curso</span><span><b style="color:#f59e0b">●</b> Próximamente / no iniciado</span><span><b style="color:#16a34a">●</b> Finalizado</span><span><b style="color:#dc2626">●</b> Rechazado / cancelado</span><span class="text-slate-500">Destinos desconocidos se muestran en Buenos Aires como referencia.</span>'; mapInstance.getContainer().parentElement.appendChild(legend); }
             const markerCountLabel=document.getElementById('mapMarkerCountLabel'); if(markerCountLabel) markerCountLabel.textContent=`Viajes representados: ${bounds.length} de ${all.length}`;
-            if (bounds.length > 1) mapInstance.fitBounds(bounds, {padding:[25,25], maxZoom:6});
+            if (bounds.length > 1) mapInstance.fitBounds(bounds, {padding:[35,35], maxZoom:7});
             else if (bounds.length === 1) mapInstance.setView(bounds[0], 5);
         }
 
@@ -2677,6 +2689,7 @@
         function renderViajesTable() {
             const body = document.getElementById('viajesTableBody');
             const search = document.getElementById('searchViajesInput').value.toLowerCase();
+            const statusFilter = document.getElementById('filterEstadoViajes')?.value || '';
             body.innerHTML = '';
 
             let countExterior = 0;
@@ -2739,7 +2752,10 @@
                     );
                 }
 
-                return matchLugar || matchEvento || matchInvita || matchCalidad || matchPersona;
+                const rawStatus = String(v.estado || v.estatus || v.situacion || '').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+                let statusKey = /rechaz|cancelad|anulad/.test(rawStatus) ? 'rechazado' : /continua|activo|en curso|iniciado|viajando|comisionado|en viaje|vigente/.test(rawStatus) ? 'continua' : /finaliz|termin|regres|cerrad|cumplid|realizad/.test(rawStatus) ? 'finalizado' : 'proximo';
+                const textMatch = !search || matchLugar || matchEvento || matchInvita || matchCalidad || matchPersona;
+                return textMatch && (!statusFilter || statusKey === statusFilter);
             });
 
             if (filtered.length === 0) {
@@ -2911,6 +2927,7 @@
     </script>
 </body>
 </html>
+
 
 
 
