@@ -662,8 +662,16 @@
             </section>
             <!-- MÓDULO INFORMACIÓN GENERAL: MOI, correos e información institucional -->
             <section id="informacionTab" class="tab-content hidden">
-                <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 mb-5"><div class="mb-4"><h2 class="text-xl font-bold"><i class="fa-solid fa-circle-info text-sky-600"></i> Información de interés general</h2><p class="text-sm text-slate-500">MOI, correos, pases, cambios de jefatura, obra social y avisos para el personal.</p></div>
-                    <form id="infoForm" onsubmit="saveInformacionForm(event)" class="bg-slate-50 border rounded-xl p-4 grid grid-cols-1 md:grid-cols-3 gap-3 mb-5"><input type="hidden" id="infoId"><div><label class="block text-xs font-semibold mb-1">Título</label><input id="infoTitle" required maxlength="180" class="w-full border rounded-lg p-2 text-sm"></div><div><label class="block text-xs font-semibold mb-1">Tipo</label><select id="infoType" class="w-full border rounded-lg p-2 text-sm"><option value="CORREO">CORREO</option><option value="MOI">MOI</option><option value="REGLAMENTO">REGLAMENTO</option><option value="DIRECTIVAS">DIRECTIVAS</option><option value="OTROS">OTROS</option></select></div><div><label class="block text-xs font-semibold mb-1">Fecha</label><input type="date" id="infoDate" class="w-full border rounded-lg p-2 text-sm"></div><div class="md:col-span-3"><label class="block text-xs font-semibold mb-1">Texto / resumen extraído del PDF</label><textarea id="infoBody" rows="4" maxlength="15000" class="w-full border rounded-lg p-2 text-sm" placeholder="Pegue información o seleccione un PDF para intentar extraer su texto…"></textarea></div><div class="md:col-span-2"><label class="block text-xs font-semibold mb-1">PDF (opcional)</label><input id="infoPdf" type="file" accept="application/pdf" class="w-full border rounded-lg p-2 text-sm" onchange="extractInfoPDF(this.files[0])"><p id="infoPdfStatus" class="text-xs text-slate-500 mt-1">El texto se puede extraer sin conservar el PDF original.</p><label class="inline-flex items-center gap-2 mt-2 text-xs"><input type="checkbox" id="infoKeepPdf"> Guardar también el PDF original privado en Drive</label></div><div class="flex items-end gap-2"><button type="submit" id="infoSaveBtn" class="bg-sky-700 text-white rounded-lg px-4 py-2 text-sm font-bold">Publicar información</button><button type="button" onclick="resetInfoForm()" class="border rounded-lg px-3 py-2 text-sm">Limpiar</button></div></form>
+                <div class="bg-gradient-to-br from-sky-50 via-white to-violet-50 rounded-2xl p-5 md:p-6 shadow-sm border border-sky-100 mb-5"><div class="mb-5 rounded-xl bg-gradient-to-r from-sky-700 via-indigo-700 to-violet-700 text-white p-5 shadow-md"><div class="flex items-center gap-3"><div class="rounded-xl bg-white/15 p-3"><i class="fa-solid fa-circle-info text-2xl"></i></div><div><h2 class="text-xl md:text-2xl font-extrabold">Información de interés general</h2><p class="text-sm text-sky-100 mt-1">MOI, correos, pases, cambios de jefatura, obra social y avisos para el personal.</p></div></div></div>
+                    <form id="infoForm" onsubmit="saveInformacionForm(event)" class="bg-white/90 border border-sky-100 rounded-xl p-4 md:p-5 grid grid-cols-1 md:grid-cols-3 gap-3 mb-5 shadow-sm"><input type="hidden" id="infoId"><div><label class="block text-xs font-semibold mb-1">Título</label><input id="infoTitle" required maxlength="180" class="w-full border rounded-lg p-2 text-sm"></div><div><label class="block text-xs font-semibold mb-1">Tipo</label><select id="infoType" class="w-full border rounded-lg p-2 text-sm"><option value="CORREO">CORREO</option><option value="MOI">MOI</option><option value="REGLAMENTO">REGLAMENTO</option><option value="DIRECTIVAS">DIRECTIVAS</option><option value="OTROS">OTROS</option></select></div><div><label class="block text-xs font-semibold mb-1">Fecha</label><input type="date" id="infoDate" class="w-full border rounded-lg p-2 text-sm"></div><div class="md:col-span-3"><label class="block text-xs font-semibold mb-1">Texto / resumen extraído del PDF</label><textarea id="infoBody" rows="4" maxlength="15000" class="w-full border rounded-lg p-2 text-sm" placeholder="Pegue información o seleccione un PDF para intentar extraer su texto…"></textarea></div><div class="md:col-span-2"><label class="block text-xs font-semibold mb-1">PDF (opcional)</label><input id="infoPdf" type="file" accept="application/pdf" class="w-full border rounded-lg p-2 text-sm" onchange="extractInfoPDF(this.files[0])"><p id="infoPdfStatus" class="text-xs text-slate-500 mt-1">El texto se puede extraer sin conservar el PDF original.</p><label class="inline-flex items-center gap-2 mt-2 text-xs"><input type="checkbox" id="infoKeepPdf"> Guardar también el PDF original privado en Drive</label></div><div class="flex items-end gap-2"><button type="submit" id="infoSaveBtn" class="bg-sky-700 text-white rounded-lg px-4 py-2 text-sm font-bold">Publicar información</button><button type="button" onclick="resetInfoForm()" class="border rounded-lg px-3 py-2 text-sm">Limpiar</button></div></form>
+                    <div class="flex flex-wrap gap-2 mb-3" aria-label="Accesos rápidos de información general">
+                        <button type="button" onclick="quickInfoFilter('')" class="rounded-full px-3 py-1.5 text-xs font-bold border border-slate-300 bg-white text-slate-700 hover:bg-slate-100"><i class="fa-solid fa-layer-group mr-1"></i> Todas</button>
+                        <button type="button" onclick="quickInfoFilter('CORREO')" class="rounded-full px-3 py-1.5 text-xs font-bold border border-sky-200 bg-sky-100 text-sky-800 hover:bg-sky-200"><i class="fa-solid fa-envelope mr-1"></i> Correos</button>
+                        <button type="button" onclick="quickInfoFilter('MOI')" class="rounded-full px-3 py-1.5 text-xs font-bold border border-violet-200 bg-violet-100 text-violet-800 hover:bg-violet-200"><i class="fa-solid fa-file-lines mr-1"></i> MOI</button>
+                        <button type="button" onclick="quickInfoFilter('REGLAMENTO')" class="rounded-full px-3 py-1.5 text-xs font-bold border border-amber-200 bg-amber-100 text-amber-800 hover:bg-amber-200"><i class="fa-solid fa-book mr-1"></i> Reglamentos</button>
+                        <button type="button" onclick="quickInfoFilter('DIRECTIVAS')" class="rounded-full px-3 py-1.5 text-xs font-bold border border-emerald-200 bg-emerald-100 text-emerald-800 hover:bg-emerald-200"><i class="fa-solid fa-list-check mr-1"></i> Directivas</button>
+                        <button type="button" onclick="quickInfoFilter('OTROS')" class="rounded-full px-3 py-1.5 text-xs font-bold border border-pink-200 bg-pink-100 text-pink-800 hover:bg-pink-200"><i class="fa-solid fa-star mr-1"></i> Otros</button>
+                    </div>
                     <div class="flex flex-wrap gap-2 mb-3"><input id="infoSearch" oninput="renderInformacion()" placeholder="Buscar por título, tipo o texto…" class="border rounded-lg p-2 text-sm flex-1 min-w-[220px]"><select id="infoFilter" onchange="renderInformacion()" class="border rounded-lg p-2 text-sm"><option value="">Todos los tipos</option><option value="CORREO">CORREO</option><option value="MOI">MOI</option><option value="REGLAMENTO">REGLAMENTO</option><option value="DIRECTIVAS">DIRECTIVAS</option><option value="OTROS">OTROS</option></select></div><div id="infoList" class="space-y-3"></div>
                 </div>
             </section>
@@ -1052,7 +1060,7 @@
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
         // Endpoint del backend seguro. No contiene contraseñas ni secretos.
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw5s3dsQMRSKAuqjAs_CwhS98tIG4vY_J_yUbQKDulu29BDWn0YVeGyfBSABch_DfgN/exec';
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx_f8jcCgTqppoqeJ-Ri0deRqaInah5gdddtrkMkiMrHLqkd_Hm0PQuATWbAW_sw2ln/exec';
         let authToken = sessionStorage.getItem('dgse_auth_token') || '';
         let tableRevisions = { Notas: '', Expedientes: '', Viajes: '' };
         let dataLoaded = false;
@@ -1528,7 +1536,8 @@
         }
         function resetInfoForm(){document.getElementById('infoForm').reset();document.getElementById('infoId').value='';infoPdfFile=null;document.getElementById('infoPdfStatus').textContent='El texto se puede extraer sin conservar el PDF original.';}
         async function saveInformacionForm(e){e.preventDefault();if(!hasPermission('informacion','create')&&!hasPermission('informacion','edit')){alert('No tiene permiso para publicar información.');return;}const btn=document.getElementById('infoSaveBtn');btn.disabled=true;try{let pdf=null;if(infoPdfFile&&document.getElementById('infoKeepPdf').checked){const dataUrl=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=()=>reject(new Error('No se pudo leer el PDF'));r.readAsDataURL(infoPdfFile);});const up=await subirPDFAGoogleDrive(dataUrl,infoPdfFile.name,'informacion');pdf={fileId:up.fileId,fileName:up.fileName||infoPdfFile.name,mimeType:'application/pdf'};}const oldInfo=infoItems.find(x=>String(x.id)===String(document.getElementById('infoId').value));const item={id:document.getElementById('infoId').value||'info-'+Date.now(),titulo:document.getElementById('infoTitle').value.trim(),tipo:document.getElementById('infoType').value,fecha:document.getElementById('infoDate').value,texto:document.getElementById('infoBody').value.trim(),pdf:pdf||(oldInfo&&oldInfo.pdf)||null};await serverRequest({action:'saveInformacion',token:authToken,item});resetInfoForm();await loadInformacion();alert('Información publicada.');}catch(err){alert('No se pudo publicar la información: '+err.message);}finally{btn.disabled=false;}}
-        function renderInformacion(){const q=(document.getElementById('infoSearch')?.value||'').toLowerCase(),f=document.getElementById('infoFilter')?.value||'';const list=infoItems.filter(x=>(!f||x.tipo===f)&&(!q||[x.titulo,x.tipo,x.texto].some(v=>String(v||'').toLowerCase().includes(q)))).sort((a,b)=>String(b.fecha||b.createdAt||'').localeCompare(String(a.fecha||a.createdAt||'')));document.getElementById('infoList').innerHTML=list.length?list.map(x=>`<article class="border rounded-xl p-4"><div class="flex flex-wrap justify-between gap-2"><h3 class="font-bold">${escapeHtml(x.titulo||'Sin título')}</h3><span class="text-xs rounded-full bg-sky-100 text-sky-800 px-2 py-1">${escapeHtml(x.tipo||'Información')}</span></div><p class="text-xs text-slate-500 mt-1">${escapeHtml(x.fecha||'')}</p><p class="text-sm mt-3 whitespace-pre-wrap break-words">${escapeHtml(x.texto||'Sin descripción')}</p>${x.pdf&&x.pdf.fileId?`<button data-action="open-pdf" data-file-id="${escapeHtml(x.pdf.fileId)}" data-file-name="${escapeHtml(x.pdf.fileName||'Información.pdf')}" class="text-blue-700 text-xs font-bold mt-3">Ver PDF original</button>`:''}${hasPermission('informacion','edit')?`<button onclick="editInfoItem('${escapeHtml(x.id)}')" class="text-amber-700 text-xs font-bold mt-3 ml-3">Editar</button>`:''}${hasPermission('informacion','delete')?`<button onclick="removeInfoItem('${escapeHtml(x.id)}')" class="text-red-700 text-xs font-bold mt-3 ml-3">Eliminar</button>`:''}</article>`).join(''):'<p class="text-sm text-slate-500 border rounded-lg p-4">No hay información publicada.</p>';const form=document.getElementById('infoForm');if(form)form.querySelectorAll('input,select,textarea,button').forEach(el=>{if(el.type!=='hidden')el.disabled=!hasPermission('informacion','create')&&!hasPermission('informacion','edit');});}
+        function quickInfoFilter(tipo){const filter=document.getElementById('infoFilter');if(filter)filter.value=tipo||'';renderInformacion();const target=document.getElementById('infoList');if(target)target.scrollIntoView({behavior:'smooth',block:'nearest'});}
+        function renderInformacion(){const q=(document.getElementById('infoSearch')?.value||'').toLowerCase(),f=document.getElementById('infoFilter')?.value||'';const list=infoItems.filter(x=>(!f||x.tipo===f)&&(!q||[x.titulo,x.tipo,x.texto].some(v=>String(v||'').toLowerCase().includes(q)))).sort((a,b)=>String(b.fecha||b.createdAt||'').localeCompare(String(a.fecha||a.createdAt||'')));document.getElementById('infoList').innerHTML=list.length?list.map(x=>`<article class="group border border-slate-200 border-l-4 border-l-sky-500 rounded-xl p-4 md:p-5 bg-white shadow-sm hover:shadow-md hover:border-sky-200 transition"><div class="flex flex-wrap justify-between gap-2"><h3 class="font-bold text-slate-800">${escapeHtml(x.titulo||'Sin título')}</h3><span class="text-xs font-bold rounded-full px-3 py-1 ${x.tipo==='CORREO'?'bg-sky-100 text-sky-800':x.tipo==='MOI'?'bg-violet-100 text-violet-800':x.tipo==='REGLAMENTO'?'bg-amber-100 text-amber-800':x.tipo==='DIRECTIVAS'?'bg-emerald-100 text-emerald-800':'bg-pink-100 text-pink-800'}">${escapeHtml(x.tipo||'Información')}</span></div><p class="text-xs text-slate-500 mt-1"><i class="fa-regular fa-calendar mr-1"></i>${escapeHtml(x.fecha||'Sin fecha')}</p><p class="text-sm mt-3 whitespace-pre-wrap break-words text-slate-700">${escapeHtml(x.texto||'Sin descripción')}</p>${x.pdf&&x.pdf.fileId?`<button data-action="open-pdf" data-file-id="${escapeHtml(x.pdf.fileId)}" data-file-name="${escapeHtml(x.pdf.fileName||'Información.pdf')}" class="text-blue-700 text-xs font-bold mt-3">Ver PDF original</button>`:''}${hasPermission('informacion','edit')?`<button onclick="editInfoItem('${escapeHtml(x.id)}')" class="text-amber-700 text-xs font-bold mt-3 ml-3">Editar</button>`:''}${hasPermission('informacion','delete')?`<button onclick="removeInfoItem('${escapeHtml(x.id)}')" class="text-red-700 text-xs font-bold mt-3 ml-3">Eliminar</button>`:''}</article>`).join(''):'<p class="text-sm text-slate-500 border rounded-lg p-4">No hay información publicada.</p>';const form=document.getElementById('infoForm');if(form)form.querySelectorAll('input,select,textarea,button').forEach(el=>{if(el.type!=='hidden')el.disabled=!hasPermission('informacion','create')&&!hasPermission('informacion','edit');});}
         async function removeInfoItem(id){if(!hasPermission('informacion','delete'))return;if(!confirm('¿Eliminar esta publicación de información?'))return;try{await serverRequest({action:'deleteInformacion',token:authToken,id});await loadInformacion();}catch(e){alert(e.message);}}
         function editInfoItem(id){const x=infoItems.find(a=>String(a.id)===String(id));if(!x||!hasPermission('informacion','edit'))return;document.getElementById('infoForm').querySelectorAll('input,select,textarea,button').forEach(el=>{if(el.type!=='hidden')el.disabled=false;});document.getElementById('infoId').value=x.id;document.getElementById('infoTitle').value=x.titulo||'';document.getElementById('infoType').value=['CORREO','MOI','REGLAMENTO','DIRECTIVAS','OTROS'].includes(String(x.tipo||'').toUpperCase())?String(x.tipo).toUpperCase():'OTROS';document.getElementById('infoDate').value=x.fecha||'';document.getElementById('infoBody').value=x.texto||'';infoPdfFile=null;document.getElementById('infoKeepPdf').checked=false;document.getElementById('infoPdfStatus').textContent=x.pdf?'Ya tiene un PDF original vinculado; seleccione otro solo si desea adjuntar uno nuevo.':'No hay PDF original guardado.';}
         async function openPermissionsEditor(username){if(!currentUser||currentUser.role!=='Administrador')return;if(String(username).toLowerCase()===String(currentUser.username).toLowerCase()){alert('Por seguridad, no puede modificar sus propios permisos.');return;}permissionEditorUser=username;const user=usersDB[username]||{};document.getElementById('permissionsUserLabel').textContent=username.toUpperCase();const rows=document.getElementById('permissionRows');rows.innerHTML=Object.entries(PERMISSION_MODULES).map(([module,label])=>`<tr class="border-t"><td class="p-2 font-semibold">${label}</td>${PERMISSION_ACTIONS.map(a=>`<td class="p-2 text-center"><input type="checkbox" data-module="${module}" data-action="${a}" ${user.permissions&&user.permissions[module]&&user.permissions[module][a]===true?'checked':''} ${module==='admin'?'disabled':''}></td>`).join('')}</tr>`).join('');document.getElementById('toggleUserEnabledBtn').textContent=user.enabled===false?'Habilitar cuenta':'Deshabilitar cuenta';document.getElementById('permissionsModal').classList.remove('hidden');}
@@ -1751,87 +1760,149 @@
             if (!mapInstance || typeof L === 'undefined') return;
             if (!mapMarkersLayer) mapMarkersLayer = L.layerGroup().addTo(mapInstance);
             mapMarkersLayer.clearLayers();
+
+            // Coordenadas de ciudades/países frecuentes. Se prioriza el destino específico
+            // del viaje y se evita inferir una ubicación por palabras genéricas como PNA.
             const places = [
-                {keys:['ushuaia','tierra del fuego'],lat:-54.8019,lon:-68.303,name:'Ushuaia, Argentina'},
+                {keys:['ushuaia'],lat:-54.8019,lon:-68.303,name:'Ushuaia, Argentina'},
                 {keys:['mar del plata'],lat:-38.0055,lon:-57.5426,name:'Mar del Plata, Argentina'},
-                {keys:['cordoba','córdoba'],lat:-31.4201,lon:-64.1888,name:'Córdoba, Argentina'},
+                {keys:['san carlos de bariloche','bariloche'],lat:-41.1335,lon:-71.3103,name:'Bariloche, Argentina'},
+                {keys:['puerto madryn'],lat:-42.7692,lon:-65.0385,name:'Puerto Madryn, Argentina'},
+                {keys:['comodoro rivadavia'],lat:-45.8641,lon:-67.4966,name:'Comodoro Rivadavia, Argentina'},
+                {keys:['rio gallegos'],lat:-51.623,lon:-69.2168,name:'Río Gallegos, Argentina'},
+                {keys:['neuquen'],lat:-38.9516,lon:-68.0591,name:'Neuquén, Argentina'},
+                {keys:['san martin de los andes'],lat:-40.1579,lon:-71.3534,name:'San Martín de los Andes, Argentina'},
+                {keys:['san juan'],lat:-31.5375,lon:-68.5364,name:'San Juan, Argentina'},
+                {keys:['san luis'],lat:-33.3017,lon:-66.3378,name:'San Luis, Argentina'},
+                {keys:['santiago del estero'],lat:-27.7834,lon:-64.2642,name:'Santiago del Estero, Argentina'},
+                {keys:['la plata'],lat:-34.9214,lon:-57.9544,name:'La Plata, Argentina'},
+                {keys:['cordoba'],lat:-31.4201,lon:-64.1888,name:'Córdoba, Argentina'},
                 {keys:['rosario'],lat:-32.9468,lon:-60.6393,name:'Rosario, Argentina'},
                 {keys:['mendoza'],lat:-32.8895,lon:-68.8458,name:'Mendoza, Argentina'},
-                {keys:['bariloche'],lat:-41.1335,lon:-71.3103,name:'Bariloche, Argentina'},
                 {keys:['salta'],lat:-24.7821,lon:-65.4232,name:'Salta, Argentina'},
-                {keys:['neuquen','neuquén'],lat:-38.9516,lon:-68.0591,name:'Neuquén, Argentina'},
-                {keys:['argentina','buenos aires','caba','capital federal','prefectura','pna'],lat:-34.6037,lon:-58.3816,name:'Buenos Aires, Argentina'},
-                {keys:['estados unidos','eeuu','usa','washington','new york','nueva york','miami','houston'],lat:38.8951,lon:-77.0364,name:'Estados Unidos'},
-                {keys:['españa','espana','madrid','barcelona'],lat:40.4168,lon:-3.7038,name:'España'},
-                {keys:['brasil','brasilia','sao paulo','são paulo','rio de janeiro'],lat:-15.7975,lon:-47.8919,name:'Brasil'},
-                {keys:['chile','santiago de chile'],lat:-33.4489,lon:-70.6693,name:'Chile'},
-                {keys:['uruguay','montevideo'],lat:-34.9011,lon:-56.1645,name:'Uruguay'},
-                {keys:['francia','paris','parís'],lat:48.8566,lon:2.3522,name:'Francia'},
-                {keys:['italia','roma','rome'],lat:41.9028,lon:12.4964,name:'Italia'},
-                {keys:['reino unido','united kingdom','londres','london'],lat:51.5074,lon:-0.1278,name:'Reino Unido'},
-                {keys:['alemania','berlin','berlín'],lat:52.52,lon:13.405,name:'Alemania'},
-                {keys:['peru','perú','lima'],lat:-12.0464,lon:-77.0428,name:'Perú'},
-                {keys:['paraguay','asuncion','asunción'],lat:-25.2637,lon:-57.5759,name:'Paraguay'},
-                {keys:['bolivia','la paz'],lat:-16.4897,lon:-68.1193,name:'Bolivia'},
-                {keys:['colombia','bogota','bogotá'],lat:4.711,lon:-74.0721,name:'Colombia'},
-                {keys:['ecuador','quito'],lat:-0.1807,lon:-78.4678,name:'Ecuador'},
-                {keys:['panama','panamá'],lat:8.9824,lon:-79.5199,name:'Panamá'},
-                {keys:['canada','canadá','ottawa','toronto'],lat:45.4215,lon:-75.6972,name:'Canadá'},
-                {keys:['japon','japón','tokio','tokyo'],lat:35.6762,lon:139.6503,name:'Japón'},
-                {keys:['china','beijing','pekin','pekín'],lat:39.9042,lon:116.4074,name:'China'},
-                {keys:['portugal','lisboa'],lat:38.7223,lon:-9.1393,name:'Portugal'}
+                {keys:['santa fe'],lat:-31.6333,lon:-60.7,name:'Santa Fe, Argentina'},
+                {keys:['corrientes'],lat:-27.4692,lon:-58.8306,name:'Corrientes, Argentina'},
+                {keys:['posadas'],lat:-27.3621,lon:-55.9009,name:'Posadas, Argentina'},
+                {keys:['parana'],lat:-31.7413,lon:-60.5115,name:'Paraná, Argentina'},
+                {keys:['buenos aires','caba','capital federal','ciudad autonoma de buenos aires'],lat:-34.6037,lon:-58.3816,name:'Buenos Aires, Argentina'},
+                {keys:['argentina'],lat:-34.6037,lon:-58.3816,name:'Buenos Aires, Argentina'},
+                {keys:['new york','nueva york'],lat:40.7128,lon:-74.006,name:'Nueva York, Estados Unidos'},
+                {keys:['miami'],lat:25.7617,lon:-80.1918,name:'Miami, Estados Unidos'},
+                {keys:['houston'],lat:29.7604,lon:-95.3698,name:'Houston, Estados Unidos'},
+                {keys:['washington'],lat:38.9072,lon:-77.0369,name:'Washington, Estados Unidos'},
+                {keys:['estados unidos','eeuu','usa','united states'],lat:38.8951,lon:-77.0364,name:'Estados Unidos'},
+                {keys:['madrid'],lat:40.4168,lon:-3.7038,name:'Madrid, España'},
+                {keys:['barcelona'],lat:41.3874,lon:2.1686,name:'Barcelona, España'},
+                {keys:['españa','espana'],lat:40.4168,lon:-3.7038,name:'España'},
+                {keys:['sao paulo','são paulo'],lat:-23.5505,lon:-46.6333,name:'São Paulo, Brasil'},
+                {keys:['rio de janeiro'],lat:-22.9068,lon:-43.1729,name:'Río de Janeiro, Brasil'},
+                {keys:['brasilia'],lat:-15.7975,lon:-47.8919,name:'Brasilia, Brasil'},
+                {keys:['brasil','brazil'],lat:-15.7975,lon:-47.8919,name:'Brasil'},
+                {keys:['santiago de chile'],lat:-33.4489,lon:-70.6693,name:'Santiago de Chile'},
+                {keys:['chile'],lat:-33.4489,lon:-70.6693,name:'Chile'},
+                {keys:['montevideo'],lat:-34.9011,lon:-56.1645,name:'Montevideo, Uruguay'},
+                {keys:['uruguay'],lat:-34.9011,lon:-56.1645,name:'Uruguay'},
+                {keys:['paris','paris'],lat:48.8566,lon:2.3522,name:'París, Francia'},
+                {keys:['francia','france'],lat:48.8566,lon:2.3522,name:'Francia'},
+                {keys:['roma','rome'],lat:41.9028,lon:12.4964,name:'Roma, Italia'},
+                {keys:['italia','italy'],lat:41.9028,lon:12.4964,name:'Italia'},
+                {keys:['londres','london'],lat:51.5074,lon:-0.1278,name:'Londres, Reino Unido'},
+                {keys:['reino unido','united kingdom','uk'],lat:51.5074,lon:-0.1278,name:'Reino Unido'},
+                {keys:['berlin'],lat:52.52,lon:13.405,name:'Berlín, Alemania'},
+                {keys:['alemania','germany'],lat:52.52,lon:13.405,name:'Alemania'},
+                {keys:['lima'],lat:-12.0464,lon:-77.0428,name:'Lima, Perú'},
+                {keys:['peru'],lat:-12.0464,lon:-77.0428,name:'Perú'},
+                {keys:['asuncion'],lat:-25.2637,lon:-57.5759,name:'Asunción, Paraguay'},
+                {keys:['paraguay'],lat:-25.2637,lon:-57.5759,name:'Paraguay'},
+                {keys:['la paz'],lat:-16.4897,lon:-68.1193,name:'La Paz, Bolivia'},
+                {keys:['bolivia'],lat:-16.4897,lon:-68.1193,name:'Bolivia'},
+                {keys:['bogota'],lat:4.711,lon:-74.0721,name:'Bogotá, Colombia'},
+                {keys:['colombia'],lat:4.711,lon:-74.0721,name:'Colombia'},
+                {keys:['quito'],lat:-0.1807,lon:-78.4678,name:'Quito, Ecuador'},
+                {keys:['ecuador'],lat:-0.1807,lon:-78.4678,name:'Ecuador'},
+                {keys:['panama'],lat:8.9824,lon:-79.5199,name:'Panamá'},
+                {keys:['toronto'],lat:43.6532,lon:-79.3832,name:'Toronto, Canadá'},
+                {keys:['canada'],lat:45.4215,lon:-75.6972,name:'Canadá'},
+                {keys:['tokio','tokyo'],lat:35.6762,lon:139.6503,name:'Tokio, Japón'},
+                {keys:['japon'],lat:35.6762,lon:139.6503,name:'Japón'},
+                {keys:['beijing','pekin'],lat:39.9042,lon:116.4074,name:'Pekín, China'},
+                {keys:['china'],lat:39.9042,lon:116.4074,name:'China'},
+                {keys:['lisboa'],lat:38.7223,lon:-9.1393,name:'Lisboa, Portugal'},
+                {keys:['portugal'],lat:38.7223,lon:-9.1393,name:'Portugal'}
             ];
-            const norm = value => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+            const norm = value => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9\s,.-]/g,' ').replace(/\s+/g,' ').trim();
+            const parseDate = value => {
+                if (!value) return null;
+                const raw = String(value).trim();
+                let d = /^\d{4}-\d{2}-\d{2}/.test(raw) ? new Date(raw.slice(0,10)+'T00:00:00') : new Date(raw);
+                return Number.isNaN(d.getTime()) ? null : new Date(d.getFullYear(),d.getMonth(),d.getDate());
+            };
             const resolveTravelStatus = v => {
                 const raw = norm(v.estado || v.estatus || v.situacion || v.status || '');
-                // Los valores usados por el formulario incluyen explícitamente «Continúa».
-                if (/rechaz|cancelad|anulad/.test(raw)) return {label:v.estado||v.estatus||v.situacion||'Rechazado', color:'#dc2626', key:'rechazado'};
-                if (/continua|activo|en curso|iniciado|viajando|comisionado|en viaje|vigente/.test(raw)) return {label:v.estado||v.estatus||v.situacion, color:'#2563eb', key:'continua'};
-                if (/finaliz|termin|regres|cerrad|cumplid|realizad/.test(raw)) return {label:v.estado||v.estatus||v.situacion, color:'#16a34a', key:'finalizado'};
+                if (/rechaz|cancelad|anulad/.test(raw)) return {label:v.estado||v.estatus||v.situacion||'Rechazado',color:'#dc2626',key:'rechazado'};
+                if (/continua|activo|en curso|iniciado|viajando|comisionado|en viaje|vigente/.test(raw)) return {label:v.estado||v.estatus||v.situacion||'En curso',color:'#2563eb',key:'continua'};
+                if (/finaliz|termin|regres|cerrad|cumplid|realizad/.test(raw)) return {label:v.estado||v.estatus||v.situacion||'Finalizado',color:'#16a34a',key:'finalizado'};
                 const today = new Date(); today.setHours(0,0,0,0);
-                const parseDate = value => { if(!value) return null; const d=new Date(String(value).slice(0,10)+'T00:00:00'); return Number.isNaN(d.getTime())?null:d; };
-                const start=parseDate(v.salida||v.fechaSalida||v.fecha_inicio||v.fechaInicio);
-                const end=parseDate(v.llegada||v.fechaLlegada||v.fecha_fin||v.fechaFin);
-                if(start && start<=today && (!end || end>=today)) return {label:v.estado||'Continúa',color:'#2563eb',key:'continua'};
-                if(start && start>today) return {label:v.estado||'Próximamente',color:'#f59e0b',key:'proximo'};
-                if(end && end<today) return {label:v.estado||'Finalizado',color:'#16a34a',key:'finalizado'};
-                return {label:v.estado||v.estatus||v.situacion||'Próximamente',color:'#f59e0b',key:'proximo'};
+                const start = parseDate(v.salida || v.fechaSalida || v.fecha_salida || v.fecha_inicio || v.fechaInicio || v.fechaPartida);
+                const end = parseDate(v.llegada || v.fechaLlegada || v.fecha_llegada || v.fecha_fin || v.fechaFin || v.fechaRegreso);
+                if (start && start > today) return {label:'Próximamente',color:'#f59e0b',key:'proximo'};
+                if (start && start <= today && (!end || end >= today)) return {label:'En curso',color:'#2563eb',key:'continua'};
+                if (end && end < today) return {label:'Finalizado',color:'#16a34a',key:'finalizado'};
+                return {label:v.estado||v.estatus||v.situacion||'Estado no consignado',color:'#64748b',key:'desconocido'};
             };
-            // Usar la tabla completa y los campos que realmente crea el formulario de viajes.
             const all = Array.isArray(viajesDB) ? viajesDB.filter(v => v && typeof v === 'object') : [];
-            const bounds = [];
-            const offsetCounts = Object.create(null);
+            const bounds = [], offsetCounts = Object.create(null);
+            let georeferenced = 0, approximate = 0;
             all.forEach((v, idx) => {
-                const personDestinations = Array.isArray(v.personas) ? v.personas.map(p => p && p.destino).filter(Boolean) : [];
-                const raw = [v.lugar, v.destino, v.pais, v.país, ...personDestinations].filter(Boolean).map(x=>String(x).trim()).filter(Boolean).join(' · ');
-                const searchable = norm([v.lugar,v.destino,v.pais,v.país,...personDestinations].filter(Boolean).join(' '));
-                let place = places.find(p => p.keys.some(k => searchable.includes(norm(k))));
+                const people = Array.isArray(v.personas) ? v.personas : [];
+                // El destino principal manda; los destinos individuales se consultan solo como respaldo.
+                const fields = [v.lugar, v.destino, v.pais, v.país, v.ciudad, v.provincia].filter(x => x != null && String(x).trim());
+                const individualDestinations = people.map(p => p && p.destino).filter(x => x != null && String(x).trim());
+                const candidates = [...fields, ...individualDestinations].map(norm).filter(Boolean);
+                let place = null;
+                for (const candidate of candidates) {
+                    // Coincidencia más específica primero; evita que un nombre genérico tape una ciudad.
+                    place = places.slice().sort((a,b)=>Math.max(...b.keys.map(k=>norm(k).length))-Math.max(...a.keys.map(k=>norm(k).length)))
+                        .find(p => p.keys.some(k => {
+                            const key = norm(k);
+                            if (key === 'argentina') return /(^|[ ,.-])argentina([ ,.-]|$)/.test(candidate);
+                            if (key === 'usa' || key === 'uk') return new RegExp('(^|\\s)'+key+'($|\\s)').test(candidate);
+                            return candidate.includes(key);
+                        }));
+                    if (place) break;
+                }
                 const matched = !!place;
                 if (!place) place = {lat:-34.6037,lon:-58.3816,name:'Ubicación pendiente de georreferenciar'};
-                const resolvedStatus = resolveTravelStatus(v);
-                const status = String(resolvedStatus.label || 'Próximamente').trim();
-                const color = resolvedStatus.color;
-                const people = Array.isArray(v.personas) ? v.personas : [];
-                const peopleText = people.length ? people.map(p => [p.grado,p.apellido].filter(Boolean).join(' ')).join(', ') : String(v.personal || 'Personal no consignado');
-                const label = raw || place.name;
-                const title = v.evento || v.mision || 'Comisión / viaje';
-                const popup = `<div style="min-width:190px;font-family:sans-serif;color:#0f172a"><strong>${escapeHtml(title)}</strong><br><span>Destino: ${escapeHtml(label)}</span><br><span>Estado: <b style="color:${color}">${escapeHtml(status)}</b></span><br><span>Personal: ${escapeHtml(peopleText)}</span>${v.salida ? `<br><span>Salida: ${escapeHtml(v.salida)}</span>` : ''}${v.llegada ? `<br><span>Llegada: ${escapeHtml(v.llegada)}</span>` : ''}${!matched ? '<br><em>Destino no reconocido: se muestra en Buenos Aires como referencia, no como ubicación exacta.</em>' : ''}</div>`;
-                // Separar visualmente los viajes con igual destino para que todos los registros sean visibles.
-                const baseKey = place.name + '|' + norm(label); // Se conserva un grupo por destino para separar marcadores coincidentes.
-                const seen = offsetCounts[baseKey] || 0; offsetCounts[baseKey] = seen + 1;
-                const angle = seen * 2.399963229728653;
-                const spread = seen ? Math.min(5.5, 1.15 * Math.sqrt(seen)) : 0;
-                const markerLat = place.lat + Math.sin(angle) * spread;
-                const markerLon = place.lon + Math.cos(angle) * spread;
-                const marker = L.circleMarker([markerLat,markerLon], {radius:10,fillColor:color,color:'#ffffff',weight:2,opacity:1,fillOpacity:.98}).addTo(mapMarkersLayer).bindPopup(popup);
-                marker.bindTooltip(`${escapeHtml(title)} · ${escapeHtml(status)}`);
-                bounds.push([markerLat,markerLon]);
+                if (matched) georeferenced++; else approximate++;
+                const resolvedStatus = resolveTravelStatus(v), status = String(resolvedStatus.label || 'Estado no consignado').trim(), color = resolvedStatus.color;
+                const peopleText = people.length ? people.map(p => [p.grado,p.apellido,p.nombre].filter(Boolean).join(' ')).join(', ') : String(v.personal || 'Personal no consignado');
+                const label = [...fields, ...individualDestinations].map(x=>String(x).trim()).filter(Boolean).join(' · ') || (matched ? place.name : 'Destino no consignado');
+                const title = v.evento || v.mision || v.motivo || 'Comisión / viaje';
+                const idText = v.id != null ? `Registro #${v.id}` : `Registro ${idx+1}`;
+                const popup = `<div style="min-width:210px;font-family:sans-serif;color:#0f172a"><strong>${escapeHtml(title)}</strong><br><span style="color:#64748b;font-size:11px">${escapeHtml(idText)}</span><br><span>Destino consignado: ${escapeHtml(label)}</span><br><span>Estado: <b style="color:${color}">${escapeHtml(status)}</b></span><br><span>Personal: ${escapeHtml(peopleText)}</span>${v.salida || v.fechaSalida || v.fechaPartida ? `<br><span>Salida: ${escapeHtml(v.salida || v.fechaSalida || v.fechaPartida)}</span>` : ''}${v.llegada || v.fechaLlegada || v.fechaRegreso ? `<br><span>Llegada/regreso: ${escapeHtml(v.llegada || v.fechaLlegada || v.fechaRegreso)}</span>` : ''}${!matched ? '<br><em style="color:#b45309">Ubicación aproximada: no se pudo reconocer el destino. El marcador está en Buenos Aires solo para que el registro no desaparezca del mapa.</em>' : `<br><span style="color:#64748b">Coordenadas de referencia de ${escapeHtml(place.name)}; no representan una dirección exacta.</span>`}</div>`;
+                // Separación en píxeles, no en grados: los marcadores coincidentes no se desplazan cientos de kilómetros.
+                const baseKey = place.name + '|' + norm(label), seen = offsetCounts[baseKey] || 0;
+                offsetCounts[baseKey] = seen + 1;
+                const basePoint = mapInstance.project([place.lat,place.lon], Math.max(mapInstance.getZoom(),3));
+                const angle = seen * 2.399963229728653, radius = seen ? 15 + 5 * Math.sqrt(seen) : 0;
+                const shiftedPoint = L.point(basePoint.x + Math.cos(angle)*radius, basePoint.y + Math.sin(angle)*radius);
+                const markerLatLng = mapInstance.unproject(shiftedPoint, Math.max(mapInstance.getZoom(),3));
+                const marker = L.circleMarker(markerLatLng, {radius:9,fillColor:color,color:'#ffffff',weight:2,opacity:1,fillOpacity:.98}).addTo(mapMarkersLayer).bindPopup(popup);
+                marker.bindTooltip(`${escapeHtml(idText)} · ${escapeHtml(title)} · ${escapeHtml(status)}`);
+                bounds.push([place.lat,place.lon]);
             });
             const counter = document.getElementById('statPaisesUnicos'); if (counter) counter.textContent = all.length;
             const legendId = 'mapStatusLegend'; let legend = document.getElementById(legendId);
-            if (!legend && mapInstance.getContainer().parentElement) { legend=document.createElement('div'); legend.id=legendId; legend.className='flex flex-wrap gap-3 text-xs mt-2'; legend.innerHTML='<strong id="mapMarkerCountLabel" class="text-slate-800">Viajes representados: 0</strong><span><b style="color:#2563eb">●</b> Activo / en curso</span><span><b style="color:#f59e0b">●</b> Próximamente / no iniciado</span><span><b style="color:#16a34a">●</b> Finalizado</span><span><b style="color:#dc2626">●</b> Rechazado / cancelado</span><span class="text-slate-500">Destinos desconocidos se muestran en Buenos Aires como referencia.</span>'; mapInstance.getContainer().parentElement.appendChild(legend); }
-            const markerCountLabel=document.getElementById('mapMarkerCountLabel'); if(markerCountLabel) markerCountLabel.textContent=`Registros de viaje representados: ${bounds.length} de ${all.length}`;
-            if (bounds.length > 1) mapInstance.fitBounds(bounds, {padding:[35,35], maxZoom:7});
+            if (!legend && mapInstance.getContainer().parentElement) {
+                legend=document.createElement('div'); legend.id=legendId;
+                legend.className='flex flex-wrap items-center gap-3 text-xs mt-3 p-3 rounded-xl border border-indigo-100 bg-gradient-to-r from-indigo-50 via-white to-sky-50';
+                legend.innerHTML='<strong id="mapMarkerCountLabel" class="text-slate-800">Viajes: 0</strong><span id="mapGeoCountLabel" class="text-emerald-800">Georreferenciados: 0</span><span id="mapApproxCountLabel" class="text-amber-800">Ubicación aproximada: 0</span><span><b style="color:#2563eb">●</b> Activo / en curso</span><span><b style="color:#f59e0b">●</b> Próximamente / no iniciado</span><span><b style="color:#16a34a">●</b> Finalizado</span><span><b style="color:#dc2626">●</b> Rechazado / cancelado</span>';
+                mapInstance.getContainer().parentElement.appendChild(legend);
+            }
+            const markerCountLabel=document.getElementById('mapMarkerCountLabel'); if(markerCountLabel) markerCountLabel.textContent=`Total de registros: ${all.length}`;
+            const geoCountLabel=document.getElementById('mapGeoCountLabel'); if(geoCountLabel) geoCountLabel.textContent=`Destinos reconocidos: ${georeferenced}`;
+            const approxCountLabel=document.getElementById('mapApproxCountLabel'); if(approxCountLabel) approxCountLabel.textContent=`Ubicación aproximada: ${approximate}`;
+            if (bounds.length > 1) mapInstance.fitBounds(bounds, {padding:[35,35], maxZoom:5});
             else if (bounds.length === 1) mapInstance.setView(bounds[0], 5);
         }
 
@@ -2956,6 +3027,7 @@
     </script>
 </body>
 </html>
+
 
 
 
