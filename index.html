@@ -468,18 +468,18 @@
 
                     <!-- NUEVOS AVISOS / MÉTRICAS DE VIAJES -->
                     <div class="grid grid-cols-2 md:grid-cols-6 gap-3 mb-6">
-                        <div class="bg-sky-50 p-3 rounded-xl shadow-sm border border-sky-200">
+                        <button type="button" onclick="filtrarViajesUbicacionRapido('exterior')" title="Mostrar solo viajes al exterior" class="text-left bg-sky-50 p-3 rounded-xl shadow-sm border border-sky-200 hover:bg-sky-100 focus:outline-none focus:ring-2 focus:ring-sky-400 transition">
                             <p class="text-[11px] text-sky-800 uppercase font-bold flex items-center gap-1">
                                 <i class="fa-solid fa-earth-americas text-sky-600"></i> Al Exterior
                             </p>
-                            <p id="viajesMetricExterior" class="text-2xl font-bold text-sky-900 mt-1">0</p>
-                        </div>
-                        <div class="bg-emerald-50 p-3 rounded-xl shadow-sm border border-emerald-200">
+                            <p id="viajesMetricExterior" class="text-2xl font-bold text-sky-900 mt-1">0</p><p class="text-[10px] text-sky-700 mt-1">Tocar para filtrar</p>
+                        </button>
+                        <button type="button" onclick="filtrarViajesUbicacionRapido('argentina')" title="Mostrar solo viajes dentro de Argentina" class="text-left bg-emerald-50 p-3 rounded-xl shadow-sm border border-emerald-200 hover:bg-emerald-100 focus:outline-none focus:ring-2 focus:ring-emerald-400 transition">
                             <p class="text-[11px] text-emerald-800 uppercase font-bold flex items-center gap-1">
                                 <i class="fa-solid fa-map-location-dot text-emerald-600"></i> En Argentina
                             </p>
-                            <p id="viajesMetricPais" class="text-2xl font-bold text-emerald-900 mt-1">0</p>
-                        </div>
+                            <p id="viajesMetricPais" class="text-2xl font-bold text-emerald-900 mt-1">0</p><p class="text-[10px] text-emerald-700 mt-1">Tocar para filtrar</p>
+                        </button>
                         <div class="bg-indigo-50 p-3 rounded-xl shadow-sm border border-indigo-200">
                             <p class="text-[11px] text-indigo-800 uppercase font-bold flex items-center gap-1">
                                 <i class="fa-solid fa-circle-check text-indigo-600"></i> Realizados
@@ -512,6 +512,7 @@
                             <input type="text" id="searchViajesInput" oninput="renderViajesTable()" placeholder="Buscar por grado, apellido, destino, evento, lugar…" class="w-full pl-9 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
                         </div>
                         <select id="filterEstadoViajes" onchange="renderViajesTable()" class="border rounded-lg px-3 py-2 text-sm bg-white"><option value="">Todos los estados</option><option value="continua">Activos / Continúa</option><option value="proximo">Próximamente</option><option value="finalizado">Finalizados</option><option value="rechazado">Rechazados / Cancelados</option></select>
+                        <button type="button" onclick="limpiarFiltrosViajesRapidos()" class="border rounded-lg px-3 py-2 text-sm bg-white hover:bg-slate-100" title="Quitar filtros de ubicación y estado"><i class="fa-solid fa-filter-circle-xmark mr-1"></i> Limpiar filtros</button>
                     </div>
 
                     <div class="overflow-x-auto border rounded-xl">
@@ -1829,7 +1830,7 @@
             const counter = document.getElementById('statPaisesUnicos'); if (counter) counter.textContent = all.length;
             const legendId = 'mapStatusLegend'; let legend = document.getElementById(legendId);
             if (!legend && mapInstance.getContainer().parentElement) { legend=document.createElement('div'); legend.id=legendId; legend.className='flex flex-wrap gap-3 text-xs mt-2'; legend.innerHTML='<strong id="mapMarkerCountLabel" class="text-slate-800">Viajes representados: 0</strong><span><b style="color:#2563eb">●</b> Activo / en curso</span><span><b style="color:#f59e0b">●</b> Próximamente / no iniciado</span><span><b style="color:#16a34a">●</b> Finalizado</span><span><b style="color:#dc2626">●</b> Rechazado / cancelado</span><span class="text-slate-500">Destinos desconocidos se muestran en Buenos Aires como referencia.</span>'; mapInstance.getContainer().parentElement.appendChild(legend); }
-            const markerCountLabel=document.getElementById('mapMarkerCountLabel'); if(markerCountLabel) markerCountLabel.textContent=`Viajes representados: ${bounds.length} de ${all.length}`;
+            const markerCountLabel=document.getElementById('mapMarkerCountLabel'); if(markerCountLabel) markerCountLabel.textContent=`Registros de viaje representados: ${bounds.length} de ${all.length}`;
             if (bounds.length > 1) mapInstance.fitBounds(bounds, {padding:[35,35], maxZoom:7});
             else if (bounds.length === 1) mapInstance.setView(bounds[0], 5);
         }
@@ -2686,6 +2687,33 @@
             container.appendChild(div);
         }
 
+        let filtroUbicacionViajesRapido = '';
+        function esViajeEnArgentina(v) {
+            const normLugar = value => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+            const texto = normLugar([v && v.lugar, v && v.destino, v && v.pais, v && v.país,
+                ...(Array.isArray(v && v.personas) ? v.personas.map(p => p && p.destino) : [])].filter(Boolean).join(' '));
+            return /argentina|buenos aires|capital federal|caba|cordoba|rosario|mendoza|ushuaia|tierra del fuego|mar del plata|bariloche|salta|neuquen|la plata|san juan|san luis|santa fe|entre rios|corrientes|misiones|formosa|chaco|catamarca|la rioja|santiago del estero|rio negro|chubut|santa cruz|jujuy|tucuman|pampa/.test(texto);
+        }
+        function filtrarViajesUbicacionRapido(tipo) {
+            filtroUbicacionViajesRapido = filtroUbicacionViajesRapido === tipo ? '' : tipo;
+            document.querySelectorAll('[onclick*="filtrarViajesUbicacionRapido"]').forEach(el => { el.classList.remove('ring-2','ring-sky-500','ring-emerald-500'); });
+            if (filtroUbicacionViajesRapido) { const active = document.querySelector(`[onclick="filtrarViajesUbicacionRapido('${filtroUbicacionViajesRapido}')"]`); if (active) active.classList.add('ring-2', filtroUbicacionViajesRapido === 'argentina' ? 'ring-emerald-500' : 'ring-sky-500'); }
+            const search = document.getElementById('searchViajesInput');
+            if (search) search.value = '';
+            renderViajesTable();
+            const panel = document.getElementById('viajesTableBody');
+            if (panel) panel.closest('.overflow-x-auto')?.scrollIntoView({behavior:'smooth',block:'nearest'});
+        }
+        function limpiarFiltrosViajesRapidos() {
+            filtroUbicacionViajesRapido = '';
+            document.querySelectorAll('[onclick*="filtrarViajesUbicacionRapido"]').forEach(el => el.classList.remove('ring-2','ring-sky-500','ring-emerald-500'));
+            const search = document.getElementById('searchViajesInput');
+            const estado = document.getElementById('filterEstadoViajes');
+            if (search) search.value = '';
+            if (estado) estado.value = '';
+            renderViajesTable();
+        }
+
         function renderViajesTable() {
             const body = document.getElementById('viajesTableBody');
             const search = document.getElementById('searchViajesInput').value.toLowerCase();
@@ -2702,8 +2730,8 @@
             const hoy = new Date();
 
             viajesDB.forEach(v => {
-                const lugarStr = (v.lugar || '').toLowerCase();
-                const esExterior = !lugarStr.includes('argentina') && !lugarStr.includes('buenos aires') && !lugarStr.includes('caba') && !lugarStr.includes('cordoba') && !lugarStr.includes('mendoza');
+                const esPais = esViajeEnArgentina(v);
+                const esExterior = !esPais;
                 
                 if (esExterior) {
                     countExterior++;
@@ -2755,7 +2783,8 @@
                 const rawStatus = String(v.estado || v.estatus || v.situacion || '').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
                 let statusKey = /rechaz|cancelad|anulad/.test(rawStatus) ? 'rechazado' : /continua|activo|en curso|iniciado|viajando|comisionado|en viaje|vigente/.test(rawStatus) ? 'continua' : /finaliz|termin|regres|cerrad|cumplid|realizad/.test(rawStatus) ? 'finalizado' : 'proximo';
                 const textMatch = !search || matchLugar || matchEvento || matchInvita || matchCalidad || matchPersona;
-                return textMatch && (!statusFilter || statusKey === statusFilter);
+                const locationMatch = !filtroUbicacionViajesRapido || (filtroUbicacionViajesRapido === 'argentina' ? esViajeEnArgentina(v) : !esViajeEnArgentina(v));
+                return textMatch && locationMatch && (!statusFilter || statusKey === statusFilter);
             });
 
             if (filtered.length === 0) {
@@ -2927,6 +2956,7 @@
     </script>
 </body>
 </html>
+
 
 
 
