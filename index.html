@@ -1098,7 +1098,7 @@
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
         // Endpoint del backend seguro. No contiene contraseñas ni secretos.
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxC-rIKnb9tWeutYLuX6q0RMihzxcJhHVG9RO1-E2eQC0YAHDSEuXdM0tBHutVSrb45/exec';
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzkFQbK8N5Z68rFSAU8jgQvhYBXgPWkPOH6o6c_Ub27zHJ5c1EMZVJwLZF0VcHb8lb_/exec';
         let authToken = sessionStorage.getItem('dgse_auth_token') || '';
         let tableRevisions = { Notas: '', Expedientes: '', Viajes: '' };
         let dataLoaded = false;
@@ -2511,6 +2511,21 @@
                 return matchSearch && matchEstado && matchMes && matchPromotor;
             });
 
+            // Orden cronológico descendente: las notas más recientes primero,
+            // independientemente del orden en que se importaron o se cargaron.
+            // Se ordena una copia filtrada; no se altera el orden ni los datos guardados.
+            const fechaOrden = value => {
+                const s = String(value || '').trim();
+                if (!s) return 0;
+                let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+                if (m) return new Date(Number(m[1]), Number(m[2])-1, Number(m[3])).getTime() || 0;
+                m = s.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})$/);
+                if (m) return new Date(Number(m[3]), Number(m[2])-1, Number(m[1])).getTime() || 0;
+                const parsed = Date.parse(s);
+                return Number.isFinite(parsed) ? parsed : 0;
+            };
+            filtered.sort((a, b) => fechaOrden(b.fecha) - fechaOrden(a.fecha) || String(b.nroNota || '').localeCompare(String(a.nroNota || ''), 'es', {numeric:true}));
+
             if (filtered.length === 0) {
                 body.innerHTML = `<tr><td colspan="10" class="p-4 text-center text-slate-400">No se encontraron notas registradas.</td></tr>`;
                 updateMetrics();
@@ -3355,6 +3370,7 @@
     </script>
 </body>
 </html>
+
 
 
 
