@@ -1095,7 +1095,7 @@
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
         // Endpoint del backend seguro. No contiene contraseñas ni secretos.
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz8dGodxN0LnESCEUszrDlcBPSBccQQbRTZ-R9b5slOjbwvefzeTsJGZbOFNrIe8F1v/exec';
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxUexC7u6ZWLVXvWburiyg6YkTvgYhMczZZrcw-rxcgunJaGq0rALrt7eoL9HZm9BG9/exec';
         let authToken = sessionStorage.getItem('dgse_auth_token') || '';
         let tableRevisions = { Notas: '', Expedientes: '', Viajes: '' };
         let dataLoaded = false;
@@ -1688,11 +1688,11 @@
             // Cada encabezado aplica a las dependencias siguientes hasta el próximo encabezado PZ.
             let entries=[];
             sources.forEach(src=>{
-                let activeZoneCode='', activeZoneName='';
+                let activeZoneCode='', activeZoneName='', activeZoneJefe='', activeZoneJeop='';
                 const headers=src.sheet.headers&&src.sheet.headers.length?src.sheet.headers:Object.keys((src.rows||[])[0]||{});
                 const firstHeader=headers[0], secondHeader=headers[1];
                 (src.rows||[]).forEach(row=>{
-                    if(row.__blankRow){activeZoneCode='';activeZoneName='';return;}
+                    if(row.__blankRow){activeZoneCode='';activeZoneName='';activeZoneJefe='';activeZoneJeop='';return;}
                     const first=String(row[firstHeader]||'').trim().toUpperCase();
                     const second=String(row[secondHeader]||'').trim();
                     const zoneMatch=first.match(/^PZ[A-Z0-9]+$/i);
@@ -1700,7 +1700,10 @@
                     if(zoneMatch){
                         activeZoneCode=zoneMatch[0].toUpperCase();
                         activeZoneName=/prefectura\s+de\s+zona/i.test(second)?second:(second||activeZoneCode);
-                        // Las filas de encabezado de PZ no son dependencias.
+                        // Los responsables de la PZ están en la propia fila encabezado.
+                        activeZoneJefe=pnaFindValue(row,['Jefe_Actual','Jefe Actual','Jefe de Zona','Jefe PZ']);
+                        activeZoneJeop=pnaFindValue(row,['Jeop_Actual','JEOP Actual','Jeop de Zona','JEOP PZ']);
+                        // La fila encabezado de PZ no se muestra como dependencia.
                         if(!row['Cuatrigrama'] && !row['Nombre_Dependencia']) return;
                         if(/prefectura\s+de\s+zona/i.test(second)) return;
                     }
@@ -1709,14 +1712,15 @@
                     if(explicitCode && !zoneMatch){activeZoneCode=explicitCode;activeZoneName=pnaZoneName(row,explicitCode)||activeZoneName;}
                     const hasData=Object.entries(row||{}).some(([k,v])=>!k.startsWith('__')&&String(v==null?'':v).trim()!=='');
                     if(!hasData)return;
-                    entries.push({row:row,sheet:src.sheet,sourceName:src.sourceName,zoneCode:activeZoneCode||explicitCode||'SIN_PZ',zoneName:activeZoneName||pnaZoneName(row,activeZoneCode||explicitCode||'')});
+                    entries.push({row:row,sheet:src.sheet,sourceName:src.sourceName,zoneCode:activeZoneCode||explicitCode||'SIN_PZ',zoneName:activeZoneName||pnaZoneName(row,activeZoneCode||explicitCode||''),zoneJefe:activeZoneJefe,zoneJeop:activeZoneJeop});
                 });
             });
             if(query)entries=entries.filter(e=>pnaNorm([e.sourceName,e.zoneCode,e.zoneName,...Object.values(e.row)].join(' ')).includes(query));
             const groups=new Map();
             entries.forEach(entry=>{
                 const code=entry.zoneCode||'SIN_PZ';
-                if(!groups.has(code))groups.set(code,{code:code,name:entry.zoneName||code,rows:[],headers:entry.sheet.headers&&entry.sheet.headers.length?entry.sheet.headers:Object.keys(entry.row||{}),sheetName:entry.sourceName});
+                if(!groups.has(code))groups.set(code,{code:code,name:entry.zoneName||code,rows:[],headers:entry.sheet.headers&&entry.sheet.headers.length?entry.sheet.headers:Object.keys(entry.row||{}),sheetName:entry.sourceName,zoneJefe:entry.zoneJefe||'',zoneJeop:entry.zoneJeop||''});
+                const group=groups.get(code);if(!group.zoneJefe&&entry.zoneJefe)group.zoneJefe=entry.zoneJefe;if(!group.zoneJeop&&entry.zoneJeop)group.zoneJeop=entry.zoneJeop;
                 const g=groups.get(code);g.rows.push(entry.row);if((!g.name||g.name===g.code)&&entry.zoneName)g.name=entry.zoneName;
             });
             const zones=[...groups.values()].sort((a,b)=>a.code.localeCompare(b.code,'es'));
@@ -1729,9 +1733,9 @@
             const director=pnaFindValue(first,['director de region','director de región','director']);
             const subdirector=pnaFindValue(first,['subdirector']);
             const zoneLocation=pnaFindValue(first,['ubicacion','ubicación','localidad']);
-            const jefe=pnaFindValue(first,['jefe de zona','jefe zona']);
-            const jeop=pnaFindValue(first,['jeop de zona','jeop zona']);
-            const metadata=[['Ubicación',zoneLocation],['Jefe de Zona',jefe],['JEOP de Zona',jeop]].filter(x=>x[1]);
+            const jefe=selected.zoneJefe||pnaFindValue(first,['jefe de zona','jefe zona']);
+            const jeop=selected.zoneJeop||pnaFindValue(first,['jeop de zona','jeop zona']);
+            const metadata=[['Responsable PZ',jefe],['JEOP de PZ',jeop],['Ubicación',zoneLocation]].filter(x=>x[1]);
             const headers=selected.headers.filter(h=>!/^__(rowNumber|blankRow)$/.test(h));
             const rows=selected.rows.map(row=>{const copy={};headers.forEach(h=>copy[h]=row[h]??'');return copy;});
             area.innerHTML=`<div class="bg-slate-900 text-white p-5 rounded-2xl shadow-md mb-5 border border-slate-800 text-center"><h3 class="text-lg font-bold tracking-wide uppercase text-blue-300">${escapeHtml(regionName)} (${escapeHtml(pnaRegion)})</h3>${director?`<p class="text-sm font-semibold text-slate-200 mt-1"><i class="fa-solid fa-user-shield text-blue-400 mr-1.5"></i>Director: ${escapeHtml(director)}</p>`:''}${subdirector?`<p class="text-xs text-slate-400 mt-0.5">Subdirector: ${escapeHtml(subdirector)}</p>`:''}</div><div class="mb-3 text-center"><p class="text-xs font-bold uppercase text-slate-500 tracking-wider">Prefecturas de Zona pertenecientes a ${escapeHtml(pnaRegion)}</p></div><div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">${zoneCards}</div><section class="bg-slate-50 border border-slate-200 rounded-2xl p-4 md:p-5"><div class="flex flex-col md:flex-row justify-between items-start gap-3 mb-4 border-b border-slate-200 pb-3"><div><h4 class="text-base font-bold text-slate-800 uppercase flex items-center gap-2"><i class="fa-solid fa-building text-blue-600"></i>${escapeHtml(selected.name||selected.code)}</h4><p class="text-xs text-slate-500 mt-1">Perteneciente a ${escapeHtml(pnaRegion)} · Fuente: ${escapeHtml(selected.sheetName)}</p></div>${metadata.length?`<div class="text-xs text-left bg-white p-3 rounded-lg border border-slate-200 shadow-sm">${metadata.map(x=>`<p class="text-slate-700"><strong>${escapeHtml(x[0])}:</strong> ${escapeHtml(x[1])}</p>`).join('')}</div>`:''}</div><h5 class="text-xs font-bold uppercase text-slate-600 mb-2 flex items-center gap-1.5"><i class="fa-solid fa-list text-slate-400"></i> Dependencias de ${escapeHtml(selected.code)}</h5>${pnaTable(headers,selected.rows,selected.sheetName)}</section>`;
@@ -1746,7 +1750,7 @@
             }
             const sheets=pnaSheets.filter(sh=>pnaSheetCategory(sh.name)===pnaCategory);
             const colors={direcciones:'border-blue-200',dtra:'border-amber-200',diop:'border-violet-200'};let total=0;
-            const blocks=sheets.map(sh=>{const rows=(sh.rows||[]).filter(row=>!row.__blankRow&&(!query||pnaNorm(Object.values(row).join(' ')).includes(query)));total+=rows.length;if(!rows.length)return '';const keys=sh.headers&&sh.headers.length?sh.headers:Object.keys(rows[0]||{});return `<section class="bg-white rounded-xl border ${colors[pnaCategory]||'border-slate-200'} shadow-sm overflow-hidden"><div class="px-4 py-3 bg-gradient-to-r from-slate-50 to-blue-50 border-b flex flex-wrap justify-between gap-2"><h3 class="font-extrabold text-slate-800"><i class="fa-solid fa-building text-blue-700 mr-2"></i>${escapeHtml(sh.name)}</h3><span class="text-xs font-bold rounded-full bg-blue-100 text-blue-800 px-3 py-1">${rows.length} registro(s)</span></div>${pnaTable(keys,rows)}</section>`;}).filter(Boolean);
+            const blocks=sheets.map(sh=>{const rows=(sh.rows||[]).filter(row=>!row.__blankRow&&(!query||pnaNorm(Object.values(row).join(' ')).includes(query)));total+=rows.length;if(!rows.length)return '';const keys=sh.headers&&sh.headers.length?sh.headers:Object.keys(rows[0]||{});return `<section class="bg-white rounded-xl border ${colors[pnaCategory]||'border-slate-200'} shadow-sm overflow-hidden"><div class="px-4 py-3 bg-gradient-to-r from-slate-50 to-blue-50 border-b flex flex-wrap justify-between gap-2"><h3 class="font-extrabold text-slate-800"><i class="fa-solid fa-building text-blue-700 mr-2"></i>${escapeHtml(sh.name)}</h3><span class="text-xs font-bold rounded-full bg-blue-100 text-blue-800 px-3 py-1">${rows.length} registro(s)</span></div>${pnaTable(keys,rows,sh.name)}</section>`;}).filter(Boolean);
             document.getElementById('pnaCount').textContent=`${total} registro(s) · ${sheets.length} pestaña(s)`;
             area.innerHTML=blocks.length?blocks.join(''):'<div class="bg-white border border-slate-200 rounded-xl p-6 text-center text-slate-500">No hay registros en esta categoría o la búsqueda no produjo resultados.</div>';
         }
@@ -3233,6 +3237,7 @@
     </script>
 </body>
 </html>
+
 
 
 
