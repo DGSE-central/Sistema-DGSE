@@ -1095,7 +1095,7 @@
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
         // Endpoint del backend seguro. No contiene contraseñas ni secretos.
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwqLxirA1sMjGe_QBviiTrkY4p34TfBcCs9NJfpu0yA93YlELRrLqhaQlkQIu7QDPgt/exec';
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzmDOfN1BIn3SdO6SvA1NLY-mgrLFuBRUAo6FEvrgKn9IwkRY5cQLIKno9XWnQzawFH/exec';
         let authToken = sessionStorage.getItem('dgse_auth_token') || '';
         let tableRevisions = { Notas: '', Expedientes: '', Viajes: '' };
         let dataLoaded = false;
@@ -1661,15 +1661,34 @@
         function pnaRenderRegionView(query){
             const area=document.getElementById('pnaContentArea'), regionName=pnaRegionLabel(pnaRegion);
             const sources=pnaRegionSheets(pnaRegion);
-            let entries=[];sources.forEach(src=>src.rows.forEach(row=>entries.push({row:row,sheet:src.sheet,sourceName:src.sourceName})));
-            if(query)entries=entries.filter(e=>pnaNorm([e.sourceName,...Object.values(e.row)].join(' ')).includes(query));
+            // En la planilla regional las PZ son encabezados dentro de la tabla:
+            // columna 1 = código PZ y columna 2 = nombre de la Prefectura de Zona.
+            // Cada encabezado aplica a las dependencias siguientes hasta el próximo encabezado PZ.
+            let entries=[];
+            sources.forEach(src=>{
+                let activeZoneCode='', activeZoneName='';
+                const headers=src.sheet.headers&&src.sheet.headers.length?src.sheet.headers:Object.keys((src.rows||[])[0]||{});
+                const firstHeader=headers[0], secondHeader=headers[1];
+                (src.rows||[]).forEach(row=>{
+                    const first=String(row[firstHeader]||'').trim().toUpperCase();
+                    const second=String(row[secondHeader]||'').trim();
+                    const zoneMatch=first.match(/^PZ[A-Z0-9]+$/i);
+                    const isZoneHeader=!!zoneMatch && /prefectura\s+de\s+zona/i.test(second);
+                    if(isZoneHeader){activeZoneCode=zoneMatch[0].toUpperCase();activeZoneName=second;return;}
+                    // Compatibilidad con hojas que identifican la PZ en columnas explícitas o por nombre de pestaña.
+                    let explicitCode=pnaZoneCode(row,src.sourceName);
+                    if(explicitCode){activeZoneCode=explicitCode;activeZoneName=pnaZoneName(row,explicitCode)||activeZoneName;}
+                    const hasData=Object.values(row||{}).some(v=>String(v==null?'':v).trim()!=='');
+                    if(!hasData)return;
+                    entries.push({row:row,sheet:src.sheet,sourceName:src.sourceName,zoneCode:activeZoneCode||explicitCode||'SIN_PZ',zoneName:activeZoneName||pnaZoneName(row,activeZoneCode||explicitCode||'')});
+                });
+            });
+            if(query)entries=entries.filter(e=>pnaNorm([e.sourceName,e.zoneCode,e.zoneName,...Object.values(e.row)].join(' ')).includes(query));
             const groups=new Map();
             entries.forEach(entry=>{
-                let code=pnaZoneCode(entry.row,entry.sourceName);
-                if(!code&&/^PZ[A-Z0-9]+$/i.test(entry.sourceName.trim()))code=entry.sourceName.trim().toUpperCase();
-                if(!code)code='SIN_PZ';
-                if(!groups.has(code))groups.set(code,{code:code,name:pnaZoneName(entry.row,code),rows:[],headers:entry.sheet.headers&&entry.sheet.headers.length?entry.sheet.headers:Object.keys(entry.row||{}),sheetName:entry.sourceName});
-                const g=groups.get(code);g.rows.push(entry.row);if(g.name===code)g.name=pnaZoneName(entry.row,code);
+                const code=entry.zoneCode||'SIN_PZ';
+                if(!groups.has(code))groups.set(code,{code:code,name:entry.zoneName||code,rows:[],headers:entry.sheet.headers&&entry.sheet.headers.length?entry.sheet.headers:Object.keys(entry.row||{}),sheetName:entry.sourceName});
+                const g=groups.get(code);g.rows.push(entry.row);if((!g.name||g.name===g.code)&&entry.zoneName)g.name=entry.zoneName;
             });
             const zones=[...groups.values()].sort((a,b)=>a.code.localeCompare(b.code,'es'));
             const subnav=document.querySelectorAll('.pna-subnav-btn');subnav.forEach(b=>{const active=b.id==='pnaRegionBtn_'+pnaRegion;b.classList.toggle('bg-blue-700',active);b.classList.toggle('text-white',active);b.classList.toggle('bg-white',!active);b.classList.toggle('text-slate-700',!active);b.classList.toggle('border',!active);b.classList.toggle('border-slate-200',!active);});
@@ -3185,6 +3204,7 @@
     </script>
 </body>
 </html>
+
 
 
 
