@@ -1095,7 +1095,7 @@
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
         // Endpoint del backend seguro. No contiene contraseñas ni secretos.
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzHM3Eg7E81lxs7mFR-PId4P4Sobm0CNHjpppZsrxFM7YhmM9W4qHXgKXRYPuikhDDb/exec';
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyK3C0m6bUA0TUhDFKbYXHhPbsJ0Nfbc0CYYSR4YwuTMpGAtPqx-aVW9NanaZkydlDz/exec';
         let authToken = sessionStorage.getItem('dgse_auth_token') || '';
         let tableRevisions = { Notas: '', Expedientes: '', Viajes: '' };
         let dataLoaded = false;
@@ -2541,7 +2541,7 @@
 
                 const attachmentButtons = [];
                 if (n.adjuntoNotaId) { const nombrePDF = String(n.adjuntoNotaNombre || (n.nroNota + '.pdf')); attachmentButtons.push(`<button type="button" data-action="open-pdf" data-file-id="${escapeHtml(n.adjuntoNotaId)}" data-file-name="${escapeHtml(nombrePDF)}" class="text-blue-600 hover:text-blue-800 font-bold"><i class="fa-solid fa-file-pdf"></i> Nota original</button>`); }
-                (Array.isArray(n.adjuntosRespuesta) ? n.adjuntosRespuesta : []).forEach((doc, i) => { const fid=String(doc.fileId || doc.id || ''); const fn=String(doc.fileName || doc.nombre || ('Respuesta ' + (i+1) + '.pdf')); if(fid) attachmentButtons.push(`<div class="flex flex-wrap items-center gap-2"><button type="button" data-action="open-pdf" data-file-id="${escapeHtml(fid)}" data-file-name="${escapeHtml(fn)}" class="text-emerald-700 hover:text-emerald-900 font-bold"><i class="fa-solid fa-file-pdf"></i> ${escapeHtml(fn)}</button>${hasPermission('notas','edit')?`<button type="button" onclick="replaceAttachedPDF('notaRespuesta','${escapeHtml(n.id)}','${i}')" class="rounded-md bg-amber-100 hover:bg-amber-200 text-amber-900 px-2 py-1 text-xs font-bold">Reemplazar PDF</button>`:''}</div>`); });
+                (Array.isArray(n.adjuntosRespuesta) ? n.adjuntosRespuesta : []).forEach((doc, i) => { const fid=String(doc.fileId || doc.id || ''); const fn=String(doc.fileName || doc.nombre || ('Respuesta ' + (i+1) + '.pdf')); if(fid) attachmentButtons.push(`<div class="flex flex-wrap items-center gap-2"><button type="button" data-action="open-pdf" data-file-id="${escapeHtml(fid)}" data-file-name="${escapeHtml(fn)}" class="text-emerald-700 hover:text-emerald-900 font-bold"><i class="fa-solid fa-file-pdf"></i> ${escapeHtml(fn)}</button>${hasPermission('notas','edit')?`<button type="button" onclick="replaceAttachedPDF('notaRespuesta','${escapeHtml(n.id)}','${i}')" class="rounded-md bg-amber-100 hover:bg-amber-200 text-amber-900 px-2 py-1 text-xs font-bold">Reemplazar</button><button type="button" onclick="deleteAttachedPDF('notaRespuesta','${escapeHtml(n.id)}','${i}')" class="rounded-md bg-red-100 hover:bg-red-200 text-red-800 px-2 py-1 text-xs font-bold">Eliminar</button>`:''}</div>`); });
                 let adjuntosHtml = attachmentButtons.length ? attachmentButtons.join('') : '-';
                 if (!attachmentButtons.length && n.adjuntoNota && /^https?:\/\//i.test(String(n.adjuntoNota))) { let legacyUrl=''; try { const parsedLegacyUrl=new URL(String(n.adjuntoNota)); if(['http:','https:'].includes(parsedLegacyUrl.protocol)) legacyUrl=parsedLegacyUrl.href; } catch (_) {} if(legacyUrl) adjuntosHtml=`<a href="${escapeHtml(legacyUrl)}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 font-bold">Adjunto legado</a>`; }
 
@@ -2848,7 +2848,7 @@
             if (!entries.length) { target.innerHTML = '<p class="text-sm text-slate-500 border rounded-lg p-4">Todavía no hay reingresos registrados. El primer registro puede agregarse arriba; la fecha inicial del expediente se conserva en sus datos generales.</p>'; return; }
             target.innerHTML = entries.map((entry, idx) => {
                 const docs = Array.isArray(entry.informes) ? entry.informes : [];
-                const docsHtml = docs.length ? docs.map((doc, i) => { const docId = String(doc.fileId || doc.id || ''); const docName = String(doc.fileName || doc.nombre || ('Informe PDF ' + (i+1))); return `<div class="flex flex-wrap items-center justify-between gap-2 border rounded-lg p-2"><span class="text-xs break-all">${escapeHtml(docName)}</span><span class="flex gap-2"><button type="button" data-action="open-pdf" data-file-id="${escapeHtml(docId)}" data-file-name="${escapeHtml(docName)}" class="text-blue-700 text-xs font-bold">Visualizar</button><button type="button" data-action="download-pdf" data-file-id="${escapeHtml(docId)}" data-file-name="${escapeHtml(docName)}" class="text-emerald-700 text-xs font-bold">Descargar</button>${hasPermission('expedientes','edit')?`<button type="button" onclick="replaceAttachedPDF('expInforme','${escapeHtml(exp.id)}','${escapeHtml(entry.id || '')}','${i}')" class="rounded-md bg-amber-100 hover:bg-amber-200 text-amber-900 px-2 py-1 text-xs font-bold">Reemplazar PDF</button>`:''}</span></div>`; }).join('') : '<p class="text-xs text-slate-500">Este ingreso no tiene PDF adjuntos.</p>';
+                const docsHtml = docs.length ? docs.map((doc, i) => { const docId = String(doc.fileId || doc.id || ''); const docName = String(doc.fileName || doc.nombre || ('Informe PDF ' + (i+1))); return `<div class="flex flex-wrap items-center justify-between gap-2 border rounded-lg p-2"><span class="text-xs break-all">${escapeHtml(docName)}</span><span class="flex gap-2"><button type="button" data-action="open-pdf" data-file-id="${escapeHtml(docId)}" data-file-name="${escapeHtml(docName)}" class="text-blue-700 text-xs font-bold">Visualizar</button><button type="button" data-action="download-pdf" data-file-id="${escapeHtml(docId)}" data-file-name="${escapeHtml(docName)}" class="text-emerald-700 text-xs font-bold">Descargar</button>${hasPermission('expedientes','edit')?`<button type="button" onclick="replaceAttachedPDF('expInforme','${escapeHtml(exp.id)}','${escapeHtml(entry.id || '')}','${i}')" class="rounded-md bg-amber-100 hover:bg-amber-200 text-amber-900 px-2 py-1 text-xs font-bold">Reemplazar</button><button type="button" onclick="deleteAttachedPDF('expInforme','${escapeHtml(exp.id)}','${escapeHtml(entry.id || '')}','${i}')" class="rounded-md bg-red-100 hover:bg-red-200 text-red-800 px-2 py-1 text-xs font-bold">Eliminar</button>`:''}</span></div>`; }).join('') : '<p class="text-xs text-slate-500">Este ingreso no tiene PDF adjuntos.</p>';
                 return `<article class="border rounded-xl p-3"><div class="flex flex-wrap justify-between gap-2"><h3 class="font-bold text-sm">Ingreso ${entries.length-idx} · ${escapeHtml(entry.fecha || 'Fecha no indicada')}</h3><span class="text-xs text-slate-500">${escapeHtml(entry.usuario || 'Usuario no registrado')}</span></div><p class="text-xs text-slate-600 mt-1">Procedencia: ${escapeHtml(entry.procedencia || 'No indicada')}</p><p class="text-sm mt-2 whitespace-pre-wrap">${escapeHtml(entry.detalle || 'Sin observaciones')}</p><div class="mt-3 space-y-2">${docsHtml}</div></article>`;
             }).join('');
         }
@@ -2884,6 +2884,56 @@
             } catch (err) { alert('No se pudo completar el ingreso: ' + err.message); }
             finally { if (btn) { btn.disabled = false; btn.textContent = 'Guardar ingreso e informes'; } }
         }
+        async function deleteAttachedPDF(kind, recordId, subId, index) {
+            const module = kind === 'notaRespuesta' ? 'notas' : 'expedientes';
+            const tableName = kind === 'notaRespuesta' ? 'Notas' : 'Expedientes';
+            if (!hasPermission(module, 'edit')) { alert('Su usuario no tiene permiso para eliminar archivos en este módulo.'); return; }
+            const table = kind === 'notaRespuesta' ? notas : expedientesDB;
+            const rec = table.find(x => String(x.id) === String(recordId));
+            if (!rec) { alert('No se encontró el registro. Recargue los datos e intente nuevamente.'); return; }
+            let doc = null, oldId = '';
+            if (kind === 'notaRespuesta') {
+                const docs = Array.isArray(rec.adjuntosRespuesta) ? rec.adjuntosRespuesta : [];
+                doc = docs[Number(subId)];
+            } else {
+                const entry = (Array.isArray(rec.historialIngresos) ? rec.historialIngresos : []).find(x => String(x.id || '') === String(subId));
+                doc = entry && Array.isArray(entry.informes) ? entry.informes[Number(index)] : null;
+            }
+            oldId = String(doc && (doc.fileId || doc.id) || '');
+            if (!doc || !oldId) { alert('No se encontró el archivo asociado al registro.'); return; }
+            const fileName = String(doc.fileName || doc.nombre || 'archivo PDF');
+            if (!confirm('¿Eliminar “' + fileName + '” de este registro? Se quitará la referencia y, si ningún otro registro lo utiliza, el archivo se enviará a la papelera de Drive. Esta acción no se puede deshacer desde la aplicación.')) return;
+            const before = JSON.parse(JSON.stringify(rec));
+            try {
+                if (kind === 'notaRespuesta') {
+                    rec.adjuntosRespuesta.splice(Number(subId), 1);
+                } else {
+                    const entry = rec.historialIngresos.find(x => String(x.id || '') === String(subId));
+                    if (!entry || !Array.isArray(entry.informes)) throw new Error('No se encontró el ingreso del expediente.');
+                    entry.informes.splice(Number(index), 1);
+                    // adjuntosIF es una lista de compatibilidad: quitar una sola referencia del mismo PDF.
+                    if (Array.isArray(rec.adjuntosIF)) {
+                        const legacyIndex = rec.adjuntosIF.findIndex(d => String(d.fileId || d.id || '') === oldId);
+                        if (legacyIndex >= 0) rec.adjuntosIF.splice(legacyIndex, 1);
+                    }
+                }
+                const saved = await persistTable(tableName, table);
+                if (!saved) { Object.assign(rec, before); throw new Error('No se confirmó el guardado en Google Sheets. El archivo no fue eliminado de Drive.'); }
+                let cleanup;
+                try { cleanup = await serverRequest({action:'deleteUnusedPDF', token:authToken, module, fileId:oldId}); }
+                catch (cleanupError) {
+                    if (kind === 'notaRespuesta') renderTable(); else { renderExpedienteHistorial(rec); renderExpedientesTable(); }
+                    alert('Se quitó el archivo del registro, pero no se pudo limpiar el archivo de Drive: ' + cleanupError.message + '. Solicite revisión al administrador.');
+                    return;
+                }
+                if (kind === 'notaRespuesta') renderTable(); else { renderExpedienteHistorial(rec); renderExpedientesTable(); }
+                alert(cleanup.deleted ? 'Archivo eliminado del registro y enviado a la papelera de Drive.' : 'Archivo eliminado del registro. El archivo de Drive se conservó porque sigue vinculado a otro registro o no se pudo verificar su uso.');
+            } catch (err) {
+                Object.assign(rec, before);
+                alert('No se pudo eliminar el archivo: ' + err.message);
+            }
+        }
+
         async function replaceAttachedPDF(kind, recordId, subId, index) {
             const module = kind === 'notaRespuesta' ? 'notas' : 'expedientes';
             if (!hasPermission(module, 'edit')) { alert('Su usuario no tiene permiso para reemplazar archivos en este módulo.'); return; }
@@ -3283,6 +3333,7 @@
     </script>
 </body>
 </html>
+
 
 
 
