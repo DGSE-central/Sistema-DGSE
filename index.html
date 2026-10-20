@@ -196,6 +196,9 @@
                             <button onclick="toggleAutoUploadSection()" id="btnAutoUpload" class="bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold px-3.5 py-2 rounded-lg transition shadow flex items-center gap-2">
                                 <i class="fa-solid fa-wand-magic-sparkles text-blue-400"></i> Cargar PDF Inteligente
                             </button>
+                            <button onclick="importarRegistroNotasOrigen()" id="btnImportarRegistroNotas" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-xs font-bold px-3.5 py-2 rounded-lg transition shadow flex items-center gap-2">
+                                <i class="fa-solid fa-database"></i> Importar registro existente
+                            </button>
                             <button onclick="exportCSV()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-semibold px-3 py-2 rounded-lg transition flex items-center gap-1">
                                 <i class="fa-solid fa-file-csv"></i> Exportar
                             </button>
@@ -1095,7 +1098,7 @@
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
         // Endpoint del backend seguro. No contiene contraseñas ni secretos.
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyK3C0m6bUA0TUhDFKbYXHhPbsJ0Nfbc0CYYSR4YwuTMpGAtPqx-aVW9NanaZkydlDz/exec';
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx8yG9l_aUmOelLjKyj0v4hkA7nFQLYL3fBLzumOTBfVwDFVxpURJgRX5K-KNHL4-i3/exec';
         let authToken = sessionStorage.getItem('dgse_auth_token') || '';
         let tableRevisions = { Notas: '', Expedientes: '', Viajes: '' };
         let dataLoaded = false;
@@ -2569,6 +2572,25 @@
             updateEstadisticas();
         }
 
+        async function importarRegistroNotasOrigen() {
+            if (!hasPermission('notas', 'create') || !hasPermission('notas', 'edit')) {
+                alert('Para importar el registro se necesitan permisos de crear y editar en Notas.'); return;
+            }
+            const ok = confirm('Se leerá la planilla original de Registro de Notas y se agregarán únicamente los números que todavía no estén cargados. Las notas existentes no se sobrescriben y no se adjuntan PDF. ¿Continuar?');
+            if (!ok) return;
+            const btn = document.getElementById('btnImportarRegistroNotas');
+            const original = btn ? btn.innerHTML : '';
+            if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Importando…'; }
+            try {
+                const result = await serverRequest({action:'importLegacyNotesFromSource', token:authToken});
+                await loadServerData();
+                populatePromotoresOptions(); renderTable(); updateEstadisticas();
+                alert('Importación finalizada.\nNuevas notas agregadas: ' + (result.added || 0) + '\nDuplicadas omitidas: ' + (result.duplicates || 0) + '\nFilas sin datos suficientes omitidas: ' + (result.skipped || 0) + '\nTotal de notas en el sistema: ' + (result.total || notas.length) + '\n\nNo se importaron archivos adjuntos ni se modificaron registros existentes.');
+            } catch (err) {
+                alert('No se pudo importar el registro. ' + (err.message || err) + '\n\nVerifique que la cuenta propietaria del Apps Script tenga acceso de lectura a la planilla de origen.');
+            } finally { if (btn) { btn.disabled = false; btn.innerHTML = original; } }
+        }
+
         function openModal() {
             document.getElementById('modalTitle').innerText = 'Nueva Nota';
             document.getElementById('notaId').value = '';
@@ -3333,6 +3355,7 @@
     </script>
 </body>
 </html>
+
 
 
 
