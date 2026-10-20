@@ -1095,7 +1095,7 @@
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
         // Endpoint del backend seguro. No contiene contraseñas ni secretos.
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxUexC7u6ZWLVXvWburiyg6YkTvgYhMczZZrcw-rxcgunJaGq0rALrt7eoL9HZm9BG9/exec';
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxLlV0gehTWhy6ctfUgi4Cjry5EXm9m2JsqENsZJ17PD2UOAgRTnQNWXmPiYa9jBR1Y/exec';
         let authToken = sessionStorage.getItem('dgse_auth_token') || '';
         let tableRevisions = { Notas: '', Expedientes: '', Viajes: '' };
         let dataLoaded = false;
@@ -2540,7 +2540,7 @@
 
                 const attachmentButtons = [];
                 if (n.adjuntoNotaId) { const nombrePDF = String(n.adjuntoNotaNombre || (n.nroNota + '.pdf')); attachmentButtons.push(`<button type="button" data-action="open-pdf" data-file-id="${escapeHtml(n.adjuntoNotaId)}" data-file-name="${escapeHtml(nombrePDF)}" class="text-blue-600 hover:text-blue-800 font-bold"><i class="fa-solid fa-file-pdf"></i> Nota original</button>`); }
-                (Array.isArray(n.adjuntosRespuesta) ? n.adjuntosRespuesta : []).forEach((doc, i) => { const fid=String(doc.fileId || doc.id || ''); const fn=String(doc.fileName || doc.nombre || ('Respuesta ' + (i+1) + '.pdf')); if(fid) attachmentButtons.push(`<button type="button" data-action="open-pdf" data-file-id="${escapeHtml(fid)}" data-file-name="${escapeHtml(fn)}" class="text-emerald-700 hover:text-emerald-900 font-bold block"><i class="fa-solid fa-file-pdf"></i> ${escapeHtml(fn)}</button>`); });
+                (Array.isArray(n.adjuntosRespuesta) ? n.adjuntosRespuesta : []).forEach((doc, i) => { const fid=String(doc.fileId || doc.id || ''); const fn=String(doc.fileName || doc.nombre || ('Respuesta ' + (i+1) + '.pdf')); if(fid) attachmentButtons.push(`<div class="flex flex-wrap items-center gap-2"><button type="button" data-action="open-pdf" data-file-id="${escapeHtml(fid)}" data-file-name="${escapeHtml(fn)}" class="text-emerald-700 hover:text-emerald-900 font-bold"><i class="fa-solid fa-file-pdf"></i> ${escapeHtml(fn)}</button>${hasPermission('notas','edit')?`<button type="button" onclick="replaceAttachedPDF('notaRespuesta','${escapeHtml(n.id)}','${i}')" class="rounded-md bg-amber-100 hover:bg-amber-200 text-amber-900 px-2 py-1 text-xs font-bold">Reemplazar PDF</button>`:''}</div>`); });
                 let adjuntosHtml = attachmentButtons.length ? attachmentButtons.join('') : '-';
                 if (!attachmentButtons.length && n.adjuntoNota && /^https?:\/\//i.test(String(n.adjuntoNota))) { let legacyUrl=''; try { const parsedLegacyUrl=new URL(String(n.adjuntoNota)); if(['http:','https:'].includes(parsedLegacyUrl.protocol)) legacyUrl=parsedLegacyUrl.href; } catch (_) {} if(legacyUrl) adjuntosHtml=`<a href="${escapeHtml(legacyUrl)}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 font-bold">Adjunto legado</a>`; }
 
@@ -2847,7 +2847,7 @@
             if (!entries.length) { target.innerHTML = '<p class="text-sm text-slate-500 border rounded-lg p-4">Todavía no hay reingresos registrados. El primer registro puede agregarse arriba; la fecha inicial del expediente se conserva en sus datos generales.</p>'; return; }
             target.innerHTML = entries.map((entry, idx) => {
                 const docs = Array.isArray(entry.informes) ? entry.informes : [];
-                const docsHtml = docs.length ? docs.map((doc, i) => { const docId = String(doc.fileId || doc.id || ''); const docName = String(doc.fileName || doc.nombre || ('Informe PDF ' + (i+1))); return `<div class="flex flex-wrap items-center justify-between gap-2 border rounded-lg p-2"><span class="text-xs break-all">${escapeHtml(docName)}</span><span class="flex gap-2"><button type="button" data-action="open-pdf" data-file-id="${escapeHtml(docId)}" data-file-name="${escapeHtml(docName)}" class="text-blue-700 text-xs font-bold">Visualizar</button><button type="button" data-action="download-pdf" data-file-id="${escapeHtml(docId)}" data-file-name="${escapeHtml(docName)}" class="text-emerald-700 text-xs font-bold">Descargar</button></span></div>`; }).join('') : '<p class="text-xs text-slate-500">Este ingreso no tiene PDF adjuntos.</p>';
+                const docsHtml = docs.length ? docs.map((doc, i) => { const docId = String(doc.fileId || doc.id || ''); const docName = String(doc.fileName || doc.nombre || ('Informe PDF ' + (i+1))); return `<div class="flex flex-wrap items-center justify-between gap-2 border rounded-lg p-2"><span class="text-xs break-all">${escapeHtml(docName)}</span><span class="flex gap-2"><button type="button" data-action="open-pdf" data-file-id="${escapeHtml(docId)}" data-file-name="${escapeHtml(docName)}" class="text-blue-700 text-xs font-bold">Visualizar</button><button type="button" data-action="download-pdf" data-file-id="${escapeHtml(docId)}" data-file-name="${escapeHtml(docName)}" class="text-emerald-700 text-xs font-bold">Descargar</button>${hasPermission('expedientes','edit')?`<button type="button" onclick="replaceAttachedPDF('expInforme','${escapeHtml(exp.id)}','${escapeHtml(entry.id || '')}','${i}')" class="rounded-md bg-amber-100 hover:bg-amber-200 text-amber-900 px-2 py-1 text-xs font-bold">Reemplazar PDF</button>`:''}</span></div>`; }).join('') : '<p class="text-xs text-slate-500">Este ingreso no tiene PDF adjuntos.</p>';
                 return `<article class="border rounded-xl p-3"><div class="flex flex-wrap justify-between gap-2"><h3 class="font-bold text-sm">Ingreso ${entries.length-idx} · ${escapeHtml(entry.fecha || 'Fecha no indicada')}</h3><span class="text-xs text-slate-500">${escapeHtml(entry.usuario || 'Usuario no registrado')}</span></div><p class="text-xs text-slate-600 mt-1">Procedencia: ${escapeHtml(entry.procedencia || 'No indicada')}</p><p class="text-sm mt-2 whitespace-pre-wrap">${escapeHtml(entry.detalle || 'Sin observaciones')}</p><div class="mt-3 space-y-2">${docsHtml}</div></article>`;
             }).join('');
         }
@@ -2883,6 +2883,51 @@
             } catch (err) { alert('No se pudo completar el ingreso: ' + err.message); }
             finally { if (btn) { btn.disabled = false; btn.textContent = 'Guardar ingreso e informes'; } }
         }
+        async function replaceAttachedPDF(kind, recordId, subId, index) {
+            const module = kind === 'notaRespuesta' ? 'notas' : 'expedientes';
+            if (!hasPermission(module, 'edit')) { alert('Su usuario no tiene permiso para reemplazar archivos en este módulo.'); return; }
+            const picker = document.createElement('input'); picker.type = 'file'; picker.accept = 'application/pdf,.pdf';
+            picker.onchange = async () => {
+                const file = picker.files && picker.files[0]; if (!file) return;
+                if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) { alert('Solo se permiten archivos PDF.'); return; }
+                if (file.size > 10 * 1024 * 1024) { alert('El PDF debe pesar 10 MB o menos.'); return; }
+                const table = kind === 'notaRespuesta' ? notas : expedientesDB;
+                const rec = table.find(x => String(x.id) === String(recordId));
+                if (!rec) { alert('No se encontró el registro. Recargue los datos e intente nuevamente.'); return; }
+                let oldDoc, oldId;
+                if (kind === 'notaRespuesta') {
+                    const docs = Array.isArray(rec.adjuntosRespuesta) ? rec.adjuntosRespuesta : [];
+                    oldDoc = docs[Number(subId)]; oldId = String(oldDoc && (oldDoc.fileId || oldDoc.id) || '');
+                } else {
+                    const entry = (Array.isArray(rec.historialIngresos) ? rec.historialIngresos : []).find(x => String(x.id || '') === String(subId));
+                    oldDoc = entry && Array.isArray(entry.informes) ? entry.informes[Number(index)] : null;
+                    oldId = String(oldDoc && (oldDoc.fileId || oldDoc.id) || '');
+                }
+                if (!oldDoc || !oldId) { alert('No se encontró el PDF anterior asociado a este registro.'); return; }
+                if (!confirm('¿Reemplazar “' + String(oldDoc.fileName || oldDoc.nombre || 'PDF actual') + '” por “' + file.name + '”? El archivo anterior se enviará a la papelera de Drive únicamente después de guardar el nuevo y comprobar que no esté vinculado a otros registros.')) return;
+                try {
+                    const readerData = await new Promise((resolve,reject) => { const reader = new FileReader(); reader.onload = () => resolve(reader.result); reader.onerror = () => reject(new Error('No se pudo leer el PDF seleccionado.')); reader.readAsDataURL(file); });
+                    const uploaded = await subirPDFAGoogleDrive(readerData, file.name, module);
+                    const newId = String(uploaded.fileId || uploaded.id || uploaded.file && uploaded.file.id || '');
+                    if (!newId) throw new Error('Drive no devolvió el identificador del PDF nuevo. El archivo anterior se conserva.');
+                    const replacement = { fileId:newId, fileName:file.name, mimeType:'application/pdf', uploadedAt:new Date().toISOString(), uploadedBy:currentUser.username || currentUser.user || currentUser.nombre || '' };
+                    if (kind === 'notaRespuesta') {
+                        rec.adjuntosRespuesta[Number(subId)] = replacement;
+                    } else {
+                        const entry = rec.historialIngresos.find(x => String(x.id || '') === String(subId));
+                        entry.informes[Number(index)] = replacement;
+                        if (Array.isArray(rec.adjuntosIF)) rec.adjuntosIF = rec.adjuntosIF.map(d => String(d.fileId || d.id || '') === oldId ? replacement : d);
+                    }
+                    const saved = await persistTable(kind === 'notaRespuesta' ? 'Notas' : 'Expedientes', table);
+                    if (!saved) { alert('El nuevo PDF se subió, pero no se confirmó el guardado del vínculo en la planilla. El archivo anterior NO se eliminó. Revise el registro antes de reintentar.'); return; }
+                    const cleanup = await serverRequest({action:'deleteReplacedPDF', token:authToken, module, oldFileId:oldId, newFileId:newId});
+                    if (kind === 'notaRespuesta') renderTable(); else { renderExpedienteHistorial(rec); renderExpedientesTable(); }
+                    alert(cleanup.deleted ? 'PDF reemplazado. El archivo anterior fue enviado a la papelera de Drive.' : 'PDF reemplazado correctamente. El archivo anterior se conservó porque sigue vinculado a otro registro.');
+                } catch (err) { alert('No se pudo completar el reemplazo: ' + err.message + '. Por seguridad, el archivo anterior no se elimina si no se confirma el guardado.'); }
+            };
+            picker.click();
+        }
+
         async function descargarInformeExpediente(fileId, fileName) {
             if (!fileId) { alert('Este informe no tiene un identificador de Drive válido.'); return; }
             try {
@@ -3237,6 +3282,7 @@
     </script>
 </body>
 </html>
+
 
 
 
