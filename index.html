@@ -1095,7 +1095,7 @@
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
         // Endpoint del backend seguro. No contiene contraseñas ni secretos.
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby684ugraHhywPGt3e74CAWLjF0LvJPLFbsSaAHXxRJckO5bMPVMWTq9Tofj6zeikJT/exec';
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwqLxirA1sMjGe_QBviiTrkY4p34TfBcCs9NJfpu0yA93YlELRrLqhaQlkQIu7QDPgt/exec';
         let authToken = sessionStorage.getItem('dgse_auth_token') || '';
         let tableRevisions = { Notas: '', Expedientes: '', Viajes: '' };
         let dataLoaded = false;
@@ -1601,9 +1601,24 @@
             promotoresUnicos.forEach(p => { const opt=document.createElement('option'); opt.value=p; opt.textContent=p; selectPromotor.appendChild(opt); });
             selectPromotor.value = selectedActual;
         }
-        // PERSONAL PNA: consulta de solo lectura desde la planilla externa configurada en Apps Script.
-        let pnaSheets = [], pnaCategory = 'direcciones', pnaRegion = 'DNOR', pnaLoaded = false, pnaLoading = false;
+        // PERSONAL PNA: la planilla es la fuente de datos; la vista respeta la jerarquía Dirección > Región > PZ > Dependencias.
+        let pnaSheets = [], pnaCategory = 'direcciones', pnaRegion = 'DNOR', pnaZone = '', pnaLoaded = false, pnaLoading = false;
         function pnaNorm(v){return String(v==null?'':v).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();}
+        function pnaFindValue(row, aliases){
+            const entries=Object.entries(row||{}), wanted=aliases.map(pnaNorm);
+            // Priorizar encabezados exactos para no confundir, por ejemplo, "Director de Región" con "Región".
+            for(const alias of wanted){const found=entries.find(([key,value])=>pnaNorm(key)===alias&&String(value==null?'':value).trim());if(found)return String(found[1]).trim();}
+            for(const alias of wanted.sort((a,b)=>b.length-a.length)){const found=entries.find(([key,value])=>pnaNorm(key).includes(alias)&&String(value==null?'':value).trim());if(found)return String(found[1]).trim();}
+            return '';
+        }
+        function pnaRowRegion(row){return pnaFindValue(row,['codigo region','cod region','region','dirección de región','direccion de region','región']);}
+        function pnaRegionLabel(code){return ({DNOR:'DIRECCIÓN DE REGIÓN NORTE',DCEN:'DIRECCIÓN DE REGIÓN CENTRO',DSUR:'DIRECCIÓN DE REGIÓN SUR'})[code]||code;}
+        function pnaRowMatchesRegion(row,code){
+            const value=pnaNorm(pnaRowRegion(row));
+            if(!value)return false;
+            const label=pnaNorm(pnaRegionLabel(code));
+            return value===pnaNorm(code)||value.includes(pnaNorm(code))||value.includes(label)||label.includes(value);
+        }
         async function loadPersonalPNA(force){
             if(pnaLoading)return;
             if(pnaLoaded&&!force){renderPersonalPNA();return;}
@@ -1614,16 +1629,76 @@
             finally{pnaLoading=false;}
         }
         function pnaSelectCategory(cat){pnaCategory=cat;document.querySelectorAll('.pna-nav-btn').forEach(b=>{b.classList.remove('bg-blue-700','text-white');b.classList.add('bg-white','text-slate-700','border','border-slate-200');});const active=document.getElementById('pnaCategoryBtn_'+cat);if(active){active.classList.add('bg-blue-700','text-white');active.classList.remove('bg-white','text-slate-700','border','border-slate-200');}document.getElementById('pnaSubnavRegiones').classList.toggle('hidden',cat!=='regiones');renderPersonalPNA();}
-        function pnaSelectRegion(region){pnaRegion=region;renderPersonalPNA();}
+        function pnaSelectRegion(region){pnaRegion=region;pnaZone='';document.querySelectorAll('.pna-subnav-btn').forEach(b=>{b.classList.remove('bg-blue-700','text-white');b.classList.add('bg-white','text-slate-700','border','border-slate-200');});const active=document.getElementById('pnaRegionBtn_'+region);if(active){active.classList.add('bg-blue-700','text-white');active.classList.remove('bg-white','text-slate-700','border','border-slate-200');}renderPersonalPNA();}
+        function pnaSelectZone(zone){pnaZone=zone;renderPersonalPNA();}
         function pnaOnSearchInput(){renderPersonalPNA();}
         function pnaSheetCategory(name){const n=pnaNorm(name);if(/dtra/.test(n))return'dtra';if(/diop/.test(n))return'diop';if(/dnor|dcen|dsur|region/.test(n))return'regiones';if(/direccion|direcciones/.test(n))return'direcciones';return'other';}
+        function pnaRegionSheets(code){
+            const codeNorm=pnaNorm(code), label=pnaNorm(pnaRegionLabel(code));
+            const found=[];
+            pnaSheets.forEach(sh=>{
+                const name=pnaNorm(sh.name), rows=sh.rows||[];
+                const nameMatch=name.includes(codeNorm)||name.includes(label)||(code==='DNOR'&&name.includes('norte'))||(code==='DCEN'&&name.includes('centro'))||(code==='DSUR'&&name.includes('sur'));
+                const matchingRows=rows.filter(row=>pnaRowMatchesRegion(row,code));
+                const genericRegionSheet=/region|direccion/.test(name)&&!(/dnor|dcen|dsur|norte|centro|sur/.test(name));
+                if(nameMatch)found.push({sheet:sh,rows:rows,sourceName:sh.name});
+                else if(matchingRows.length)found.push({sheet:sh,rows:matchingRows,sourceName:sh.name});
+                else if(genericRegionSheet&&rows.length&&rows.some(row=>pnaRowRegion(row)))found.push({sheet:sh,rows:matchingRows,sourceName:sh.name});
+            });
+            // Eliminar duplicados por pestaña cuando la misma pestaña coincidió por nombre y por filas.
+            const seen=new Set();return found.filter(x=>{if(seen.has(x.sheet.name))return false;seen.add(x.sheet.name);return true;});
+        }
+        function pnaZoneCode(row, sheetName){
+            const raw=pnaFindValue(row,['codigo pz','código pz','cod pz','pz','prefectura de zona','codigo de zona','código de zona']);
+            const m=String(raw||'').toUpperCase().match(/PZ[A-Z0-9]+/);if(m)return m[0];
+            const sn=String(sheetName||'').toUpperCase().match(/^\s*(PZ[A-Z0-9]+)/);return sn?sn[1]:'';
+        }
+        function pnaZoneName(row, code){return pnaFindValue(row,['nombre pz','nombre de pz','prefectura de zona','nombre de zona','denominacion pz','denominación pz','zona'])||code;}
+        function pnaTable(headers, rows){
+            if(!rows.length)return '<div class="p-4 text-sm text-slate-500">No hay dependencias cargadas para esta PZ.</div>';
+            return `<div class="overflow-x-auto rounded-xl border border-slate-200"><table class="min-w-full text-sm"><thead class="bg-slate-50"><tr>${headers.map(k=>`<th class="text-left px-3 py-2 font-bold text-slate-600 whitespace-nowrap border-b">${escapeHtml(k)}</th>`).join('')}</tr></thead><tbody>${rows.map((row,i)=>`<tr class="${i%2?'bg-slate-50/70':'bg-white'} hover:bg-blue-50">${headers.map(k=>`<td class="px-3 py-2 border-b border-slate-100 text-slate-700 whitespace-nowrap">${escapeHtml(row[k]??'')}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+        }
+        function pnaRenderRegionView(query){
+            const area=document.getElementById('pnaContentArea'), regionName=pnaRegionLabel(pnaRegion);
+            const sources=pnaRegionSheets(pnaRegion);
+            let entries=[];sources.forEach(src=>src.rows.forEach(row=>entries.push({row:row,sheet:src.sheet,sourceName:src.sourceName})));
+            if(query)entries=entries.filter(e=>pnaNorm([e.sourceName,...Object.values(e.row)].join(' ')).includes(query));
+            const groups=new Map();
+            entries.forEach(entry=>{
+                let code=pnaZoneCode(entry.row,entry.sourceName);
+                if(!code&&/^PZ[A-Z0-9]+$/i.test(entry.sourceName.trim()))code=entry.sourceName.trim().toUpperCase();
+                if(!code)code='SIN_PZ';
+                if(!groups.has(code))groups.set(code,{code:code,name:pnaZoneName(entry.row,code),rows:[],headers:entry.sheet.headers&&entry.sheet.headers.length?entry.sheet.headers:Object.keys(entry.row||{}),sheetName:entry.sourceName});
+                const g=groups.get(code);g.rows.push(entry.row);if(g.name===code)g.name=pnaZoneName(entry.row,code);
+            });
+            const zones=[...groups.values()].sort((a,b)=>a.code.localeCompare(b.code,'es'));
+            const subnav=document.querySelectorAll('.pna-subnav-btn');subnav.forEach(b=>{const active=b.id==='pnaRegionBtn_'+pnaRegion;b.classList.toggle('bg-blue-700',active);b.classList.toggle('text-white',active);b.classList.toggle('bg-white',!active);b.classList.toggle('text-slate-700',!active);b.classList.toggle('border',!active);b.classList.toggle('border-slate-200',!active);});
+            if(!zones.length){document.getElementById('pnaCount').textContent='0 registros';area.innerHTML=`<div class="bg-white border border-slate-200 rounded-xl p-6 text-center text-slate-500">No se encontraron datos para ${escapeHtml(regionName)} (${escapeHtml(pnaRegion)}). Verificá que la pestaña o las filas de Google Sheets identifiquen la región.</div>`;return 0;}
+            if(!pnaZone||!groups.has(pnaZone))pnaZone=zones[0].code;
+            const selected=groups.get(pnaZone);let total=entries.length;
+            const zoneCards=zones.map(z=>`<button type="button" onclick="pnaSelectZone('${escapeHtml(z.code)}')" class="text-left p-4 rounded-xl border-2 transition ${z.code===pnaZone?'border-blue-600 bg-blue-50 shadow-sm':'border-slate-200 bg-white hover:border-blue-300'}"><div class="font-extrabold text-slate-800 text-base mb-1">${escapeHtml(z.code==='SIN_PZ'?'PZ sin identificar':z.code)}</div><div class="text-xs font-semibold text-slate-600">${escapeHtml(z.name||z.sheetName)}</div><div class="mt-2 text-xs text-slate-500">${z.rows.length} registro(s)</div></button>`).join('');
+            const first=selected.rows[0]||{};
+            const director=pnaFindValue(first,['director de region','director de región','director']);
+            const subdirector=pnaFindValue(first,['subdirector']);
+            const zoneLocation=pnaFindValue(first,['ubicacion','ubicación','localidad']);
+            const jefe=pnaFindValue(first,['jefe de zona','jefe zona']);
+            const jeop=pnaFindValue(first,['jeop de zona','jeop zona']);
+            const metadata=[['Ubicación',zoneLocation],['Jefe de Zona',jefe],['JEOP de Zona',jeop]].filter(x=>x[1]);
+            const headers=selected.headers.filter(h=>!/^__rowNumber$/.test(h));
+            const rows=selected.rows.map(row=>{const copy={};headers.forEach(h=>copy[h]=row[h]??'');return copy;});
+            area.innerHTML=`<div class="bg-slate-900 text-white p-5 rounded-2xl shadow-md mb-5 border border-slate-800 text-center"><h3 class="text-lg font-bold tracking-wide uppercase text-blue-300">${escapeHtml(regionName)} (${escapeHtml(pnaRegion)})</h3>${director?`<p class="text-sm font-semibold text-slate-200 mt-1"><i class="fa-solid fa-user-shield text-blue-400 mr-1.5"></i>Director: ${escapeHtml(director)}</p>`:''}${subdirector?`<p class="text-xs text-slate-400 mt-0.5">Subdirector: ${escapeHtml(subdirector)}</p>`:''}</div><div class="mb-3 text-center"><p class="text-xs font-bold uppercase text-slate-500 tracking-wider">Prefecturas de Zona pertenecientes a ${escapeHtml(pnaRegion)}</p></div><div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">${zoneCards}</div><section class="bg-slate-50 border border-slate-200 rounded-2xl p-4 md:p-5"><div class="flex flex-col md:flex-row justify-between items-start gap-3 mb-4 border-b border-slate-200 pb-3"><div><h4 class="text-base font-bold text-slate-800 uppercase flex items-center gap-2"><i class="fa-solid fa-building text-blue-600"></i>${escapeHtml(selected.name||selected.code)}</h4><p class="text-xs text-slate-500 mt-1">Perteneciente a ${escapeHtml(pnaRegion)} · Fuente: ${escapeHtml(selected.sheetName)}</p></div>${metadata.length?`<div class="text-xs text-left bg-white p-3 rounded-lg border border-slate-200 shadow-sm">${metadata.map(x=>`<p class="text-slate-700"><strong>${escapeHtml(x[0])}:</strong> ${escapeHtml(x[1])}</p>`).join('')}</div>`:''}</div><h5 class="text-xs font-bold uppercase text-slate-600 mb-2 flex items-center gap-1.5"><i class="fa-solid fa-list text-slate-400"></i> Dependencias de ${escapeHtml(selected.code)}</h5>${pnaTable(headers,rows)}</section>`;
+            return total;
+        }
         function renderPersonalPNA(){
             const area=document.getElementById('pnaContentArea');if(!area)return;
             if(!pnaSheets.length){area.innerHTML='<div class="bg-white border border-amber-200 rounded-xl p-5 text-sm text-amber-800">La consulta no devolvió pestañas. Revisá el ID y los permisos de la planilla en Apps Script.</div>';document.getElementById('pnaCount').textContent='0 registros';return;}
             const query=pnaNorm(document.getElementById('pnaSearch')?.value||'');
-            let sheets=pnaSheets.filter(sh=>{const cat=pnaSheetCategory(sh.name);if(pnaCategory==='regiones')return cat==='regiones'&&pnaNorm(sh.name).includes(pnaNorm(pnaRegion));return cat===pnaCategory;});
-            const colors={direcciones:'border-blue-200',regiones:'border-indigo-200',dtra:'border-amber-200',diop:'border-violet-200'};let total=0;
-            const blocks=sheets.map(sh=>{const rows=(sh.rows||[]).filter(row=>!query||pnaNorm(Object.values(row).join(' ')).includes(query));total+=rows.length;if(!rows.length)return '';const keys=sh.headers&&sh.headers.length?sh.headers:Object.keys(rows[0]||{});return `<section class="bg-white rounded-xl border ${colors[pnaCategory]||'border-slate-200'} shadow-sm overflow-hidden"><div class="px-4 py-3 bg-gradient-to-r from-slate-50 to-blue-50 border-b flex flex-wrap justify-between gap-2"><h3 class="font-extrabold text-slate-800"><i class="fa-solid fa-building text-blue-700 mr-2"></i>${escapeHtml(sh.name)}</h3><span class="text-xs font-bold rounded-full bg-blue-100 text-blue-800 px-3 py-1">${rows.length} registro(s)</span></div><div class="overflow-x-auto"><table class="min-w-full text-sm"><thead class="bg-slate-50"><tr>${keys.map(k=>`<th class="text-left px-3 py-2 font-bold text-slate-600 whitespace-nowrap border-b">${escapeHtml(k)}</th>`).join('')}</tr></thead><tbody>${rows.map((row,i)=>`<tr class="${i%2?'bg-slate-50/70':'bg-white'} hover:bg-blue-50">${keys.map(k=>`<td class="px-3 py-2 border-b border-slate-100 text-slate-700 whitespace-nowrap">${escapeHtml(row[k]??'')}</td>`).join('')}</tr>`).join('')}</tbody></table></div></section>`;}).filter(Boolean);
+            if(pnaCategory==='regiones'){
+                const total=pnaRenderRegionView(query);document.getElementById('pnaCount').textContent=`${total} registro(s) · ${pnaRegionLabel(pnaRegion)} · ${pnaRegion}`;return;
+            }
+            const sheets=pnaSheets.filter(sh=>pnaSheetCategory(sh.name)===pnaCategory);
+            const colors={direcciones:'border-blue-200',dtra:'border-amber-200',diop:'border-violet-200'};let total=0;
+            const blocks=sheets.map(sh=>{const rows=(sh.rows||[]).filter(row=>!query||pnaNorm(Object.values(row).join(' ')).includes(query));total+=rows.length;if(!rows.length)return '';const keys=sh.headers&&sh.headers.length?sh.headers:Object.keys(rows[0]||{});return `<section class="bg-white rounded-xl border ${colors[pnaCategory]||'border-slate-200'} shadow-sm overflow-hidden"><div class="px-4 py-3 bg-gradient-to-r from-slate-50 to-blue-50 border-b flex flex-wrap justify-between gap-2"><h3 class="font-extrabold text-slate-800"><i class="fa-solid fa-building text-blue-700 mr-2"></i>${escapeHtml(sh.name)}</h3><span class="text-xs font-bold rounded-full bg-blue-100 text-blue-800 px-3 py-1">${rows.length} registro(s)</span></div>${pnaTable(keys,rows)}</section>`;}).filter(Boolean);
             document.getElementById('pnaCount').textContent=`${total} registro(s) · ${sheets.length} pestaña(s)`;
             area.innerHTML=blocks.length?blocks.join(''):'<div class="bg-white border border-slate-200 rounded-xl p-6 text-center text-slate-500">No hay registros en esta categoría o la búsqueda no produjo resultados.</div>';
         }
@@ -3110,6 +3185,7 @@
     </script>
 </body>
 </html>
+
 
 
 
