@@ -52,44 +52,53 @@
             .stats-grid { grid-template-columns: 1fr; }
         }
 
-        /* IDENTIDAD VISUAL DGSE: tipografía, tarjetas, campos y encabezados coherentes en todas las solapas. */
-        body, button, input, select, textarea, table, th, td, label, .tab-content { font-family: Arial, Helvetica, sans-serif !important; }
-        .tab-content { color: #1e293b; animation: dgseTabAppear .16s ease-out; }
-        .tab-content h1, .tab-content h2, .tab-content h3, .tab-content h4 { color: #172f50; letter-spacing: -.015em; }
-        .tab-content > .bg-gradient-to-br,
-        #agendaTab > div, #informacionTab > div, #personalPnaTab > div,
-        #expedientesTab > div, #viajesTab > div, #estadisticasTab > div {
-            border-radius: 1rem; border-color: #dbe3ed; box-shadow: 0 2px 5px rgba(15,23,42,.045);
+        /* IDENTIDAD VISUAL DGSE: referencia Registro de Notas aplicada a todas las solapas */
+        body, body *, button, input, select, textarea, table, th, td, label {
+            font-family: Arial, Helvetica, sans-serif !important;
+            box-sizing: border-box;
         }
-        /* Los encabezados coloridos de módulos secundarios pasan al azul institucional de Registro de Notas. */
-        #agendaTab .bg-gradient-to-r, #informacionTab .bg-gradient-to-r, #personalPnaTab .bg-gradient-to-r,
-        #agendaTab .bg-gradient-to-br, #informacionTab .bg-gradient-to-br, #personalPnaTab .bg-gradient-to-br {
-            background-image: none !important;
+        .tab-content { color:#334155; animation:dgseTabAppear .16s ease-out; }
+        .tab-content h1,.tab-content h2,.tab-content h3,.tab-content h4 { color:#172f50; letter-spacing:-.015em; }
+        /* Superficies principales: fondo blanco, borde frío y sombra sutil como Registro de Notas */
+        #agendaTab .bg-gradient-to-br,#informacionTab .bg-gradient-to-br,#personalPnaTab .bg-gradient-to-br,
+        #agendaTab .bg-white,#informacionTab .bg-white,#personalPnaTab .bg-white {
+            border-color:#dbe3ed !important; border-radius:.85rem; box-shadow:0 2px 5px rgba(15,23,42,.045);
         }
-        #agendaTab .bg-gradient-to-r, #informacionTab .bg-gradient-to-r, #personalPnaTab .bg-gradient-to-r {
-            background-color: #1e3a5f !important; color: #fff !important; border-color: #294b70 !important;
+        #agendaTab .bg-gradient-to-br,#informacionTab .bg-gradient-to-br,#personalPnaTab .bg-gradient-to-br,
+        #agendaTab .bg-gradient-to-r,#informacionTab .bg-gradient-to-r,#personalPnaTab .bg-gradient-to-r {
+            background-image:none !important;
         }
-        #agendaTab .bg-gradient-to-r *, #informacionTab .bg-gradient-to-r *, #personalPnaTab .bg-gradient-to-r * { color: inherit; }
-        #agendaTab .bg-gradient-to-br, #informacionTab .bg-gradient-to-br, #personalPnaTab .bg-gradient-to-br { background-color: #fff !important; }
-        #agendaTab input:not([type=checkbox]), #agendaTab select, #agendaTab textarea,
-        #informacionTab input:not([type=checkbox]):not([type=file]), #informacionTab select, #informacionTab textarea,
-        #personalPnaTab input:not([type=checkbox]), #personalPnaTab select, #personalPnaTab textarea {
-            border: 1px solid #cbd5e1; border-radius: .5rem; font: inherit;
+        #agendaTab .bg-gradient-to-br,#informacionTab .bg-gradient-to-br,#personalPnaTab .bg-gradient-to-br { background-color:#fff !important; }
+        #agendaTab .bg-gradient-to-r,#informacionTab .bg-gradient-to-r,#personalPnaTab .bg-gradient-to-r {
+            background-color:#1e3a5f !important; color:#fff !important; border:1px solid #294b70 !important; border-radius:.7rem !important;
         }
-        #agendaTab button, #informacionTab button, #personalPnaTab button { font-family: inherit; }
-        .dgse-view-only-hidden { display: none !important; }
-        @keyframes dgseTabAppear { from { opacity: .88; } to { opacity: 1; } }
-        /* RESEÑA: panel institucional sobrio, legible y con separadores claros. */
-        #dgseHistoryModal { background: rgba(15,23,42,.58); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
-        .dgse-holo-panel { background: #fff; color: #334155; border: 1px solid #b8c7d9; box-shadow: 0 24px 70px rgba(15,23,42,.28); animation: dgseHoloIn .18s ease-out; }
-        .dgse-history-scroll { max-height: min(72vh,760px); overflow-y: auto; }
-        .dgse-history-title { font-family: Arial,Helvetica,sans-serif; font-size: 1.4rem; line-height: 1.25; font-weight: 800; letter-spacing: .14em; text-align: center; color: #1e3a5f; }
-        .dgse-history-divider { border: 1px solid #d6e0eb; border-radius: .75rem; padding: 1rem; background: #f8fafc; }
-        #btnHistoriaSoftware { border: 1px solid #cbd5e1; color: #1e3a5f; background: #fff; }
-        #btnHistoriaSoftware:hover { background: #eff6ff; }
-        @keyframes dgseHoloIn { from { opacity: 0; transform: translateY(5px) scale(.995); } to { opacity: 1; transform: translateY(0) scale(1); } }
-        @media (prefers-reduced-motion: reduce) { .dgse-holo-panel, .tab-content { animation: none !important; } }
-        @media (max-width: 640px) { .dgse-holo-panel { max-height: 96dvh; } .dgse-history-scroll { max-height: 78dvh; } }
+        #agendaTab .bg-gradient-to-r *,#informacionTab .bg-gradient-to-r *,#personalPnaTab .bg-gradient-to-r * { color:inherit; }
+        #agendaTab input:not([type=checkbox]),#agendaTab select,#agendaTab textarea,
+        #informacionTab input:not([type=checkbox]):not([type=file]),#informacionTab select,#informacionTab textarea,
+        #personalPnaTab input:not([type=checkbox]),#personalPnaTab select,#personalPnaTab textarea {
+            font:inherit !important; color:#334155; background:#fff; border:1px solid #dbe3ed !important; border-radius:.5rem !important;
+        }
+        #agendaTab button,#informacionTab button,#personalPnaTab button { font-family:inherit !important; border-radius:.5rem; }
+        #agendaTab table,#informacionTab table,#personalPnaTab table { width:100%; border-collapse:separate; border-spacing:0; font-size:.875rem; }
+        #agendaTab th,#informacionTab th,#personalPnaTab th { background:#f1f5f9; color:#334155; font-weight:700; border-bottom:1px solid #dbe3ed; }
+        #agendaTab td,#informacionTab td,#personalPnaTab td { border-bottom:1px solid #e2e8f0; }
+        .dgse-view-only-hidden { display:none !important; }
+        @keyframes dgseTabAppear { from { opacity:.88; } to { opacity:1; } }
+        /* RESEÑA HOLOGRÁFICA: recuperar brillo cian, transparencia y marco luminoso */
+        #dgseHistoryModal { background:rgba(2,12,27,.78); backdrop-filter:blur(7px); -webkit-backdrop-filter:blur(7px); }
+        .dgse-holo-panel { background:linear-gradient(145deg,rgba(8,28,49,.98),rgba(10,43,66,.97)); color:#e2f7ff; border:1px solid rgba(92,226,255,.82); box-shadow:0 0 0 1px rgba(92,226,255,.16),0 0 34px rgba(34,211,238,.28),0 25px 80px rgba(0,0,0,.5); animation:dgseHoloIn .24s ease-out; }
+        .dgse-history-scroll { max-height:min(72vh,760px); overflow-y:auto; scrollbar-color:#38bdf8 rgba(15,23,42,.4); }
+        .dgse-history-title { font-family:inherit; font-size:clamp(1.3rem,2.6vw,1.7rem); line-height:1.25; font-weight:800; letter-spacing:.14em; text-align:center; color:#a5f3fc; text-shadow:0 0 14px rgba(103,232,249,.48); }
+        .dgse-history-divider { border:1px solid rgba(103,232,249,.42); border-radius:.75rem; padding:1rem; background:rgba(8,47,73,.42); }
+        #dgseHistoryModal .text-slate-900,#dgseHistoryModal .text-slate-700 { color:#ecfeff !important; }
+        #dgseHistoryModal .text-slate-600,#dgseHistoryModal .text-slate-500 { color:#c5dce7 !important; }
+        #dgseHistoryModal .border-slate-200 { border-color:rgba(125,211,252,.35) !important; }
+        #dgseHistoryModal .bg-white,#dgseHistoryModal .bg-slate-50 { background:rgba(8,47,73,.5) !important; }
+        #btnHistoriaSoftware { border:1px solid rgba(103,232,249,.5); color:#a5f3fc; background:linear-gradient(135deg,rgba(8,47,73,.95),rgba(30,64,100,.9)); box-shadow:0 0 12px rgba(34,211,238,.16); }
+        #btnHistoriaSoftware:hover { box-shadow:0 0 18px rgba(34,211,238,.36); color:#fff; }
+        @keyframes dgseHoloIn { from { opacity:0; transform:translateY(10px) scale(.985); } to { opacity:1; transform:translateY(0) scale(1); } }
+        @media (prefers-reduced-motion:reduce) { .dgse-holo-panel,.tab-content { animation:none !important; } }
+        @media (max-width:640px) { .dgse-holo-panel { max-height:96dvh; } .dgse-history-scroll { max-height:78dvh; } }
 
     </style>
 </head>
@@ -757,14 +766,13 @@
         <div class="dgse-history-scroll p-5 sm:p-7 space-y-5 text-sm leading-relaxed">
           <p>El Sistema DGSE surgió como una iniciativa de modernización destinada a fortalecer la gestión administrativa mediante la digitalización, centralización y disponibilidad de la información, con accesos diferenciados según las funciones y responsabilidades de cada usuario.</p>
           <p>Impulsado en el ámbito de la Dirección General de Seguridad, el proyecto fue concebido con una visión de crecimiento y proyección institucional, orientada al desarrollo de herramientas digitales adaptables a las necesidades de las distintas Direcciones Generales.</p>
-          <section class="dgse-history-divider"><h3 class="font-bold text-xs uppercase tracking-wider text-slate-700 mb-3">Impulso y respaldo institucional</h3><div class="space-y-3">
-            <p><strong class="text-slate-900">Prefecto General Carlos Alfredo VILLARREAL</strong><span class="block text-xs text-slate-600 mt-1">Director General de Seguridad. Apoyo institucional y autorización para iniciar el proyecto.</span></p>
-            <p><strong class="text-slate-900">Prefecto Mayor Adrián Alejandro VARGAS</strong><span class="block text-xs text-slate-600 mt-1">Impulsor de la iniciativa en el ámbito institucional.</span></p>
-            <p><strong class="text-slate-900">Prefecto Cristian Iván RODRÍGUEZ</strong><span class="block text-xs text-slate-600 mt-1">Aportes de ideas para la concepción y orientación del proyecto.</span></p>
+          <section class="dgse-history-divider"><h3 class="font-bold text-xs uppercase tracking-wider text-cyan-200 mb-3">Diagramación, diseño y desarrollo integral</h3><div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div class="rounded-lg border border-cyan-200/40 bg-cyan-100/5 p-3"><p class="font-bold text-white">Oficial Ayudante Sofia Belen ROMERO</p></div>
+            <div class="rounded-lg border border-cyan-200/40 bg-cyan-100/5 p-3"><p class="font-bold text-white">Cabo Primero Eduardo Francisco RIOS</p></div>
           </div></section>
-          <section class="dgse-history-divider"><h3 class="font-bold text-xs uppercase tracking-wider text-slate-700 mb-3">Diagramación, diseño y desarrollo integral</h3><div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div class="rounded-lg border border-slate-200 bg-white p-3"><p class="font-bold text-slate-900">Oficial Ayudante Sofia Belen ROMERO</p></div>
-            <div class="rounded-lg border border-slate-200 bg-white p-3"><p class="font-bold text-slate-900">Cabo Primero Eduardo Francisco RIOS</p></div>
+          <section class="dgse-history-divider"><h3 class="font-bold text-xs uppercase tracking-wider text-cyan-200 mb-3">Impulso y respaldo institucional</h3><div class="space-y-3">
+            <p><strong class="text-white">Prefecto Mayor Adrián Alejandro VARGAS</strong><span class="block text-xs text-slate-300 mt-1">Impulsor de la iniciativa en el ámbito institucional.</span></p>
+            <p><strong class="text-white">Prefecto Cristian Iván RODRÍGUEZ</strong><span class="block text-xs text-slate-300 mt-1">Aportes de ideas para la concepción y orientación del proyecto.</span></p>
           </div></section>
           <p class="border-t border-slate-200 pt-4 text-center text-xs font-medium text-slate-600">El origen, el trabajo y la visión de sus participantes forman parte de la historia del Sistema DGSE.</p>
         </div>
@@ -1159,7 +1167,7 @@
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
         // Endpoint del backend seguro. No contiene contraseñas ni secretos.
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby3u_peQa6mO3WgTV7ONQJTXhc4NptV4bTGF89yQrgyCytXKIaOVg_rGUt64T9WsAPM/exec';
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw00hWxmtcgeWTCNTrzlbZyGZ-bsoOeARJcM-X-rvIy4d-nuop1srLdHWfhH2lVmb4/exec';
         let authToken = sessionStorage.getItem('dgse_auth_token') || '';
         let tableRevisions = { Notas: '', Expedientes: '', Viajes: '' };
         let dataLoaded = false;
@@ -3632,6 +3640,7 @@
 </script>
 </body>
 </html>
+
 
 
 
