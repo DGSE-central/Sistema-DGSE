@@ -53,10 +53,17 @@
         }
 
         /* IDENTIDAD VISUAL DGSE: referencia Registro de Notas aplicada a todas las solapas */
-        body, body *, button, input, select, textarea, table, th, td, label {
+        /* Tipografía de interfaz uniforme sin sobrescribir la fuente propia de Font Awesome. */
+        body { font-family: Arial, Helvetica, sans-serif; }
+        body *:not(i):not(.fa):not([class*="fa-"]):not(svg):not(path),
+        button, input, select, textarea, table, th, td, label {
             font-family: Arial, Helvetica, sans-serif !important;
             box-sizing: border-box;
         }
+        /* Font Awesome necesita conservar su font-family para que los iconos no desaparezcan. */
+        i.fa, i[class^="fa-"], i[class*=" fa-"] { font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands" !important; }
+        i.fa-solid, i.fa-regular { font-weight: 900 !important; }
+        i.fa-brands { font-family: "Font Awesome 6 Brands" !important; font-weight: 400 !important; }
         .tab-content { color:#334155; animation:dgseTabAppear .16s ease-out; }
         .tab-content h1,.tab-content h2,.tab-content h3,.tab-content h4 { color:#172f50; letter-spacing:-.015em; }
         /* Superficies principales: fondo blanco, borde frío y sombra sutil como Registro de Notas */
@@ -88,7 +95,7 @@
         #dgseHistoryModal { background:rgba(2,12,27,.78); backdrop-filter:blur(7px); -webkit-backdrop-filter:blur(7px); }
         .dgse-holo-panel { background:linear-gradient(145deg,rgba(8,28,49,.98),rgba(10,43,66,.97)); color:#e2f7ff; border:1px solid rgba(92,226,255,.82); box-shadow:0 0 0 1px rgba(92,226,255,.16),0 0 34px rgba(34,211,238,.28),0 25px 80px rgba(0,0,0,.5); animation:dgseHoloIn .24s ease-out; }
         .dgse-history-scroll { max-height:min(72vh,760px); overflow-y:auto; scrollbar-color:#38bdf8 rgba(15,23,42,.4); }
-        .dgse-history-title { font-family:inherit; font-size:clamp(1.3rem,2.6vw,1.7rem); line-height:1.25; font-weight:800; letter-spacing:.14em; text-align:center; color:#a5f3fc; text-shadow:0 0 14px rgba(103,232,249,.48); }
+        .dgse-history-title { font-family:Arial, Helvetica, sans-serif; font-size:clamp(1.05rem,2vw,1.35rem); line-height:1.25; font-weight:600; letter-spacing:.08em; text-align:center; color:#a5f3fc; text-shadow:0 0 12px rgba(103,232,249,.42); }
         .dgse-history-divider { border:1px solid rgba(103,232,249,.42); border-radius:.75rem; padding:1rem; background:rgba(8,47,73,.42); }
         #dgseHistoryModal .text-slate-900,#dgseHistoryModal .text-slate-700 { color:#ecfeff !important; }
         #dgseHistoryModal .text-slate-600,#dgseHistoryModal .text-slate-500 { color:#c5dce7 !important; }
@@ -1167,7 +1174,7 @@
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
         // Endpoint del backend seguro. No contiene contraseñas ni secretos.
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw00hWxmtcgeWTCNTrzlbZyGZ-bsoOeARJcM-X-rvIy4d-nuop1srLdHWfhH2lVmb4/exec';
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby2y8jG7IzRexk6WxrL79rB3-WPHexx9c8ot810OuSSPeJTyQxkwJ15jHaWz-Aveqjs/exec';
         let authToken = sessionStorage.getItem('dgse_auth_token') || '';
         let tableRevisions = { Notas: '', Expedientes: '', Viajes: '' };
         let dataLoaded = false;
@@ -3640,6 +3647,10 @@
 </script>
 </body>
 </html>
+
+
+
+
 
 
 
