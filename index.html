@@ -1098,7 +1098,7 @@
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
         // Endpoint del backend seguro. No contiene contraseñas ni secretos.
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwiqLs8IYIKa6jwwoBRzBg9Gz3nqNYXXGRlSkyKq7ltYKrVreD7aDQgaXatTP7yMMI/exec';
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxPsDdN0V1zc-6_0RurdVzwjYoC5ln4Zn8VOs5afxVGhx5fq21LuIDfKEmROdo4k6HB/exec';
         let authToken = sessionStorage.getItem('dgse_auth_token') || '';
         let tableRevisions = { Notas: '', Expedientes: '', Viajes: '' };
         let dataLoaded = false;
@@ -1115,16 +1115,37 @@
             alert('La dirección del servidor no se modifica desde el navegador.');
         }
 
-        async function serverRequest(payload) {
+        // Petición centralizada: timeout y medición. No reintenta automáticamente
+        // operaciones de escritura para evitar duplicar registros si el servidor sigue procesando.
+        async function serverRequest(payload, timeoutMs = 60000) {
             if (!GOOGLE_SCRIPT_URL) throw new Error('No está configurada la dirección del servidor.');
-            const response = await fetch(GOOGLE_SCRIPT_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify(payload)
-            });
-            const result = await response.json();
-            if (!response.ok || result.status !== 'success') { const error = new Error(result.message || 'El servidor rechazó la operación.'); error.code = result.code || ''; throw error; }
-            return result;
+            const controller = new AbortController();
+            const startedAt = performance.now();
+            const timer = setTimeout(() => controller.abort(), timeoutMs);
+            try {
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(payload),
+                    signal: controller.signal
+                });
+                const result = await response.json();
+                if (!response.ok || result.status !== 'success') {
+                    const error = new Error(result.message || `Error HTTP ${response.status}`);
+                    error.code = result.code || '';
+                    throw error;
+                }
+                return result;
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    throw new Error('El servidor tardó más de 60 segundos en responder. La operación puede seguir procesándose; verifique el resultado antes de volver a intentarla.');
+                }
+                throw error;
+            } finally {
+                clearTimeout(timer);
+                const elapsed = Math.round(performance.now() - startedAt);
+                if (elapsed > 1500) console.info(`[DGSE rendimiento] ${String(payload.action || 'solicitud')}: ${elapsed} ms`);
+            }
         }
 
         async function persistTable(tableName, data) {
@@ -1363,8 +1384,11 @@
 
         async function handleLogin(e) {
             e.preventDefault();
+            const submitButton = e.submitter || document.querySelector('#loginForm button[type="submit"]');
             const u = document.getElementById('loginUser').value.toLowerCase().trim();
             const p = document.getElementById('loginPass').value;
+            if (submitButton) { submitButton.disabled = true; submitButton.dataset.originalText = submitButton.textContent; submitButton.textContent = 'Ingresando…'; }
+            const startedAt = performance.now();
             try {
                 const result = await serverRequest({ action: 'login', user: u, pass: p });
                 authToken = result.token;
@@ -1378,13 +1402,20 @@
                     return;
                 }
                 document.getElementById('loginPass').value = '';
+                // El backend ya incluye estos datos: no ejecutar checkAuth/loadServerData otra vez.
                 if (Array.isArray(result.notas) && Array.isArray(result.expedientes) && Array.isArray(result.viajes)) {
                     applyServerData(result);
                     showAuthenticatedApp();
                 } else {
+                    // Compatibilidad con despliegues antiguos que no devuelven carga inicial.
                     await checkAuth();
                 }
-            } catch (error) { alert(error.message || 'Usuario o contraseña incorrectos.'); }
+            } catch (error) {
+                alert(error.message || 'Usuario o contraseña incorrectos.');
+            } finally {
+                console.info(`[DGSE rendimiento] inicio de sesión total: ${Math.round(performance.now() - startedAt)} ms`);
+                if (submitButton) { submitButton.disabled = false; if (submitButton.dataset.originalText) submitButton.textContent = submitButton.dataset.originalText; }
+            }
         }
 
         async function handleLogout() {
@@ -3371,6 +3402,7 @@
     </script>
 </body>
 </html>
+
 
 
 
