@@ -52,23 +52,47 @@
             .stats-grid { grid-template-columns: 1fr; }
         }
 
-        /* Identidad visual unificada para todas las solapas del Sistema DGSE. */
-        .tab-content > .bg-gradient-to-br {
+        /* Identidad visual institucional unificada: mismo lenguaje que Notas y Expedientes. */
+        .tab-content > .bg-gradient-to-br,
+        .tab-content > div.bg-gradient-to-br,
+        .tab-content > section > .bg-gradient-to-br {
             background: #ffffff !important;
-            border: 1px solid #dbe3ec !important;
-            border-radius: 1rem !important;
-            box-shadow: 0 4px 14px rgba(15, 23, 42, .055) !important;
+            background-image: none !important;
+            border: 1px solid #cbd5e1 !important;
+            border-radius: .875rem !important;
+            box-shadow: 0 3px 12px rgba(15, 23, 42, .065) !important;
         }
-        .tab-content > .bg-gradient-to-br > .mb-5.rounded-xl.bg-gradient-to-r {
-            border-radius: .75rem !important;
-            box-shadow: 0 5px 14px rgba(15, 23, 42, .12) !important;
+        .tab-content .rounded-xl.bg-gradient-to-r,
+        .tab-content .rounded-xl.bg-gradient-to-r[class*="from-"] {
+            background: #1e293b !important;
+            background-image: none !important;
+            border: 1px solid #334155 !important;
+            border-radius: .65rem !important;
+            box-shadow: none !important;
+            color: #f8fafc !important;
+        }
+        .tab-content .rounded-xl.bg-gradient-to-r p,
+        .tab-content .rounded-xl.bg-gradient-to-r .text-sky-100,
+        .tab-content .rounded-xl.bg-gradient-to-r .text-blue-100 {
+            color: #cbd5e1 !important;
+        }
+        .tab-content .border-emerald-100,
+        .tab-content .border-sky-100,
+        .tab-content .border-blue-100,
+        .tab-content .border-violet-100,
+        .tab-content .border-indigo-100 {
+            border-color: #cbd5e1 !important;
         }
         .tab-content { animation: dgseTabAppear .18s ease-out; }
         @keyframes dgseTabAppear { from { opacity: .78; transform: translateY(2px); } to { opacity: 1; transform: translateY(0); } }
         /* Ventana holográfica de reseña */
         #dgseHistoryModal { background: rgba(2, 12, 27, .76); backdrop-filter: blur(7px); -webkit-backdrop-filter: blur(7px); }
         .dgse-holo-panel { background: linear-gradient(145deg, rgba(8, 28, 49, .98), rgba(10, 43, 66, .97)); border: 1px solid rgba(92, 226, 255, .78); box-shadow: 0 0 0 1px rgba(92,226,255,.12), 0 0 38px rgba(34,211,238,.22), 0 25px 80px rgba(0,0,0,.48); animation: dgseHoloIn .24s ease-out; }
-        .dgse-holo-glow { text-shadow: 0 0 14px rgba(103,232,249,.45); }
+        .dgse-holo-glow { text-shadow: 0 0 14px rgba(103,232,249,.45); font-family: inherit; }
+        #dgseHistoryModal .border-t { border-top-color: rgba(103,232,249,.48) !important; }
+        #dgseHistoryModal .border-cyan-200\\/25 { border-color: rgba(165,243,252,.35) !important; }
+        #dgseHistoryModal .dgse-holo-panel { outline: 1px solid rgba(103,232,249,.22); }
+        #dgseHistoryModal h3 { padding-bottom: .55rem; border-bottom: 1px solid rgba(103,232,249,.35); }
         .dgse-history-scroll { max-height: min(72vh, 760px); overflow-y: auto; scrollbar-color: #38bdf8 rgba(15,23,42,.4); }
         #btnHistoriaSoftware { border: 1px solid rgba(103,232,249,.5); color: #a5f3fc; background: linear-gradient(135deg, rgba(8,47,73,.95), rgba(30,64,100,.9)); box-shadow: 0 0 12px rgba(34,211,238,.12); }
         #btnHistoriaSoftware:hover { box-shadow: 0 0 18px rgba(34,211,238,.32); color: white; }
@@ -734,9 +758,9 @@
     <!-- RESEÑA HISTÓRICA: ventana holográfica integrada a la aplicación -->
     <div id="dgseHistoryModal" class="fixed inset-0 z-[100] hidden items-center justify-center p-3 sm:p-6" role="dialog" aria-modal="true" aria-labelledby="dgseHistoryTitle" onclick="if(event.target===this)closeHistoriaSoftware()">
       <div class="dgse-holo-panel relative w-full max-w-3xl rounded-2xl overflow-hidden text-slate-100">
-        <div class="flex items-center gap-3 p-4 sm:p-5 border-b border-cyan-300/30">
-          <img src="HERLADICO_DGSE_ANTIGUO.png" alt="Escudo de la Dirección General de Seguridad" class="h-12 w-12 object-contain shrink-0" onerror="this.style.display='none'">
-          <div class="min-w-0 flex-1"><p class="text-[10px] sm:text-xs tracking-[.18em] text-cyan-200 uppercase">Dirección General de Seguridad</p><h2 id="dgseHistoryTitle" class="dgse-holo-glow text-xl sm:text-2xl font-extrabold tracking-wide text-cyan-100">RESEÑA</h2><p class="text-xs text-slate-300 mt-1">Sistema DGSE · Registro histórico institucional</p></div>
+        <div class="flex items-center gap-3 p-4 sm:p-5 border-b-2 border-cyan-300/70 bg-slate-950/35">
+          <img src="HERLADICO_DGSE_ANTIGUO.png" alt="Escudo de la Dirección General de Seguridad" class="h-16 w-16 sm:h-[76px] sm:w-[76px] object-contain shrink-0" onerror="this.style.display='none'">
+          <div class="min-w-0 flex-1 text-center"><p class="text-[10px] sm:text-xs tracking-[.16em] text-cyan-200 uppercase">Dirección General de Seguridad</p><h2 id="dgseHistoryTitle" class="dgse-holo-glow text-xl sm:text-2xl font-extrabold tracking-wide text-cyan-100 text-center">RESEÑA</h2></div>
           <button type="button" onclick="closeHistoriaSoftware()" class="shrink-0 rounded-lg border border-cyan-200/40 px-3 py-2 text-xs font-bold text-cyan-100 hover:bg-cyan-200/10" aria-label="Cerrar reseña"><i class="fa-solid fa-xmark mr-1"></i><span class="hidden sm:inline">CERRAR</span></button>
         </div>
         <div class="dgse-history-scroll p-4 sm:p-6 space-y-5 text-sm leading-relaxed">
@@ -760,7 +784,7 @@
           </div>
           <div class="rounded-xl border border-cyan-300/30 bg-cyan-200/5 p-4 text-center"><p class="text-cyan-100 font-semibold">El origen, el trabajo y la visión de sus participantes forman parte de la historia del Sistema DGSE.</p></div>
         </div>
-        <div class="flex justify-end border-t border-cyan-300/25 p-3 sm:px-5"><button type="button" onclick="closeHistoriaSoftware()" class="rounded-lg bg-cyan-100 px-5 py-2.5 text-sm font-bold text-slate-900 hover:bg-white"><i class="fa-solid fa-arrow-left mr-2"></i>Volver al sistema</button></div>
+        <div class="flex justify-end border-t-2 border-cyan-300/60 bg-slate-950/25 p-3 sm:px-5"><button type="button" onclick="closeHistoriaSoftware()" class="rounded-lg bg-cyan-100 px-5 py-2.5 text-sm font-bold text-slate-900 hover:bg-white"><i class="fa-solid fa-arrow-left mr-2"></i>Volver al sistema</button></div>
       </div>
     </div>
 
@@ -1151,7 +1175,7 @@
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
         // Endpoint del backend seguro. No contiene contraseñas ni secretos.
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby2y8jG7IzRexk6WxrL79rB3-WPHexx9c8ot810OuSSPeJTyQxkwJ15jHaWz-Aveqjs/exec';
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx2d37PSB9f3PXlrANKRRycYSCwHDtytEXY5TNLRC-xyp1s1RGOca9jhU1yX3WwWYdK/exec';
         let authToken = sessionStorage.getItem('dgse_auth_token') || '';
         let tableRevisions = { Notas: '', Expedientes: '', Viajes: '' };
         let dataLoaded = false;
@@ -1508,7 +1532,8 @@
         function showAuthenticatedApp() {
             if (!currentUser) throw new Error('No se pudo validar el usuario de la sesión.');
             document.getElementById('loginScreen').classList.add('hidden');
-            document.getElementById('appScreen').classList.remove('hidden');
+            document.getElementById('appScreen').classList.remove('hidden')
+            if (typeof applyModulePermissionVisibility === 'function') applyModulePermissionVisibility();;
             document.getElementById('userInfo').textContent = `${currentUser.name} (${currentUser.role})`;
             const warning = document.getElementById('passwordExpiryWarning');
             const warningText = document.getElementById('passwordExpiryWarningText');
@@ -1972,9 +1997,24 @@
             area.innerHTML=blocks.length?blocks.join(''):'<div class="bg-white border border-slate-200 rounded-xl p-6 text-center text-slate-500">No hay registros en esta categoría o la búsqueda no produjo resultados.</div>';
         }
 
+        function applyModulePermissionVisibility() {
+            // En perfiles de solo consulta no se muestran formularios ni accesos de alta.
+            const canWrite = (module) => hasPermission(module, 'create') || hasPermission(module, 'edit');
+            const setVisible = (id, visible) => {
+                const el = document.getElementById(id);
+                if (el) el.classList.toggle('hidden', !visible);
+            };
+            setVisible('agendaEditor', canWrite('agenda'));
+            const agendaQuickActions = document.querySelector('#agendaTab .grid.grid-cols-2.md\\:grid-cols-4');
+            if (agendaQuickActions) agendaQuickActions.classList.toggle('hidden', !canWrite('agenda'));
+            setVisible('infoForm', canWrite('informacion'));
+            // Mantener visibles búsqueda, filtros, calendario y registros de consulta.
+        }
+
         function switchTab(tabId) {
             const required = {registroTab:'notas',expedientesTab:'expedientes',viajesTab:'viajes',estadisticasTab:'estadisticas',agendaTab:'agenda',informacionTab:'informacion',personalPnaTab:'personalPna'}[tabId];
             if (required && !hasPermission(required, 'view')) { alert('Su usuario no tiene permiso para consultar este módulo.'); return; }
+            applyModulePermissionVisibility();
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             const target = document.getElementById(tabId); if (target) target.classList.remove('hidden');
             ['Registro','Expedientes','Viajes','Estadisticas','Agenda','Informacion','PersonalPna'].forEach((name,i) => {
@@ -3624,6 +3664,7 @@
 </script>
 </body>
 </html>
+
 
 
 
