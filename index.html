@@ -1098,7 +1098,7 @@
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
         // Endpoint del backend seguro. No contiene contraseñas ni secretos.
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzkFQbK8N5Z68rFSAU8jgQvhYBXgPWkPOH6o6c_Ub27zHJ5c1EMZVJwLZF0VcHb8lb_/exec';
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwiqLs8IYIKa6jwwoBRzBg9Gz3nqNYXXGRlSkyKq7ltYKrVreD7aDQgaXatTP7yMMI/exec';
         let authToken = sessionStorage.getItem('dgse_auth_token') || '';
         let tableRevisions = { Notas: '', Expedientes: '', Viajes: '' };
         let dataLoaded = false;
@@ -2577,7 +2577,7 @@
                         <td class="p-3"><span class="px-2 py-1 rounded-full text-[11px] font-bold border ${badgeClass}">${escapeHtml(n.estado || '-') }</span></td>
                         <td class="p-3 text-slate-600">${escapeHtml(n.respuesta || '-') }</td>
                         <td class="p-3 whitespace-nowrap">${adjuntosHtml}</td>
-                        <td class="p-3 text-center whitespace-nowrap">${hasPermission('notas','edit') ? `<button onclick="editNota(${n.id})" class="text-blue-600 hover:text-blue-800 mr-2" title="Editar"><i class="fa-solid fa-pen-to-square"></i></button>` : ''}${hasPermission('notas','delete') ? `<button onclick="deleteNota(${n.id})" class="text-red-600 hover:text-red-800" title="Eliminar"><i class="fa-solid fa-trash"></i></button>` : ''}</td>
+                        <td class="p-3 text-center whitespace-nowrap">${hasPermission('notas','edit') ? `<button type="button" onclick="editNota('${escapeHtml(String(n.id))}')" class="text-blue-600 hover:text-blue-800 mr-2" title="Editar"><i class="fa-solid fa-pen-to-square"></i></button>` : ''}${hasPermission('notas','delete') ? `<button type="button" onclick="deleteNota('${escapeHtml(String(n.id))}')" class="text-red-600 hover:text-red-800" title="Eliminar"><i class="fa-solid fa-trash"></i></button>` : ''}</td>
                     </tr>
                 `;
             });
@@ -2669,8 +2669,9 @@
         }
 
         function editNota(id) {
-            const n = notas.find(item => item.id === id);
-            if (!n) return;
+            const n = notas.find(item => String(item.id) === String(id));
+            if (!n) { alert('No se encontró la nota seleccionada. Actualizá la lista e intentá nuevamente.'); return; }
+            if (!hasPermission('notas', 'edit')) { alert('Su usuario no tiene permiso para editar notas.'); return; }
 
             document.getElementById('modalTitle').innerText = 'Editar Nota';
             document.getElementById('notaId').value = n.id;
@@ -2690,8 +2691,8 @@
         function deleteNota(id) {
             if (!hasPermission('notas','delete')) { alert('Su usuario no tiene permisos para eliminar notas.'); return; }
             if (confirm('¿Desea eliminar este registro de nota?')) {
-                const n = notas.find(item => item.id === id);
-                notas = notas.filter(item => item.id !== id);
+                const n = notas.find(item => String(item.id) === String(id));
+                notas = notas.filter(item => String(item.id) !== String(id));
                 void persistTable('Notas', notas);
                 if (n) registrarAuditoria('Eliminó', 'Notas', `Nota Nro: ${escapeHtml(n.nroNota || '-')}`);
                 populatePromotoresOptions();
@@ -3370,6 +3371,7 @@
     </script>
 </body>
 </html>
+
 
 
 
