@@ -66,6 +66,47 @@
         i.fa-brands { font-family: "Font Awesome 6 Brands" !important; font-weight: 400 !important; }
         .tab-content { color:#334155; animation:dgseTabAppear .16s ease-out; }
         .tab-content h1,.tab-content h2,.tab-content h3,.tab-content h4 { color:#172f50; letter-spacing:-.015em; }
+        /* AJUSTE TIPOGRÁFICO FINO: igualar jerarquía visual con Registro de Notas y Expedientes. */
+        #agendaTab, #informacionTab, #personalPnaTab,
+        #agendaTab *, #informacionTab *, #personalPnaTab * {
+            font-family: Arial, Helvetica, sans-serif !important;
+        }
+        /* Las fuentes de iconos se preservan para que no desaparezcan los pictogramas. */
+        #agendaTab i.fa, #agendaTab i[class^="fa-"], #agendaTab i[class*=" fa-"],
+        #informacionTab i.fa, #informacionTab i[class^="fa-"], #informacionTab i[class*=" fa-"],
+        #personalPnaTab i.fa, #personalPnaTab i[class^="fa-"], #personalPnaTab i[class*=" fa-"] {
+            font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands" !important;
+        }
+        #agendaTab h1, #agendaTab h2, #informacionTab h1, #informacionTab h2,
+        #personalPnaTab h1, #personalPnaTab h2 {
+            font-size: 1.25rem !important;
+            line-height: 1.4 !important;
+            font-weight: 700 !important;
+            letter-spacing: -.015em !important;
+            text-transform: none !important;
+        }
+        #agendaTab h3, #agendaTab h4, #informacionTab h3, #informacionTab h4,
+        #personalPnaTab h3, #personalPnaTab h4 {
+            font-size: 1rem !important;
+            line-height: 1.45 !important;
+            font-weight: 600 !important;
+            letter-spacing: 0 !important;
+        }
+        #agendaTab p, #informacionTab p, #personalPnaTab p,
+        #agendaTab label, #informacionTab label, #personalPnaTab label,
+        #agendaTab input, #agendaTab select, #agendaTab textarea,
+        #informacionTab input, #informacionTab select, #informacionTab textarea,
+        #personalPnaTab input, #personalPnaTab select, #personalPnaTab textarea {
+            font-size: .875rem;
+            line-height: 1.5;
+        }
+        #agendaTab .font-extrabold, #informacionTab .font-extrabold, #personalPnaTab .font-extrabold,
+        #agendaTab .font-black, #informacionTab .font-black, #personalPnaTab .font-black {
+            font-weight: 700 !important;
+        }
+        #agendaTab .text-2xl, #informacionTab .text-2xl, #personalPnaTab .text-2xl { font-size: 1.25rem !important; }
+        #agendaTab .text-xl, #informacionTab .text-xl, #personalPnaTab .text-xl { font-size: 1.25rem !important; }
+
         /* Superficies principales: fondo blanco, borde frío y sombra sutil como Registro de Notas */
         #agendaTab .bg-gradient-to-br,#informacionTab .bg-gradient-to-br,#personalPnaTab .bg-gradient-to-br,
         #agendaTab .bg-white,#informacionTab .bg-white,#personalPnaTab .bg-white {
@@ -735,7 +776,7 @@
                 <div class="bg-gradient-to-br from-blue-50 via-white to-indigo-50 rounded-2xl p-5 md:p-6 shadow-sm border border-blue-100 mb-5">
                     <div class="mb-5 rounded-xl bg-gradient-to-r from-blue-800 via-blue-700 to-indigo-700 text-white p-5 shadow-md">
                         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-                            <div><h2 class="text-xl md:text-2xl font-extrabold flex items-center gap-2"><i class="fa-solid fa-address-book"></i> PERSONAL PNA</h2><p class="text-sm text-blue-100 mt-1">Consulta del personal de la prefectura.</p></div>
+                            <div><h2 class="text-xl md:text-2xl font-extrabold flex items-center gap-2"><i class="fa-solid fa-address-book"></i> Personal PNA</h2><p class="text-sm text-blue-100 mt-1">Consulta del personal de la prefectura.</p></div>
                             <button type="button" onclick="loadPersonalPNA(true)" class="rounded-lg bg-white/15 hover:bg-white/25 px-4 py-2 text-sm font-bold"><i class="fa-solid fa-rotate mr-1"></i> Actualizar</button>
                         </div>
                     </div>
@@ -1174,7 +1215,7 @@
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
         // Endpoint del backend seguro. No contiene contraseñas ni secretos.
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby2y8jG7IzRexk6WxrL79rB3-WPHexx9c8ot810OuSSPeJTyQxkwJ15jHaWz-Aveqjs/exec';
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxK1jzOPW5r_J1qqABv3tzmiOFuBncpEinp1EzOw8UJ5oJD87H1-NAypx0-IQ7JB28k/exec';
         let authToken = sessionStorage.getItem('dgse_auth_token') || '';
         let tableRevisions = { Notas: '', Expedientes: '', Viajes: '' };
         let dataLoaded = false;
@@ -3647,6 +3688,11 @@
 </script>
 </body>
 </html>
+
+
+
+
+
 
 
 
