@@ -75,7 +75,7 @@
         </div>
     </div>
 
-    <!-- PANTALLA DE LOGIN -->
+    
     <div id="loginScreen" class="fixed inset-0 bg-slate-900 z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl text-center border border-slate-700 relative">
             <button onclick="openDriveConfigModal()" style="display:none" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-xs" title="Configurar Google Drive">
@@ -378,7 +378,7 @@
                     <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
                         <div>
                             <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
-                                <i class="fa-solid fa-folder-tree text-amber-600"></i>Expedientes (GDE)
+                                <i class="fa-solid fa-folder-tree text-amber-600"></i>Expedientes
                             </h2>
                         </div>
                         <div class="flex items-center gap-3">
@@ -393,7 +393,7 @@
 
                     <div class="grid grid-cols-2 md:grid-cols-6 gap-3 mb-6">
                         <div class="bg-blue-50 p-3 rounded-xl shadow-sm border border-blue-200 cursor-pointer hover:bg-blue-100 transition" onclick="filterExpByMetric('En revision DGSE')">
-                            <p class="text-[11px] text-blue-800 uppercase font-bold">En Revisión DGSE</p>
+                            <p class="text-[11px] text-blue-800 uppercase font-bold">En Revisión</p>
                             <p id="expMetricRevision" class="text-2xl font-bold text-blue-900 mt-1">0</p>
                         </div>
                         <div class="bg-red-50 p-3 rounded-xl shadow-sm border border-red-200 cursor-pointer hover:bg-red-100 transition" onclick="filterExpByMetric('Devuelto')">
@@ -415,12 +415,12 @@
                     <div class="flex flex-col md:flex-row justify-between items-center gap-3 mb-4">
                         <div class="relative w-full md:w-96">
                             <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400"></i>
-                            <input type="text" id="searchExpInput" oninput="renderExpedientesTable()" placeholder="Buscar por Nro Expediente, Tema / Trámite, Proveniente..." class="w-full pl-9 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
+                            <input type="text" id="searchExpInput" oninput="renderExpedientesTable()" placeholder="Buscar" class="w-full pl-9 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
                         </div>
                         <div class="flex items-center gap-2 w-full md:w-auto">
                             <select id="filterExpEstado" onchange="renderExpedientesTable()" class="border rounded-lg text-sm px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 w-full md:w-auto">
                                 <option value="TODOS">Todos los Estados</option>
-                                <option value="En revision DGSE">En revisión DGSE</option>
+                                <option value="En revision">En revisión</option>
                                 <option value="Devuelto">Devuelto</option>
                                 <option value="Finalizado">Finalizado</option>
                                 <option value="ANTIGUOS">⚠️ Hace más de 1 mes en DGSE</option>
@@ -435,12 +435,12 @@
                                     <th class="p-3">Fecha</th>
                                     <th class="p-3">Nro. Expediente</th>
                                     <th class="p-3">Proveniente</th>
-                                    <th class="p-3">Tema / Trámite</th>
-                                    <th class="p-3">IF / Intervención DGSE</th>
+                                    <th class="p-3">Referencia</th>
+                                    <th class="p-3">IF con Intervención DGSE</th>
                                     <th class="p-3">Estado</th>
                                     <th class="p-3">Pase Actual</th>
                                     <th class="p-3">Observaciones</th>
-                                    <th class="p-3 text-center">Acciones</th>
+                                    <th class="p-3 text-center">Edición</th>
                                 </tr>
                             </thead>
                             <tbody id="expTableBody" class="divide-y divide-slate-200">
@@ -450,19 +450,19 @@
                 </div>
             </div>
 
-            <!-- SOLAPA 3: CONTROL DE VIAJES -->
+           
             <div id="viajesTab" class="tab-content hidden">
                 <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 mb-6">
                     <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
                         <div>
                             <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
-                                <i class="fa-solid fa-plane-departure text-emerald-600"></i> Control de Viajes y Comisiones DGSE
+                                <i class="fa-solid fa-plane-departure text-emerald-600"></i> Viajes 
                             </h2>
-                            <p class="text-xs text-slate-500">Planilla de viajes con intervención de la Dirección General de Seguridad.</p>
+                            <p class="text-xs text-slate-500">Control de viajes con intervención DGSE.</p>
                         </div>
                         <div class="flex items-center gap-3">
                             <button onclick="openViajeModal()" id="btnNuevoViaje" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-3.5 py-2 rounded-lg transition shadow flex items-center gap-1.5">
-                                <i class="fa-solid fa-plus"></i> Carga Manual Viaje
+                                <i class="fa-solid fa-plus"></i> Carga Manual
                             </button>
                             <button onclick="exportViajesCSV()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-semibold px-3 py-2 rounded-lg transition flex items-center gap-1">
                                 <i class="fa-solid fa-download"></i> Exportar
@@ -470,17 +470,17 @@
                         </div>
                     </div>
 
-                    <!-- NUEVOS AVISOS / MÉTRICAS DE VIAJES -->
+                  
                     <div class="grid grid-cols-2 md:grid-cols-6 gap-3 mb-6">
                         <button type="button" onclick="filtrarViajesUbicacionRapido('exterior')" title="Mostrar solo viajes al exterior" class="text-left bg-sky-50 p-3 rounded-xl shadow-sm border border-sky-200 hover:bg-sky-100 focus:outline-none focus:ring-2 focus:ring-sky-400 transition">
                             <p class="text-[11px] text-sky-800 uppercase font-bold flex items-center gap-1">
-                                <i class="fa-solid fa-earth-americas text-sky-600"></i> Al Exterior
+                                <i class="fa-solid fa-earth-americas text-sky-600"></i>Exterior
                             </p>
                             <p id="viajesMetricExterior" class="text-2xl font-bold text-sky-900 mt-1">0</p><p class="text-[10px] text-sky-700 mt-1">Tocar para filtrar</p>
                         </button>
                         <button type="button" onclick="filtrarViajesUbicacionRapido('argentina')" title="Mostrar solo viajes dentro de Argentina" class="text-left bg-emerald-50 p-3 rounded-xl shadow-sm border border-emerald-200 hover:bg-emerald-100 focus:outline-none focus:ring-2 focus:ring-emerald-400 transition">
                             <p class="text-[11px] text-emerald-800 uppercase font-bold flex items-center gap-1">
-                                <i class="fa-solid fa-map-location-dot text-emerald-600"></i> En Argentina
+                                <i class="fa-solid fa-map-location-dot text-emerald-600"></i>Argentina
                             </p>
                             <p id="viajesMetricPais" class="text-2xl font-bold text-emerald-900 mt-1">0</p><p class="text-[10px] text-emerald-700 mt-1">Tocar para filtrar</p>
                         </button>
@@ -504,7 +504,7 @@
                         </div>
                         <div class="bg-purple-50 p-3 rounded-xl shadow-sm border border-purple-200" title="Personas únicas en el exterior que han hecho viajes">
                             <p class="text-[11px] text-purple-800 uppercase font-bold flex items-center gap-1">
-                                <i class="fa-solid fa-user-shield text-purple-600"></i> Pers. Exterior
+                                <i class="fa-solid fa-user-shield text-purple-600"></i> Pers. total que viajo al exterior
                             </p>
                             <p id="viajesMetricPersExterior" class="text-2xl font-bold text-purple-900 mt-1">0</p>
                         </div>
@@ -513,7 +513,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-[1fr_220px] gap-3 mb-4">
                         <div class="relative">
                             <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400"></i>
-                            <input type="text" id="searchViajesInput" oninput="renderViajesTable()" placeholder="Buscar por grado, apellido, destino, evento, lugar…" class="w-full pl-9 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            <input type="text" id="searchViajesInput" oninput="renderViajesTable()" placeholder="Buscar" class="w-full pl-9 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
                         </div>
                         <select id="filterEstadoViajes" onchange="renderViajesTable()" class="border rounded-lg px-3 py-2 text-sm bg-white"><option value="">Todos los estados</option><option value="continua">Activos / Continúa</option><option value="proximo">Próximamente</option><option value="finalizado">Finalizados</option><option value="rechazado">Rechazados / Cancelados</option></select>
                         <button type="button" onclick="limpiarFiltrosViajesRapidos()" class="border rounded-lg px-3 py-2 text-sm bg-white hover:bg-slate-100" title="Quitar filtros de ubicación y estado"><i class="fa-solid fa-filter-circle-xmark mr-1"></i> Limpiar filtros</button>
@@ -525,8 +525,8 @@
                                 <tr>
                                     <th class="p-3">Grado</th>
                                     <th class="p-3">Apellido y Nombre</th>
-                                    <th class="p-3">Destino / Organismo</th>
-                                    <th class="p-3">Evento / Misión</th>
+                                    <th class="p-3">Destino </th>
+                                    <th class="p-3">Evento</th>
                                     <th class="p-3">Fecha Partida</th>
                                     <th class="p-3">Fecha Llegada</th>
                                     <th class="p-3">Lugar</th>
@@ -534,7 +534,7 @@
                                     <th class="p-3">Calidad</th>
                                     <th class="p-3">Gastos a Cargo</th>
                                     <th class="p-3">Estado</th>
-                                    <th class="p-3 text-center">Acciones</th>
+                                    <th class="p-3 text-center">Edición</th>
                                 </tr>
                             </thead>
                             <tbody id="viajesTableBody" class="divide-y divide-slate-200">
@@ -544,18 +544,18 @@
                 </div>
             </div>
 
-            <!-- SOLAPA 4: ESTADÍSTICAS DGSE -->
+            
             <div id="estadisticasTab" class="tab-content hidden">
                 <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 mb-6">
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-6">
                         <div>
                             <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
-                                <i class="fa-solid fa-chart-line text-indigo-600"></i> Estadísticas y Reportes de Gestión DGSE
+                                <i class="fa-solid fa-chart-line text-indigo-600"></i> Estadísticas
                             </h2>
-                            <p class="text-xs text-slate-500 mt-1">Indicadores de notas, expedientes y comisiones; evolución por período, respuestas, dependencias y mapa geográfico.</p>
+                            <p class="text-xs text-slate-500 mt-1">Estadisticas generales de la DGSE</p>
                         </div>
                         <button onclick="updateEstadisticas()" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold text-xs px-3.5 py-2 rounded-lg border border-indigo-200 transition flex items-center gap-1.5 shadow-sm">
-                            <i class="fa-solid fa-rotate-right"></i> Actualizar métricas
+                            <i class="fa-solid fa-rotate-right"></i> Actualizar
                         </button>
                     </div>
 
@@ -570,48 +570,40 @@
                         </div>
                         <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex items-center gap-4">
                             <div class="p-3 bg-emerald-600 text-white rounded-lg shadow"><i class="fa-solid fa-plane text-xl"></i></div>
-                            <div><p class="text-xs uppercase font-bold text-emerald-800">Comisiones / viajes</p><p id="statTotalViajes" class="text-2xl font-black text-emerald-950 mt-0.5">0</p></div>
-                        </div>
-                        <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-4 flex items-center gap-4">
-                            <div class="p-3 bg-indigo-600 text-white rounded-lg shadow"><i class="fa-solid fa-earth-americas text-xl"></i></div>
-                            <div><p class="text-xs uppercase font-bold text-indigo-800">Viajes representados</p><p id="statPaisesUnicos" class="text-2xl font-black text-indigo-950 mt-0.5">0</p></div>
+                            <div><p class="text-xs uppercase font-bold text-emerald-800">Viajes</p><p id="statTotalViajes" class="text-2xl font-black text-emerald-950 mt-0.5">0</p></div>
                         </div>
                     </div>
 
                     <div class="mb-8 rounded-xl border border-indigo-200 bg-indigo-50/50 p-5">
                         <h3 class="font-bold text-sm uppercase text-slate-800 mb-2 flex items-center gap-2"><i class="fa-solid fa-calendar-days text-indigo-600"></i> Ingresos por período</h3>
-                        <p class="text-xs text-slate-500 mb-4">Se utilizan las fechas disponibles en cada registro. Para notas respondidas, al no existir una fecha independiente de respuesta, se cuenta la fecha documental de las notas cuyo estado figura como contestado/respondido.</p>
+                        <p class="text-xs text-slate-500 mb-4"> Registro anual, mensual y diario </p>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div class="bg-white rounded-xl border border-blue-200 p-4">
                                 <h4 class="text-xs font-bold uppercase text-blue-800 mb-3">Notas ingresadas</h4>
                                 <div class="space-y-2 text-sm">
                                     <div class="flex justify-between"><span>Hoy</span><strong id="statNotasDia">0</strong></div>
-                                    <div class="flex justify-between"><span>Este mes</span><strong id="statNotasMes">0</strong></div>
-                                    <div class="flex justify-between"><span>Este año</span><strong id="statNotasAnio">0</strong></div>
+                                    <div class="flex justify-between"><span>Mes</span><strong id="statNotasMes">0</strong></div>
+                                    <div class="flex justify-between"><span>Año</span><strong id="statNotasAnio">0</strong></div>
                                 </div>
                             </div>
                             <div class="bg-white rounded-xl border border-emerald-200 p-4">
                                 <h4 class="text-xs font-bold uppercase text-emerald-800 mb-3">Notas contestadas / respondidas*</h4>
                                 <div class="space-y-2 text-sm">
-                                    <div class="flex justify-between"><span>Hoy*</span><strong id="statRespondidasDia">0</strong></div>
-                                    <div class="flex justify-between"><span>Este mes*</span><strong id="statRespondidasMes">0</strong></div>
-                                    <div class="flex justify-between"><span>Este año*</span><strong id="statRespondidasAnio">0</strong></div>
+                                    <div class="flex justify-between"><span>Hoy</span><strong id="statRespondidasDia">0</strong></div>
+                                    <div class="flex justify-between"><span>Mes*</span><strong id="statRespondidasMes">0</strong></div>
+                                    <div class="flex justify-between"><span>Año*</span><strong id="statRespondidasAnio">0</strong></div>
                                 </div>
                             </div>
                             <div class="bg-white rounded-xl border border-amber-200 p-4">
-                                <h4 class="text-xs font-bold uppercase text-amber-800 mb-3">Ingresos de expedientes (incluye reingresos)</h4>
+                                <h4 class="text-xs font-bold uppercase text-amber-800 mb-3">Ingresos de expedientes</h4>
                                 <div class="space-y-2 text-sm">
                                     <div class="flex justify-between"><span>Hoy</span><strong id="statExpDia">0</strong></div>
-                                    <div class="flex justify-between"><span>Este mes</span><strong id="statExpMes">0</strong></div>
-                                    <div class="flex justify-between"><span>Este año</span><strong id="statExpAnio">0</strong></div>
+                                    <div class="flex justify-between"><span>Mes</span><strong id="statExpMes">0</strong></div>
+                                    <div class="flex justify-between"><span>Año</span><strong id="statExpAnio">0</strong></div>
                                 </div>
                             </div>
                         </div>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                            <div class="bg-white rounded-xl border p-4"><h4 class="text-xs font-bold uppercase text-slate-600 mb-3">Ingresos de hoy</h4><div class="flex justify-between text-sm"><span>Notas</span><strong id="statHoyNotas">0</strong></div><div class="flex justify-between text-sm"><span>Ingresos de expedientes</span><strong id="statHoyExp">0</strong></div><div class="flex justify-between text-sm"><span>Viajes</span><strong id="statHoyViajes">0</strong></div></div>
-                            <div class="bg-white rounded-xl border p-4"><h4 class="text-xs font-bold uppercase text-slate-600 mb-3">Ingresos del mes</h4><div class="flex justify-between text-sm"><span>Notas</span><strong id="statMesNotas">0</strong></div><div class="flex justify-between text-sm"><span>Ingresos de expedientes</span><strong id="statMesExp">0</strong></div><div class="flex justify-between text-sm"><span>Viajes</span><strong id="statMesViajes">0</strong></div></div>
-                            <div class="bg-white rounded-xl border p-4"><h4 class="text-xs font-bold uppercase text-slate-600 mb-3">Ingresos del año</h4><div class="flex justify-between text-sm"><span>Notas</span><strong id="statAnioNotas">0</strong></div><div class="flex justify-between text-sm"><span>Ingresos de expedientes</span><strong id="statAnioExp">0</strong></div><div class="flex justify-between text-sm"><span>Viajes</span><strong id="statAnioViajes">0</strong></div></div>
-                        </div>
+                        
                     </div>
 
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
