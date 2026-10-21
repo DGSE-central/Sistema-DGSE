@@ -9,7 +9,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
- 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -29,7 +28,7 @@
             color: #2563eb;
             font-weight: 700;
         }
-        
+  
         .table-scroll { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
         .table-scroll table { min-width: 720px; }
         .form-control { width: 100%; min-width: 0; }
@@ -55,13 +54,13 @@
 </head>
 <body class="bg-slate-100 min-h-screen text-slate-800 font-sans pb-12" onload="checkAuth()">
 
-   
+    
     <div id="driveConfigModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
         <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl relative">
             <h2 class="text-lg font-bold mb-2 text-slate-800 flex items-center gap-2">
                 <i class="fa-brands fa-google-drive text-blue-600"></i> Configurar Google Drive
             </h2>
-            <p class="text-xs text-slate-500 mb-4"></p>
+            <p class="text-xs text-slate-500 mb-4">Ingresa la URL del Web App de Google Apps Script para guardar los PDFs directamente en tu Drive.</p>
             <div class="space-y-3">
                 <div>
                     <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">URL de Google Apps Script</label>
@@ -75,7 +74,7 @@
         </div>
     </div>
 
-    
+    INICIO - RS 
     <div id="loginScreen" class="fixed inset-0 bg-slate-900 z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl text-center border border-slate-700 relative">
             <button onclick="openDriveConfigModal()" style="display:none" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-xs" title="Configurar Google Drive">
@@ -104,7 +103,7 @@
         </div>
     </div>
 
-    
+    PANTALLA GENERAL - RS 
     <div id="appScreen" class="hidden">
         
         <header class="bg-slate-900 text-white shadow-lg sticky top-0 z-30">
@@ -113,7 +112,7 @@
                     <img src="HERLADICO_DGSE_ANTIGUO.png" class="h-12 w-auto object-contain" alt="Escudo Oficial DGSE" onerror="this.style.display='none'">
                     <div>
                         <h1 class="text-lg font-bold tracking-wide leading-tight">DIRECCIÓN GENERAL DE SEGURIDAD</h1>
-                        <p class="text-xs text-blue-300 font-medium">SISTEMA DE CONTROL</p>
+                        <p class="text-xs text-blue-300 font-medium">Sistema de Control</p>
                     </div>
                 </div>
                 <div class="flex items-center space-x-3">
@@ -127,7 +126,7 @@
                     <button onclick="openChangePasswordModal(false)" id="btnMiContrasena" class="bg-blue-900 hover:bg-blue-800 border border-blue-700 text-blue-100 font-medium px-3 py-1.5 rounded-lg text-xs transition flex items-center shadow" title="Cambiar mi contraseña">
                         <i class="fa-solid fa-key mr-1.5"></i> Mi contraseña
                     </button>
-                   
+                    
                     <button onclick="openAuditModal()" id="btnAuditLog" class="bg-indigo-900 hover:bg-indigo-800 border border-indigo-700 text-indigo-200 font-medium px-3 py-1.5 rounded-lg text-xs transition flex items-center shadow hidden" title="Ver Historial de Modificaciones">
                         <i class="fa-solid fa-clock-rotate-left mr-1.5 text-indigo-400"></i> Auditoría
                     </button>
@@ -148,7 +147,7 @@
         </div>
         <main class="max-w-7xl mx-auto px-4 mt-6">
 
-         
+           SOLAPAS
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 mb-6">
                 <div class="flex border-b border-slate-200 overflow-x-auto">
                     <button onclick="switchTab('registroTab')" id="tabBtnRegistro" class="tab-active px-6 py-4 text-sm font-semibold flex items-center gap-2 focus:outline-none transition whitespace-nowrap">
@@ -158,7 +157,7 @@
                         <i class="fa-solid fa-folder-tree text-amber-600"></i> Expedientes
                     </button>
                     <button onclick="switchTab('viajesTab')" id="tabBtnViajes" class="px-6 py-4 text-sm font-semibold text-slate-500 flex items-center gap-2 hover:text-slate-700 focus:outline-none transition whitespace-nowrap">
-                        <i class="fa-solid fa-plane-departure text-emerald-600"></i> Control de Viajes
+                        <i class="fa-solid fa-plane-departure text-emerald-600"></i>Viajes
                     </button>
                     <button onclick="switchTab('estadisticasTab')" id="tabBtnEstadisticas" class="px-6 py-4 text-sm font-semibold text-slate-500 flex items-center gap-2 hover:text-slate-700 focus:outline-none transition whitespace-nowrap">
                         <i class="fa-solid fa-chart-pie text-indigo-600"></i> Estadísticas
@@ -169,7 +168,7 @@
                 </div>
             </div>
 
-            
+            NOTAS
             <div id="registroTab" class="tab-content">
                
                 <div id="alertBanner" class="hidden mb-6 p-4 rounded-xl border shadow-sm transition">
@@ -186,7 +185,7 @@
                     <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
                         <div>
                             <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
-                                <i class="fa-solid fa-envelope-open-text text-blue-600"></i> REGISTRO GENERAL 
+                                <i class="fa-solid fa-envelope-open-text text-blue-600"></i> Registro de Notas
                             </h2>
                         </div>
                         <div class="flex items-center gap-3" id="accionesNotasArea">
@@ -197,19 +196,19 @@
                                 <i class="fa-solid fa-wand-magic-sparkles text-blue-400"></i> Cargar Inteligente
                             </button>
                             <button onclick="importarRegistroNotasOrigen()" id="btnImportarRegistroNotas" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-xs font-bold px-3.5 py-2 rounded-lg transition shadow flex items-center gap-2">
-                                <i class="fa-solid fa-database"></i> Importar registro
+                                <i class="fa-solid fa-database"></i> Importar excel
                             </button>
                             <button onclick="exportCSV()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-semibold px-3 py-2 rounded-lg transition flex items-center gap-1">
-                                <i class="fa-solid fa-file-csv"></i> Exportar PDF
+                                <i class="fa-solid fa-file-csv"></i> Exportar
                             </button>
                         </div>
                     </div>
 
-                    CARGA INTELIGENTE - SR 
+                    CARGA INTELIGENTE - RS 
                     <div id="autoUploadSection" class="hidden my-6 p-6 bg-slate-50 border-2 border-blue-200 rounded-2xl transition">
                         <div class="flex justify-between items-center mb-4">
                             <h3 class="text-md font-bold text-slate-800 flex items-center gap-2">
-                                <i class="fa-solid fa-file-pdf text-blue-600"></i> Extracción de datos PDF
+                                <i class="fa-solid fa-file-pdf text-blue-600"></i> Extracción automática de datos
                             </h3>
                             <button onclick="toggleAutoUploadSection()" class="text-slate-400 hover:text-slate-600 text-sm">
                                 <i class="fa-solid fa-xmark text-lg"></i>
@@ -229,7 +228,7 @@
                         <div id="parsedResultForm" class="hidden max-w-3xl mx-auto mt-6 border-t pt-4 space-y-4">
                             <div class="flex justify-between items-center">
                                 <h4 class="font-bold text-sm text-slate-800 flex items-center gap-2">
-                                    <i class="fa-solid fa-check-double text-green-500"></i> Datos Detectados del Documento
+                                    <i class="fa-solid fa-check-double text-green-500"></i> Datos Detectados
                                 </h4>
                                 <span class="text-xs bg-green-100 text-green-800 font-bold px-2 py-0.5 rounded-full">Verificar antes de guardar</span>
                             </div>
@@ -269,7 +268,7 @@
                             <div class="flex justify-end gap-3 pt-2">
                                 <button onclick="clearAutoForm()" class="px-3 py-1.5 border rounded-lg text-xs hover:bg-slate-100">Descartar</button>
                                 <button onclick="confirmAutoSave()" class="px-4 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-semibold hover:bg-blue-500 shadow">
-                                    <i class="fa-solid fa-floppy-disk mr-1.5"></i> Confirmar y Guardar 
+                                    <i class="fa-solid fa-floppy-disk mr-1.5"></i> Confirmar y Guardar
                                 </button>
                             </div>
                         </div>
@@ -293,12 +292,12 @@
                             <p id="metricContestados" class="text-2xl font-bold text-green-800 mt-1">0</p>
                         </div>
                         <div class="bg-slate-100 p-4 rounded-xl shadow-sm border border-slate-300 cursor-pointer" onclick="filterByMetric('Archivado')">
-                            <p class="text-xs text-slate-600 uppercase font-semibold">Finalizados</p>
+                            <p class="text-xs text-slate-600 uppercase font-semibold">Archivados</p>
                             <p id="metricArchivados" class="text-2xl font-bold text-slate-700 mt-1">0</p>
                         </div>
                     </div>
 
-                    BUSCADOR Y FILTROS - RS
+                    BUSCADOR - RS 
                     <div class="flex flex-col xl:flex-row justify-between items-center gap-4">
                         <div class="flex flex-col md:flex-row items-center gap-3 w-full xl:w-auto">
                             <div class="relative w-full md:w-72">
@@ -308,7 +307,7 @@
 
                             <div class="flex items-center gap-1.5 w-full md:w-auto">
                                 <select id="filterMes" onchange="renderTable()" class="border rounded-lg text-sm px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 w-full md:w-auto">
-                                    <option value="MESES">Meses</option>
+                                    <option value="Meses">Mes</option>
                                     <option value="01">Enero</option>
                                     <option value="02">Febrero</option>
                                     <option value="03">Marzo</option>
@@ -344,7 +343,7 @@
                                 <option value="Pendiente">Pendientes</option>
                                 <option value="En espera">En espera</option>
                                 <option value="Contestado">Contestados</option>
-                                <option value="Finalizados">Finalizados</option>
+                                <option value="Archivado">Archivados</option>
                             </select>
                         </div>
                     </div>
@@ -372,21 +371,21 @@
                 </div>
             </div>
 
-         REGISTRO DE EXPEDIENTES - RS
+            EXPEDIENTES - RS 
             <div id="expedientesTab" class="tab-content hidden">
                 <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 mb-6">
                     <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
                         <div>
                             <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
-                                <i class="fa-solid fa-folder-tree text-amber-600"></i>Expedientes
+                                <i class="fa-solid fa-folder-tree text-amber-600"></i>Expedientes 
                             </h2>
                         </div>
                         <div class="flex items-center gap-3">
                             <button onclick="openExpedienteModal()" id="btnNuevoExpediente" class="bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold px-3.5 py-2 rounded-lg transition shadow flex items-center gap-1.5">
-                                <i class="fa-solid fa-plus"></i> Carga Expediente
+                                <i class="fa-solid fa-plus"></i> Carga 
                             </button>
                             <button onclick="exportExpedientesCSV()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-semibold px-3 py-2 rounded-lg transition flex items-center gap-1">
-                                <i class="fa-solid fa-download"></i> Exportar PDF
+                                <i class="fa-solid fa-download"></i> Exportar
                             </button>
                         </div>
                     </div>
@@ -401,7 +400,7 @@
                             <p id="expMetricDevueltos" class="text-2xl font-bold text-red-900 mt-1">0</p>
                         </div>
                         <div class="bg-slate-100 p-3 rounded-xl shadow-sm border border-slate-300 cursor-pointer hover:bg-slate-200 transition" onclick="filterExpByMetric('Finalizado')">
-                            <p class="text-[11px] text-slate-700 uppercase font-bold">Finalizados</p>
+                            <p class="text-[11px] text-slate-700 uppercase font-bold">Archivados</p>
                             <p id="expMetricFinalizados" class="text-2xl font-bold text-slate-800 mt-1">0</p>
                         </div>
                         <div class="bg-rose-100 p-3 rounded-xl shadow-sm border border-rose-300 cursor-pointer hover:bg-rose-200 transition" onclick="filterExpByMetric('ANTIGUOS')" title="Expedientes con más de 30 días en la DGSE sin finalizar">
@@ -415,14 +414,14 @@
                     <div class="flex flex-col md:flex-row justify-between items-center gap-3 mb-4">
                         <div class="relative w-full md:w-96">
                             <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400"></i>
-                            <input type="text" id="searchExpInput" oninput="renderExpedientesTable()" placeholder="Buscar" class="w-full pl-9 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
+                            <input type="text" id="searchExpInput" oninput="renderExpedientesTable()" placeholder="Buscar por Nro Expediente, Tema / Trámite, Proveniente..." class="w-full pl-9 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
                         </div>
                         <div class="flex items-center gap-2 w-full md:w-auto">
                             <select id="filterExpEstado" onchange="renderExpedientesTable()" class="border rounded-lg text-sm px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 w-full md:w-auto">
                                 <option value="TODOS">Todos los Estados</option>
                                 <option value="En revision DGSE">En revisión DGSE</option>
                                 <option value="Devuelto">Devuelto</option>
-                                <option value="Finalizado">Finalizado</option>
+                                <option value="Archivados">Archivados</option>
                                 <option value="ANTIGUOS">⚠️ Hace más de 1 mes en DGSE</option>
                             </select>
                         </div>
@@ -436,7 +435,7 @@
                                     <th class="p-3">Nro. Expediente</th>
                                     <th class="p-3">Proveniente</th>
                                     <th class="p-3">Referencia</th>
-                                    <th class="p-3">Intervención DGSE</th>
+                                    <th class="p-3">IF con intervención DGSE</th>
                                     <th class="p-3">Estado</th>
                                     <th class="p-3">Giro</th>
                                     <th class="p-3">Observaciones</th>
@@ -450,39 +449,39 @@
                 </div>
             </div>
 
-             CONTROL DE VIAJES - RS
+            VIAJES - RS
             <div id="viajesTab" class="tab-content hidden">
                 <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 mb-6">
                     <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
                         <div>
                             <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
-                                <i class="fa-solid fa-plane-departure text-emerald-600"></i> Control de Viajes 
+                                <i class="fa-solid fa-plane-departure text-emerald-600"></i> VIAJES
                             </h2>
-                            <p class="text-xs text-slate-500">Control de comisiones.</p>
+                            <p class="text-xs text-slate-500">Control de viajes con intervención DGSE</p>
                         </div>
                         <div class="flex items-center gap-3">
                             <button onclick="openViajeModal()" id="btnNuevoViaje" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-3.5 py-2 rounded-lg transition shadow flex items-center gap-1.5">
                                 <i class="fa-solid fa-plus"></i> Carga Manual
                             </button>
                             <button onclick="exportViajesCSV()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-semibold px-3 py-2 rounded-lg transition flex items-center gap-1">
-                                <i class="fa-solid fa-download"></i> Exportar PDF
+                                <i class="fa-solid fa-download"></i> Exportar
                             </button>
                         </div>
                     </div>
 
-                    SOLAPAS DE VIAJES - RS
+                    <!-- NUEVOS AVISOS / MÉTRICAS DE VIAJES -->
                     <div class="grid grid-cols-2 md:grid-cols-6 gap-3 mb-6">
                         <button type="button" onclick="filtrarViajesUbicacionRapido('exterior')" title="Mostrar solo viajes al exterior" class="text-left bg-sky-50 p-3 rounded-xl shadow-sm border border-sky-200 hover:bg-sky-100 focus:outline-none focus:ring-2 focus:ring-sky-400 transition">
                             <p class="text-[11px] text-sky-800 uppercase font-bold flex items-center gap-1">
                                 <i class="fa-solid fa-earth-americas text-sky-600"></i>Exterior
                             </p>
-                            <p id="viajesMetricExterior" class="text-2xl font-bold text-sky-900 mt-1">0</p><p class="text-[10px] text-sky-700 mt-1">Filtrar</p>
+                            <p id="viajesMetricExterior" class="text-2xl font-bold text-sky-900 mt-1">0</p><p class="text-[10px] text-sky-700 mt-1"></p>
                         </button>
                         <button type="button" onclick="filtrarViajesUbicacionRapido('argentina')" title="Mostrar solo viajes dentro de Argentina" class="text-left bg-emerald-50 p-3 rounded-xl shadow-sm border border-emerald-200 hover:bg-emerald-100 focus:outline-none focus:ring-2 focus:ring-emerald-400 transition">
                             <p class="text-[11px] text-emerald-800 uppercase font-bold flex items-center gap-1">
                                 <i class="fa-solid fa-map-location-dot text-emerald-600"></i>Argentina
                             </p>
-                            <p id="viajesMetricPais" class="text-2xl font-bold text-emerald-900 mt-1">0</p><p class="text-[10px] text-emerald-700 mt-1">Tocar para filtrar</p>
+                            <p id="viajesMetricPais" class="text-2xl font-bold text-emerald-900 mt-1">0</p><p class="text-[10px] text-emerald-700 mt-1"></p>
                         </button>
                         <div class="bg-indigo-50 p-3 rounded-xl shadow-sm border border-indigo-200">
                             <p class="text-[11px] text-indigo-800 uppercase font-bold flex items-center gap-1">
@@ -504,7 +503,7 @@
                         </div>
                         <div class="bg-purple-50 p-3 rounded-xl shadow-sm border border-purple-200" title="Personas únicas en el exterior que han hecho viajes">
                             <p class="text-[11px] text-purple-800 uppercase font-bold flex items-center gap-1">
-                                <i class="fa-solid fa-user-shield text-purple-600"></i> Pers. que estuvieron en el exterior
+                                <i class="fa-solid fa-user-shield text-purple-600"></i> Cantidad de personal que salieron al exterior
                             </p>
                             <p id="viajesMetricPersExterior" class="text-2xl font-bold text-purple-900 mt-1">0</p>
                         </div>
@@ -515,7 +514,7 @@
                             <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400"></i>
                             <input type="text" id="searchViajesInput" oninput="renderViajesTable()" placeholder="Buscar" class="w-full pl-9 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
                         </div>
-                        <select id="filterEstadoViajes" onchange="renderViajesTable()" class="border rounded-lg px-3 py-2 text-sm bg-white"><option value="">Todos los estados</option><option value="continua">Activos</option><option value="proximo">Próximamente</option><option value="finalizado">Finalizados</option><option value="rechazado">Rechazados</option></select>
+                        <select id="filterEstadoViajes" onchange="renderViajesTable()" class="border rounded-lg px-3 py-2 text-sm bg-white"><option value="">Todos los estados</option><option value="continua">Activos</option><option value="proximo">Próximos</option><option value="archivados">Archivados</option><option value="rechazado">Rechazados</option></select>
                         <button type="button" onclick="limpiarFiltrosViajesRapidos()" class="border rounded-lg px-3 py-2 text-sm bg-white hover:bg-slate-100" title="Quitar filtros de ubicación y estado"><i class="fa-solid fa-filter-circle-xmark mr-1"></i> Limpiar filtros</button>
                     </div>
 
@@ -550,8 +549,9 @@
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-6">
                         <div>
                             <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
-                                <i class="fa-solid fa-chart-line text-indigo-600"></i> Estadísticas
+                                <i class="fa-solid fa-chart-line text-indigo-600"></i> Estadísticas 
                             </h2>
+                            <p class="text-xs text-slate-500 mt-1">Estadisticas generales.</p>
                         </div>
                         <button onclick="updateEstadisticas()" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold text-xs px-3.5 py-2 rounded-lg border border-indigo-200 transition flex items-center gap-1.5 shadow-sm">
                             <i class="fa-solid fa-rotate-right"></i> Actualizar
@@ -561,11 +561,11 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
                         <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-center gap-4">
                             <div class="p-3 bg-blue-600 text-white rounded-lg shadow"><i class="fa-solid fa-envelope-open-text text-xl"></i></div>
-                            <div><p class="text-xs uppercase font-bold text-blue-800">Total Notas</p><p id="statTotalNotas" class="text-2xl font-black text-blue-950 mt-0.5">0</p></div>
+                            <div><p class="text-xs uppercase font-bold text-blue-800">Total notas</p><p id="statTotalNotas" class="text-2xl font-black text-blue-950 mt-0.5">0</p></div>
                         </div>
                         <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-center gap-4">
                             <div class="p-3 bg-amber-600 text-white rounded-lg shadow"><i class="fa-solid fa-folder-tree text-xl"></i></div>
-                            <div><p class="text-xs uppercase font-bold text-amber-800">Total Expedientes</p><p id="statTotalExp" class="text-2xl font-black text-amber-950 mt-0.5">0</p></div>
+                            <div><p class="text-xs uppercase font-bold text-amber-800">Expedientes activos</p><p id="statTotalExp" class="text-2xl font-black text-amber-950 mt-0.5">0</p></div>
                         </div>
                         <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex items-center gap-4">
                             <div class="p-3 bg-emerald-600 text-white rounded-lg shadow"><i class="fa-solid fa-plane text-xl"></i></div>
@@ -573,12 +573,11 @@
                         </div>
                         <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-4 flex items-center gap-4">
                             <div class="p-3 bg-indigo-600 text-white rounded-lg shadow"><i class="fa-solid fa-earth-americas text-xl"></i></div>
-                            <div><p class="text-xs uppercase font-bold text-indigo-800">Viajes representados</p><p id="statPaisesUnicos" class="text-2xl font-black text-indigo-950 mt-0.5">0</p></div>
                         </div>
                     </div>
 
                     <div class="mb-8 rounded-xl border border-indigo-200 bg-indigo-50/50 p-5">
-                        <h3 class="font-bold text-sm uppercase text-slate-800 mb-2 flex items-center gap-2"><i class="fa-solid fa-calendar-days text-indigo-600"></i> Registro anual, mensual y diario</h3>
+                        <h3 class="font-bold text-sm uppercase text-slate-800 mb-2 flex items-center gap-2"><i class="fa-solid fa-calendar-days text-indigo-600"></i> Ingresos anuales, mensuales y diarios</h3>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div class="bg-white rounded-xl border border-blue-200 p-4">
                                 <h4 class="text-xs font-bold uppercase text-blue-800 mb-3">Notas ingresadas</h4>
@@ -597,18 +596,13 @@
                                 </div>
                             </div>
                             <div class="bg-white rounded-xl border border-amber-200 p-4">
-                                <h4 class="text-xs font-bold uppercase text-amber-800 mb-3">Ingresos de expedientes (incluye reingresos)</h4>
+                                <h4 class="text-xs font-bold uppercase text-amber-800 mb-3">Ingresos de expedientes</h4>
                                 <div class="space-y-2 text-sm">
                                     <div class="flex justify-between"><span>Hoy</span><strong id="statExpDia">0</strong></div>
-                                    <div class="flex justify-between"><span>Este mes</span><strong id="statExpMes">0</strong></div>
-                                    <div class="flex justify-between"><span>Este año</span><strong id="statExpAnio">0</strong></div>
+                                    <div class="flex justify-between"><span>Mes</span><strong id="statExpMes">0</strong></div>
+                                    <div class="flex justify-between"><span>Año</span><strong id="statExpAnio">0</strong></div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                            <div class="bg-white rounded-xl border p-4"><h4 class="text-xs font-bold uppercase text-slate-600 mb-3">Ingresos de hoy</h4><div class="flex justify-between text-sm"><span>Notas</span><strong id="statHoyNotas">0</strong></div><div class="flex justify-between text-sm"><span>Ingresos de expedientes</span><strong id="statHoyExp">0</strong></div><div class="flex justify-between text-sm"><span>Viajes</span><strong id="statHoyViajes">0</strong></div></div>
-                            <div class="bg-white rounded-xl border p-4"><h4 class="text-xs font-bold uppercase text-slate-600 mb-3">Ingresos del mes</h4><div class="flex justify-between text-sm"><span>Notas</span><strong id="statMesNotas">0</strong></div><div class="flex justify-between text-sm"><span>Ingresos de expedientes</span><strong id="statMesExp">0</strong></div><div class="flex justify-between text-sm"><span>Viajes</span><strong id="statMesViajes">0</strong></div></div>
-                            <div class="bg-white rounded-xl border p-4"><h4 class="text-xs font-bold uppercase text-slate-600 mb-3">Ingresos del año</h4><div class="flex justify-between text-sm"><span>Notas</span><strong id="statAnioNotas">0</strong></div><div class="flex justify-between text-sm"><span>Ingresos de expedientes</span><strong id="statAnioExp">0</strong></div><div class="flex justify-between text-sm"><span>Viajes</span><strong id="statAnioViajes">0</strong></div></div>
                         </div>
                     </div>
 
@@ -618,7 +612,7 @@
                             <div class="relative h-64"><canvas id="chartNotasPromotor"></canvas></div>
                         </div>
                         <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 shadow-sm">
-                            <div class="flex justify-between items-center mb-3"><h3 class="font-bold text-xs uppercase text-slate-700 flex items-center gap-2"><i class="fa-solid fa-plane-circle-check text-emerald-600"></i> Comisiones</h3><span class="text-[11px] font-semibold text-slate-400"></span></div>
+                            <div class="flex justify-between items-center mb-3"><h3 class="font-bold text-xs uppercase text-slate-700 flex items-center gap-2"><i class="fa-solid fa-plane-circle-check text-emerald-600"></i> Viajes</h3><span class="text-[11px] font-semibold text-slate-400"></span></div>
                             <div class="relative h-64"><canvas id="chartViajesUbicacion"></canvas></div>
                         </div>
                     </div>
@@ -626,46 +620,46 @@
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
                         <div class="bg-white p-5 rounded-xl border shadow-sm"><h3 class="font-bold text-slate-800 mb-3">Tipo de expedientes</h3><div id="statsExpTipos" class="space-y-2 text-sm"></div></div>
                         <div class="bg-white p-5 rounded-xl border shadow-sm">
-                            <h3 class="font-bold text-slate-800 mb-3">Promedio de notas</h3><div id="statsNotasRespuesta" class="space-y-2 text-sm"></div>
+                            <h3 class="font-bold text-slate-800 mb-3">Notas</h3><div id="statsNotasRespuesta" class="space-y-2 text-sm"></div>
                             <h4 class="font-bold text-slate-700 mt-4 mb-2 text-sm">Destinatarios con más respuestas registradas</h4><div id="statsDestinosRespuesta" class="space-y-2 text-sm"></div>
                         </div>
                     </div>
 
                     <div class="bg-gradient-to-br from-sky-50 via-indigo-50 to-emerald-50 p-5 rounded-xl border border-sky-200 shadow-sm text-slate-800">
-                        <h3 class="font-bold text-sm text-slate-800 flex items-center gap-2"><i class="fa-solid fa-map-location-dot text-indigo-600"></i> Mapa interactivo de viajes</h3>
-                        <p class="text-xs text-slate-600 mt-1 mb-3">Se puede visualizar la ubicacion de los viajes realizados por el personal</p>
+                        <h3 class="font-bold text-sm text-slate-800 flex items-center gap-2"><i class="fa-solid fa-map-location-dot text-indigo-600"></i> Mapa de viaje</h3>
+                        <p class="text-xs text-slate-600 mt-1 mb-3">Viajes del personal con intervencion DGSE.</p>
                         <div class="rounded-xl p-1 bg-gradient-to-br from-sky-200 via-indigo-100 to-emerald-100 shadow-inner"><div id="map" class="shadow-md border border-sky-200 rounded-lg overflow-hidden" style="background:linear-gradient(135deg,#dbeafe 0%,#e0f2fe 45%,#dcfce7 100%)"></div></div>
                     </div>
                 </div>
             </div>
 
-            AGENDA - RS
+            AGENDA
             <section id="agendaTab" class="tab-content hidden">
                 <div class="bg-gradient-to-br from-emerald-50 via-white to-sky-50 rounded-2xl p-5 md:p-6 shadow-sm border border-emerald-100 mb-5">
-                    <div class="flex flex-wrap justify-between items-center gap-3 mb-4"><div><h2 class="text-xl md:text-2xl font-extrabold text-slate-800"><i class="fa-solid fa-calendar-days text-emerald-600"></i> Agenda</h2><p class="text-sm text-slate-500 mt-1"></p></div><div class="flex flex-wrap gap-2"><input type="month" id="agendaMonth" class="border rounded-lg p-2 text-sm" onchange="agendaMonth=this.value;renderAgenda()"><button onclick="exportAgendaPDF('DGSE')" class="bg-emerald-700 text-white px-3 py-2 rounded-lg text-xs font-bold">Exportar agenda del director</button><button onclick="exportAgendaPDF('PERSONAL')" class="bg-sky-700 text-white px-3 py-2 rounded-lg text-xs font-bold">Exportar agenda del personal</button></div></div>
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4"><button type="button" onclick="agendaQuickType('Agenda del Director','DGSE')" class="text-left rounded-xl p-3 bg-emerald-100 hover:bg-emerald-200 border border-emerald-200"><span class="text-xl">🟢</span><div class="font-bold text-sm text-emerald-900 mt-1">Director</div><div class="text-xs text-emerald-800">Reuniones del director</div></button><button type="button" onclick="agendaQuickType('Actividad personal DGSE','DGSE')" class="text-left rounded-xl p-3 bg-sky-100 hover:bg-sky-200 border border-sky-200"><span class="text-xl">🔵</span><div class="font-bold text-sm text-sky-900 mt-1">Personal DGSE</div><div class="text-xs text-sky-800">Actividades y comisiones</div></button><button type="button" onclick="agendaQuickType('Cumpleaños','DGSE')" class="text-left rounded-xl p-3 bg-amber-100 hover:bg-amber-200 border border-amber-200"><span class="text-xl">🎂</span><div class="font-bold text-sm text-amber-900 mt-1">Cumpleaños DGSE</div><div class="text-xs text-amber-800"></div></button><button type="button" onclick="agendaQuickType('Cumpleaños/aniversarios/otros externo','PERSONAL')" class="text-left rounded-xl p-3 bg-pink-100 hover:bg-pink-200 border border-pink-200"><span class="text-xl">🎉</span><div class="font-bold text-sm text-pink-900 mt-1">Externos / aniversarios</div><div class="text-xs text-pink-800">Cumpleaños y aniversarios de otras direcciones</div></button></div>
+                    <div class="flex flex-wrap justify-between items-center gap-3 mb-4"><div><h2 class="text-xl md:text-2xl font-extrabold text-slate-800"><i class="fa-solid fa-calendar-days text-emerald-600"></i> Agenda</h2></div><div class="flex flex-wrap gap-2"><input type="month" id="agendaMonth" class="border rounded-lg p-2 text-sm" onchange="agendaMonth=this.value;renderAgenda()"><button onclick="exportAgendaPDF('DGSE')" class="bg-emerald-700 text-white px-3 py-2 rounded-lg text-xs font-bold">Exportar agenda DGSE</button><button onclick="exportAgendaPDF('PERSONAL')" class="bg-sky-700 text-white px-3 py-2 rounded-lg text-xs font-bold">Exportar agenda del personal</button></div></div>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4"><button type="button" onclick="agendaQuickType('Agenda del Director','DGSE')" class="text-left rounded-xl p-3 bg-emerald-100 hover:bg-emerald-200 border border-emerald-200"><span class="text-xl">🟢</span><div class="font-bold text-sm text-emerald-900 mt-1">Director</div><div class="text-xs text-emerald-800">Reuniones y compromisos</div></button><button type="button" onclick="agendaQuickType('Actividad personal DGSE','DGSE')" class="text-left rounded-xl p-3 bg-sky-100 hover:bg-sky-200 border border-sky-200"><span class="text-xl">🔵</span><div class="font-bold text-sm text-sky-900 mt-1">Personal DGSE</div><div class="text-xs text-sky-800">Actividades</div></button><button type="button" onclick="agendaQuickType('Cumpleaños personal DGSE','DGSE')" class="text-left rounded-xl p-3 bg-amber-100 hover:bg-amber-200 border border-amber-200"><span class="text-xl">🎂</span><div class="font-bold text-sm text-amber-900 mt-1">Cumpleaños DGSE</div><div class="text-xs text-amber-800"></div></button><button type="button" onclick="agendaQuickType('Cumpleaños/aniversarios/otros externo','PERSONAL')" class="text-left rounded-xl p-3 bg-pink-100 hover:bg-pink-200 border border-pink-200"><span class="text-xl">🎉</span><div class="font-bold text-sm text-pink-900 mt-1">Externos / aniversarios</div><div class="text-xs text-pink-800">Cumpleaños y aniversarios de otras direcciones</div></button></div>
                     <details id="agendaEditor" open class="bg-white/90 border border-emerald-100 rounded-xl mb-5 overflow-hidden shadow-sm">
                         <summary class="cursor-pointer select-none px-4 py-3 font-bold text-sm text-emerald-900 bg-emerald-50 flex items-center justify-between"><span><i class="fa-solid fa-circle-plus mr-2"></i><span id="agendaEditorHeading">Agregar un evento</span></span><span class="text-xs font-normal text-slate-500">Complete los datos</span></summary>
                         <form id="agendaForm" onsubmit="saveAgendaForm(event)" class="p-4">
                             <input type="hidden" id="agendaId">
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                                <div class="md:col-span-2"><label class="block text-xs font-semibold mb-1">¿Qué tenemos que recordar? *</label><input id="agendaTitle" required maxlength="180" placeholder="Ej.: Reunión con el Director, cumpleaños de…" class="w-full border rounded-lg p-2.5 text-sm bg-white"></div>
-                                <div><label class="block text-xs font-semibold mb-1">Tipo de actividad *</label><select id="agendaType" class="w-full border rounded-lg p-2.5 text-sm bg-white"><option>Agenda del Director</option><option>Actividad personal DGSE</option><option>Cumpleaños personal DGSE</option><option>Cumpleaños/aniversarios/otros externo</option></select></div>
-                                <div><label class="block text-xs font-semibold mb-1">Fecha *</label><input type="date" id="agendaDate" required class="w-full border rounded-lg p-2.5 text-sm bg-white" onchange="agendaMonth=this.value.slice(0,7);document.getElementById('agendaMonth').value=agendaMonth;renderAgenda()"></div>
-                                <div><label class="block text-xs font-semibold mb-1">Hora (opcional)</label><input type="time" id="agendaTime" class="w-full border rounded-lg p-2.5 text-sm bg-white"></div>
-                                <div><label class="block text-xs font-semibold mb-1">¿Para quién es la información?</label><select id="agendaScope" class="w-full border rounded-lg p-2.5 text-sm bg-white"><option value="DGSE">Solo DGSE</option><option value="PERSONAL">Resto del personal / externo</option><option value="TODOS">Todo el personal</option></select></div><div class="md:col-span-3 rounded-lg bg-amber-50 border border-amber-200 p-3"><label class="inline-flex items-start gap-2 text-sm font-semibold text-amber-900"><input type="checkbox" id="agendaAnnualRepeat" class="mt-1"><span>Repetir automáticamente todos los años <span class="block text-xs font-normal text-amber-800 mt-1">Ideal para cumpleaños y aniversarios: guardá la fecha una sola vez. No se crearán registros duplicados.</span></span></label></div>
+                                <div class="md:col-span-2"><label class="block text-xs font-semibold mb-1">¿Qué quieres agendar?</label><input id="agendaTitle" required maxlength="180" placeholder="Ej.: Reunión con el Director, cumpleaños de…" class="w-full border rounded-lg p-2.5 text-sm bg-white"></div>
+                                <div><label class="block text-xs font-semibold mb-1">Tipo de actividad </label><select id="agendaType" class="w-full border rounded-lg p-2.5 text-sm bg-white"><option>Agenda del Director</option><option>Actividad personal DGSE</option><option>Cumpleaños personal DGSE</option><option>Cumpleaños/aniversarios/otros externo</option></select></div>
+                                <div><label class="block text-xs font-semibold mb-1">Fecha</label><input type="date" id="agendaDate" required class="w-full border rounded-lg p-2.5 text-sm bg-white" onchange="agendaMonth=this.value.slice(0,7);document.getElementById('agendaMonth').value=agendaMonth;renderAgenda()"></div>
+                                <div><label class="block text-xs font-semibold mb-1">Hora</label><input type="time" id="agendaTime" class="w-full border rounded-lg p-2.5 text-sm bg-white"></div>
+                                <div><label class="block text-xs font-semibold mb-1">¿Para quién es la información?</label><select id="agendaScope" class="w-full border rounded-lg p-2.5 text-sm bg-white"><option value="DGSE">Solo DGSE</option><option value="PERSONAL">Resto del personal</option><option value="TODOS">Todo el personal</option></select></div><div class="md:col-span-3 rounded-lg bg-amber-50 border border-amber-200 p-3"><label class="inline-flex items-start gap-2 text-sm font-semibold text-amber-900"><input type="checkbox" id="agendaAnnualRepeat" class="mt-1"><span>Repetir automáticamente todos los años <span class="block text-xs font-normal text-amber-800 mt-1"></span></span></label></div>
                             </div>
-                            <details class="mt-3"><summary class="cursor-pointer text-xs font-semibold text-sky-800 py-2"><i class="fa-solid fa-list-ul mr-1"></i> Agregar detalles (lugar, responsable u observaciones)</summary><div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2"><div><label class="block text-xs font-semibold mb-1">Lugar / detalle</label><textarea id="agendaDetail" maxlength="1000" rows="2" placeholder="Lugar, horario ampliado u observaciones…" class="w-full border rounded-lg p-2 text-sm bg-white"></textarea></div><div><label class="block text-xs font-semibold mb-1">Personal / responsable</label><input id="agendaPerson" maxlength="250" placeholder="Nombre, apellido o personal abocado" class="w-full border rounded-lg p-2 text-sm bg-white"></div></div></details>
+                            <details class="mt-3"><summary class="cursor-pointer text-xs font-semibold text-sky-800 py-2"><i class="fa-solid fa-list-ul mr-1"></i> Agregar detalles (lugar, responsable u observaciones)</summary><div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2"><div><label class="block text-xs font-semibold mb-1">Lugar / detalle</label><textarea id="agendaDetail" maxlength="1000" rows="2" placeholder="Lugar u observaciones…" class="w-full border rounded-lg p-2 text-sm bg-white"></textarea></div><div><label class="block text-xs font-semibold mb-1">Personal responsable</label><input id="agendaPerson" maxlength="250" placeholder="Nombre, apellido o personal " class="w-full border rounded-lg p-2 text-sm bg-white"></div></div></details>
                             <div class="flex flex-wrap items-center gap-2 mt-4"><button type="submit" id="agendaSaveBtn" class="bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg px-5 py-2.5 text-sm font-bold"><i class="fa-solid fa-floppy-disk mr-1"></i> Guardar evento</button><button type="button" onclick="resetAgendaForm()" class="border bg-white hover:bg-slate-100 rounded-lg px-4 py-2.5 text-sm">Limpiar</button><span class="text-xs text-slate-500">Consejo: también podés tocar un día del calendario para elegir la fecha.</span></div>
                         </form>
                     </details>
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-5"><div class="bg-white rounded-xl border border-slate-200 p-3 md:p-4 shadow-sm"><h3 class="font-bold text-slate-800 mb-2"><i class="fa-regular fa-calendar text-emerald-600 mr-1"></i> Calendario del mes</h3><div id="agendaCalendar" class="grid grid-cols-7 border border-slate-200 rounded-lg overflow-hidden text-xs"></div></div><div class="bg-white rounded-xl border border-slate-200 p-3 md:p-4 shadow-sm"><h3 class="font-bold text-slate-800 mb-2"><i class="fa-solid fa-list-check text-sky-600 mr-1"></i> Resumen mensual detallado</h3><div id="agendaSummary" class="space-y-2 max-h-[560px] overflow-y-auto"></div></div></div>
                 </div>
             </section>
-            <!-- MÓDULO INFORMACIÓN GENERAL: MOI, correos e información institucional -->
+            INFORMACIÓN GENERAL - RS 
             <section id="informacionTab" class="tab-content hidden">
-                <div class="bg-gradient-to-br from-sky-50 via-white to-violet-50 rounded-2xl p-5 md:p-6 shadow-sm border border-sky-100 mb-5"><div class="mb-5 rounded-xl bg-gradient-to-r from-sky-700 via-indigo-700 to-violet-700 text-white p-5 shadow-md"><div class="flex items-center gap-3"><div class="rounded-xl bg-white/15 p-3"><i class="fa-solid fa-circle-info text-2xl"></i></div><div><h2 class="text-xl md:text-2xl font-extrabold">Información de interés general</h2><p class="text-sm text-sky-100 mt-1">MOI, correos, pases, cambios de jefatura, obra social y avisos para el personal.</p></div></div></div>
-                    <form id="infoForm" onsubmit="saveInformacionForm(event)" class="bg-white/90 border border-sky-100 rounded-xl p-4 md:p-5 grid grid-cols-1 md:grid-cols-3 gap-3 mb-5 shadow-sm"><input type="hidden" id="infoId"><div><label class="block text-xs font-semibold mb-1">Título</label><input id="infoTitle" required maxlength="180" class="w-full border rounded-lg p-2 text-sm"></div><div><label class="block text-xs font-semibold mb-1">Tipo</label><select id="infoType" class="w-full border rounded-lg p-2 text-sm"><option value="CORREO">CORREO</option><option value="MOI">MOI</option><option value="REGLAMENTO">REGLAMENTO</option><option value="DIRECTIVAS">DIRECTIVAS</option><option value="OTROS">OTROS</option></select></div><div><label class="block text-xs font-semibold mb-1">Fecha</label><input type="date" id="infoDate" class="w-full border rounded-lg p-2 text-sm"></div><div class="md:col-span-3"><label class="block text-xs font-semibold mb-1">Texto / resumen extraído del PDF</label><textarea id="infoBody" rows="4" maxlength="15000" class="w-full border rounded-lg p-2 text-sm" placeholder="Pegue información o seleccione un PDF para intentar extraer su texto…"></textarea></div><div class="md:col-span-2"><label class="block text-xs font-semibold mb-1">PDF (opcional)</label><input id="infoPdf" type="file" accept="application/pdf" class="w-full border rounded-lg p-2 text-sm" onchange="extractInfoPDF(this.files[0])"><p id="infoPdfStatus" class="text-xs text-slate-500 mt-1">El texto se puede extraer sin conservar el PDF original.</p><label class="inline-flex items-center gap-2 mt-2 text-xs"><input type="checkbox" id="infoKeepPdf"> Guardar también el PDF original privado en Drive</label></div><div class="flex items-end gap-2"><button type="submit" id="infoSaveBtn" class="bg-sky-700 text-white rounded-lg px-4 py-2 text-sm font-bold">Publicar información</button><button type="button" onclick="resetInfoForm()" class="border rounded-lg px-3 py-2 text-sm">Limpiar</button></div></form>
+                <div class="bg-gradient-to-br from-sky-50 via-white to-violet-50 rounded-2xl p-5 md:p-6 shadow-sm border border-sky-100 mb-5"><div class="mb-5 rounded-xl bg-gradient-to-r from-sky-700 via-indigo-700 to-violet-700 text-white p-5 shadow-md"><div class="flex items-center gap-3"><div class="rounded-xl bg-white/15 p-3"><i class="fa-solid fa-circle-info text-2xl"></i></div><div><h2 class="text-xl md:text-2xl font-extrabold">Información de interés general</h2><p class="text-sm text-sky-100 mt-1">MOI, correos o avisos para el personal.</p></div></div></div>
+                    <form id="infoForm" onsubmit="saveInformacionForm(event)" class="bg-white/90 border border-sky-100 rounded-xl p-4 md:p-5 grid grid-cols-1 md:grid-cols-3 gap-3 mb-5 shadow-sm"><input type="hidden" id="infoId"><div><label class="block text-xs font-semibold mb-1">Título</label><input id="infoTitle" required maxlength="180" class="w-full border rounded-lg p-2 text-sm"></div><div><label class="block text-xs font-semibold mb-1">Tipo</label><select id="infoType" class="w-full border rounded-lg p-2 text-sm"><option value="CORREO">CORREO</option><option value="MOI">MOI</option><option value="REGLAMENTO">REGLAMENTO</option><option value="DIRECTIVAS">DIRECTIVAS</option><option value="OTROS">OTROS</option></select></div><div><label class="block text-xs font-semibold mb-1">Fecha</label><input type="date" id="infoDate" class="w-full border rounded-lg p-2 text-sm"></div><div class="md:col-span-3"><label class="block text-xs font-semibold mb-1">Texto extraído del PDF</label><textarea id="infoBody" rows="4" maxlength="15000" class="w-full border rounded-lg p-2 text-sm" placeholder="Pegue información o seleccione un PDF para intentar extraer su texto…"></textarea></div><div class="md:col-span-2"><label class="block text-xs font-semibold mb-1">PDF (opcional)</label><input id="infoPdf" type="file" accept="application/pdf" class="w-full border rounded-lg p-2 text-sm" onchange="extractInfoPDF(this.files[0])"><p id="infoPdfStatus" class="text-xs text-slate-500 mt-1">El texto se puede extraer sin conservar el PDF original.</p><label class="inline-flex items-center gap-2 mt-2 text-xs"><input type="checkbox" id="infoKeepPdf"> Guardar también el PDF original privado en Drive</label></div><div class="flex items-end gap-2"><button type="submit" id="infoSaveBtn" class="bg-sky-700 text-white rounded-lg px-4 py-2 text-sm font-bold">Publicar información</button><button type="button" onclick="resetInfoForm()" class="border rounded-lg px-3 py-2 text-sm">Limpiar</button></div></form>
                     <div class="flex flex-wrap gap-2 mb-3" aria-label="Accesos rápidos de información general">
                         <button type="button" onclick="quickInfoFilter('')" class="rounded-full px-3 py-1.5 text-xs font-bold border border-slate-300 bg-white text-slate-700 hover:bg-slate-100"><i class="fa-solid fa-layer-group mr-1"></i> Todas</button>
                         <button type="button" onclick="quickInfoFilter('CORREO')" class="rounded-full px-3 py-1.5 text-xs font-bold border border-sky-200 bg-sky-100 text-sky-800 hover:bg-sky-200"><i class="fa-solid fa-envelope mr-1"></i> Correos</button>
@@ -677,12 +671,12 @@
                     <div class="flex flex-wrap gap-2 mb-3"><input id="infoSearch" oninput="renderInformacion()" placeholder="Buscar por título, tipo o texto…" class="border rounded-lg p-2 text-sm flex-1 min-w-[220px]"><select id="infoFilter" onchange="renderInformacion()" class="border rounded-lg p-2 text-sm"><option value="">Todos los tipos</option><option value="CORREO">CORREO</option><option value="MOI">MOI</option><option value="REGLAMENTO">REGLAMENTO</option><option value="DIRECTIVAS">DIRECTIVAS</option><option value="OTROS">OTROS</option></select></div><div id="infoList" class="space-y-3"></div>
                 </div>
             </section>
-            <!-- BLOQUE 5: PERSONAL PNA (consulta desde Google Sheets externo) -->
+            PERSONAL PNA
             <section id="personalPnaTab" class="tab-content hidden">
                 <div class="bg-gradient-to-br from-blue-50 via-white to-indigo-50 rounded-2xl p-5 md:p-6 shadow-sm border border-blue-100 mb-5">
                     <div class="mb-5 rounded-xl bg-gradient-to-r from-blue-800 via-blue-700 to-indigo-700 text-white p-5 shadow-md">
                         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-                            <div><h2 class="text-xl md:text-2xl font-extrabold flex items-center gap-2"><i class="fa-solid fa-address-book"></i> PERSONAL PNA</h2><p class="text-sm text-blue-100 mt-1">Consulta del personal organizada por dependencia y región.</p></div>
+                            <div><h2 class="text-xl md:text-2xl font-extrabold flex items-center gap-2"><i class="fa-solid fa-address-book"></i> PERSONAL PNA</h2><p class="text-sm text-blue-100 mt-1">Consulta del personal de la Prefectura.</p></div>
                             <button type="button" onclick="loadPersonalPNA(true)" class="rounded-lg bg-white/15 hover:bg-white/25 px-4 py-2 text-sm font-bold"><i class="fa-solid fa-rotate mr-1"></i> Actualizar datos</button>
                         </div>
                     </div>
@@ -691,7 +685,7 @@
                         <span id="pnaCount" class="text-sm font-semibold text-slate-600">Esperando datos…</span>
                     </div>
                     <div class="flex flex-wrap justify-center gap-3 mb-4 border-t border-b border-blue-100 py-3">
-                        <button id="pnaCategoryBtn_direcciones" onclick="pnaSelectCategory('direcciones')" class="pna-nav-btn font-bold px-5 py-2.5 rounded-lg text-xs uppercase tracking-wide flex items-center gap-2 bg-blue-700 text-white"><i class="fa-solid fa-sitemap"></i> DIRECCIONES</button>
+                        <button id="pnaCategoryBtn_direcciones" onclick="pnaSelectCategory('direcciones')" class="pna-nav-btn font-bold px-5 py-2.5 rounded-lg text-xs uppercase tracking-wide flex items-center gap-2 bg-blue-700 text-white"><i class="fa-solid fa-sitemap"></i> DIRECCIONES DEL EG</button>
                         <button id="pnaCategoryBtn_regiones" onclick="pnaSelectCategory('regiones')" class="pna-nav-btn font-bold px-5 py-2.5 rounded-lg text-xs uppercase tracking-wide flex items-center gap-2 bg-white text-slate-700 border border-slate-200"><i class="fa-solid fa-map-location-dot"></i> DIRECCIONES DE REGIÓN</button>
                         <button id="pnaCategoryBtn_dtra" onclick="pnaSelectCategory('dtra')" class="pna-nav-btn font-bold px-5 py-2.5 rounded-lg text-xs uppercase tracking-wide flex items-center gap-2 bg-white text-slate-700 border border-slate-200"><i class="fa-solid fa-ship"></i> DTRA</button>
                         <button id="pnaCategoryBtn_diop" onclick="pnaSelectCategory('diop')" class="pna-nav-btn font-bold px-5 py-2.5 rounded-lg text-xs uppercase tracking-wide flex items-center gap-2 bg-white text-slate-700 border border-slate-200"><i class="fa-solid fa-shield-halved"></i> DIOP</button>
@@ -708,12 +702,12 @@
         </main>
     </div>
 
-    <!-- MODAL HISTORIAL DE AUDITORÍA (SOLO ADMIN) -->
+    AUDIROTIA - RS
     <div id="auditModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
         <div class="bg-white rounded-2xl w-full max-w-3xl p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
-                    <i class="fa-solid fa-clock-rotate-left text-indigo-600"></i> Historial de Auditoría (Modificaciones y Eliminaciones)
+                    <i class="fa-solid fa-clock-rotate-left text-indigo-600"></i> Historial de Auditoría 
                 </h2>
                 <button onclick="closeAuditModal()" class="text-slate-400 hover:text-slate-600 text-sm">
                     <i class="fa-solid fa-xmark text-lg"></i>
@@ -728,7 +722,7 @@
                             <th class="p-2.5">Usuario</th>
                             <th class="p-2.5">Acción</th>
                             <th class="p-2.5">Módulo</th>
-                            <th class="p-2.5">Detalle / Referencia</th>
+                            <th class="p-2.5">Detalle</th>
                         </tr>
                     </thead>
                     <tbody id="auditTableBody" class="divide-y divide-slate-200">
@@ -745,7 +739,7 @@
         </div>
     </div>
 
-    <!-- MODAL CAMBIO DE CONTRASEÑA: obligatorio en primer acceso, restablecimiento o vencimiento -->
+   
     <div id="changePasswordModal" class="fixed inset-0 bg-slate-950/80 z-[70] flex items-center justify-center p-4 hidden">
         <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl border border-slate-200">
             <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2"><i class="fa-solid fa-shield-halved text-blue-700"></i> <span id="changePasswordTitle">Cambiar contraseña</span></h2>
@@ -769,7 +763,7 @@
         </div>
     </div>
 
-    <!-- MODAL DE ASIGNACIÓN MANUAL DE CONTRASEÑA PROVISORIA (SOLO ADMINISTRADOR) -->
+    
     <div id="resetUserPasswordModal" class="fixed inset-0 bg-slate-950/80 z-[80] flex items-center justify-center p-4 hidden">
         <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl border border-slate-200">
             <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2"><i class="fa-solid fa-key text-amber-600"></i> Asignar contraseña provisoria</h2>
@@ -785,7 +779,7 @@
         </div>
     </div>
 
-    <!-- MODAL GESTIÓN DE ACCESOS / PERSONAL (SOLO ADMINISTRADOR) -->
+    
     <div id="usersModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
         <div class="bg-white rounded-2xl w-full max-w-xl p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
             <h2 class="text-lg font-bold mb-4 text-slate-800 flex items-center gap-2">
@@ -844,7 +838,7 @@
 
     <div id="permissionsModal" class="fixed inset-0 bg-black/50 z-[70] flex items-center justify-center hidden p-3"><div class="bg-white rounded-2xl w-full max-w-4xl p-5 max-h-[90vh] overflow-y-auto"><div class="flex justify-between items-center mb-3"><h2 class="font-bold text-lg">Permisos independientes: <span id="permissionsUserLabel"></span></h2><button type="button" onclick="closePermissionsEditor()" class="border rounded-lg px-3 py-1">Cerrar</button></div><p class="text-xs text-slate-500 mb-3">Cada permiso se valida también en el servidor. Conceda solo las acciones necesarias para cada módulo.</p><div class="overflow-x-auto"><table class="w-full text-xs border"><thead class="bg-slate-800 text-white"><tr><th class="p-2 text-left">Módulo</th><th class="p-2">Ver</th><th class="p-2">Crear</th><th class="p-2">Editar</th><th class="p-2">Eliminar</th><th class="p-2">Exportar</th></tr></thead><tbody id="permissionRows"></tbody></table></div><div class="flex justify-between mt-4"><button type="button" id="toggleUserEnabledBtn" onclick="toggleUserEnabled()" class="border rounded-lg px-3 py-2 text-xs font-bold">Habilitar / deshabilitar cuenta</button><button type="button" onclick="savePermissionEditor()" class="bg-blue-700 text-white rounded-lg px-4 py-2 text-sm font-bold">Guardar permisos</button></div></div></div>
 
-    <!-- MODAL CARGA MANUAL DE NOTA -->
+    CARGA MANUAL NOTAS
     <div id="itemModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
         <div class="bg-white rounded-2xl w-full max-w-2xl p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
             <h2 id="modalTitle" class="text-xl font-bold mb-4 text-slate-800">Nueva Nota</h2>
@@ -889,7 +883,7 @@
                         <select id="estado" class="w-full border p-2 rounded-lg text-sm bg-white">
                             <option value="Pendiente">🟡 Pendiente</option>
                             <option value="En espera">🟠 En espera de respuesta</option>
-                            <option value="Contestado">🟢 Contestado / Finalizado</option>
+                            <option value="Contestado">🟢 Contestado</option>
                             <option value="Archivado">⚪ Archivado</option>
                         </select>
                     </div>
@@ -903,7 +897,7 @@
                     <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Observaciones</label>
                     <input type="text" id="respuesta" placeholder="Detalle de contestación u observaciones..." class="w-full border p-2 rounded-lg text-sm mb-2">
                     
-                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Adjuntar Respuesta (PDFs Múltiples)</label>
+                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Respuesta</label>
                     <input type="file" id="respuestaArchivos" multiple accept="application/pdf" class="w-full border p-2 rounded-lg text-xs bg-slate-50">
                 </div>
 
@@ -915,7 +909,7 @@
         </div>
     </div>
 
-    <!-- MODAL CARGA MANUAL / EDICIÓN DE EXPEDIENTE -->
+    CARGA MANUAL EXPEDIENTES
     <div id="expModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
         <div class="bg-white rounded-2xl w-full max-w-xl p-6 shadow-2xl relative">
             <h2 id="expModalTitle" class="text-xl font-bold mb-4 text-slate-800 flex items-center gap-2">
@@ -938,22 +932,22 @@
                     <input type="text" id="expNro" required placeholder="Ej. EX-2026-12345678--APN-DGSE#PNA" class="w-full border p-2 rounded-lg text-sm font-bold text-amber-900">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Tema / Trámite</label>
+                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Referencia</label>
                     <textarea id="expExtracto" required rows="2" placeholder="Detalle del tema o trámite..." class="w-full border p-2 rounded-lg text-sm"></textarea>
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">IF Intervención DGSE (Documentos PDF/GDE)</label>
+                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">IF con Intervención DGSE</label>
                     <input type="file" id="expAdjuntoIF" multiple accept="application/pdf" class="w-full border p-2 rounded-lg text-xs bg-slate-50">
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Estado</label>
                         <select id="expEstado" class="w-full border p-2 rounded-lg text-sm bg-white font-semibold">
-                            <option value="En revision DGSE">🔵 En revisión DGSE</option>
+                            <option value="En revision DGSE">🔵 En revisión</option>
                             <option value="Devuelto">🔴 Devuelto</option>
                             <option value="Guarda temporal">🟡 Guarda temporal</option>
                             <option value="En Tramite">🟠 En Trámite</option>
-                            <option value="Finalizado">🟢 Finalizado / Archivado</option>
+                            <option value="Finalizado">🟢 Archivado</option>
                         </select>
                     </div>
                     <div>
@@ -973,7 +967,7 @@
         </div>
     </div>
 
-    <!-- MODAL HISTORIAL DE INGRESOS E INFORMES DEL EXPEDIENTE -->
+    HISTORIAL DE INGRESOS E INFORMES DEL EXPEDIENTE
     <div id="expHistorialModal" class="hidden fixed inset-0 z-[90] bg-black/60 p-2 md:p-6 overflow-y-auto">
       <div class="bg-white rounded-2xl max-w-4xl mx-auto my-4 p-4 md:p-6 shadow-2xl">
         <div class="flex items-start justify-between gap-3 mb-4">
@@ -996,31 +990,31 @@
       </div>
     </div>
 
-    <!-- MODAL CARGA MANUAL / EDICIÓN DE VIAJE -->
+    CARGA MANUAL VIAJES
     <div id="viajeModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
         <div class="bg-white rounded-2xl w-full max-w-3xl p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
             <h2 id="viajeModalTitle" class="text-xl font-bold mb-4 text-slate-800 flex items-center gap-2">
-                <i class="fa-solid fa-plane-circle-check text-emerald-600"></i> Registrar Comisión / Viaje
+                <i class="fa-solid fa-plane-circle-check text-emerald-600"></i> Registrar Viaje
             </h2>
             <form onsubmit="saveViajeManual(event)" class="space-y-4">
                 <input type="hidden" id="viajeId">
                 
-                <!-- SECCIÓN PERSONAL / MÚLTIPLES PERSONAS CON GRADO Y APELLIDO SEPARADOS -->
+                
                 <div>
                     <div class="flex justify-between items-center mb-1">
-                        <label class="block text-xs font-semibold uppercase text-slate-600">Personal en Comisión (Grado, Apellido y Nombre y su Destino específico)</label>
+                        <label class="block text-xs font-semibold uppercase text-slate-600">Personal en Comisión</label>
                         <button type="button" onclick="agregarFilaPersona()" class="text-xs bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 px-2 py-1 rounded font-bold flex items-center gap-1 transition">
                             <i class="fa-solid fa-user-plus"></i> Agregar Persona
                         </button>
                     </div>
                     <div id="personasContainer" class="space-y-2 bg-slate-50 p-3 rounded-xl border">
-                        <!-- Las filas de personas se cargarán dinámicamente aquí con Grado y Apellido separados -->
+                       
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">País de destino (selección normalizada)</label>
+                        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">País de destino</label>
                         <select id="viajePais" class="w-full border p-2 rounded-lg text-sm bg-white">
                             <option value="">Seleccionar país…</option><option>Argentina</option><option>Estados Unidos</option><option>Canadá</option><option>México</option><option>Brasil</option><option>Chile</option><option>Uruguay</option><option>Paraguay</option><option>Bolivia</option><option>Perú</option><option>Colombia</option><option>Ecuador</option><option>Panamá</option><option>España</option><option>Francia</option><option>Italia</option><option>Reino Unido</option><option>Alemania</option><option>Portugal</option><option>Países Bajos</option><option>Bélgica</option><option>Suiza</option><option>Noruega</option><option>Suecia</option><option>Finlandia</option><option>Dinamarca</option><option>Polonia</option><option>Turquía</option><option>Israel</option><option>Japón</option><option>China</option><option>Corea del Sur</option><option>India</option><option>Australia</option><option>Nueva Zelanda</option><option>Otro / no listado</option>
                         </select>
@@ -1030,7 +1024,7 @@
                         <input type="text" id="viajeLugar" placeholder="Ej. Miami, Madrid, Ushuaia…" class="w-full border p-2 rounded-lg text-sm">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Evento / Misión</label>
+                        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Evento</label>
                         <input type="text" id="viajeEvento" required placeholder="Ej. CURSO INTERNACIONAL DE OFICIALES" class="w-full border p-2 rounded-lg text-sm">
                     </div>
                 </div>
@@ -3542,7 +3536,6 @@
     </script>
 </body>
 </html>
-
 
 
 
