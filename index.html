@@ -1098,10 +1098,12 @@
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
         // Endpoint del backend seguro. No contiene contraseñas ni secretos.
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxPsDdN0V1zc-6_0RurdVzwjYoC5ln4Zn8VOs5afxVGhx5fq21LuIDfKEmROdo4k6HB/exec';
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwHbTADuF778C52oYwxj_vcaupqFotgD49P0FiINx5VGLKGbTF1ITTwmNn_TkTZvA0a/exec';
         let authToken = sessionStorage.getItem('dgse_auth_token') || '';
         let tableRevisions = { Notas: '', Expedientes: '', Viajes: '' };
         let dataLoaded = false;
+        const loadedModules = new Set();
+        const moduleLoadsInFlight = new Map();
         let activePdfObjectUrl = null;
 
         function openDriveConfigModal() {
@@ -1161,7 +1163,9 @@
                 if (error.code === 'DATA_CONFLICT') {
                     alert('Otro usuario modificó ' + tableName + ' desde que cargaste los datos. Para evitar sobrescribir su trabajo, se actualizará la pantalla con la versión del servidor. Revisá y volvé a aplicar tus cambios.');
                     try {
-                        await loadServerData();
+                        const moduleToRefresh = tableName === 'Notas' ? 'notas' : tableName === 'Expedientes' ? 'expedientes' : 'viajes';
+                        loadedModules.delete(moduleToRefresh);
+                        await loadModuleData(moduleToRefresh, true);
                         if (typeof renderTable === 'function') renderTable();
                         if (typeof renderExpedientesTable === 'function') renderExpedientesTable();
                         if (typeof renderViajesTable === 'function') renderViajesTable();
@@ -1314,10 +1318,6 @@
         }
 
         function applyServerData(result) {
-            notas = Array.isArray(result.notas) ? result.notas : [];
-            expedientesDB = Array.isArray(result.expedientes) ? result.expedientes : [];
-            viajesDB = Array.isArray(result.viajes) ? result.viajes : [];
-            tableRevisions = Object.assign({ Notas: '', Expedientes: '', Viajes: '' }, result.revisions || {});
             currentUser = result.user || currentUser;
             if (currentUser) sessionStorage.setItem('activeUser', JSON.stringify(currentUser));
             dataLoaded = true;
@@ -1326,6 +1326,60 @@
         async function loadServerData() {
             const result = await serverRequest({ action: 'getInitialData', token: authToken });
             applyServerData(result);
+        }
+
+        async function loadModuleData(module, force = false) {
+            const moduleConfig = {
+                notas: { field: 'notas', table: 'Notas', render: renderTable },
+                expedientes: { field: 'expedientes', table: 'Expedientes', render: renderExpedientesTable },
+                viajes: { field: 'viajes', table: 'Viajes', render: renderViajesTable }
+            };
+            const cfg = moduleConfig[module];
+            if (!cfg || !hasPermission(module, 'view')) return;
+            if (loadedModules.has(module) && !force) return;
+            if (moduleLoadsInFlight.has(module)) return moduleLoadsInFlight.get(module);
+            const task = (async () => {
+                setModuleLoadingMessage(module, true);
+                try {
+                    const result = await serverRequest({ action: 'getModuleData', module, token: authToken });
+                    if (module === 'notas') notas = Array.isArray(result[cfg.field]) ? result[cfg.field] : [];
+                    if (module === 'expedientes') expedientesDB = Array.isArray(result[cfg.field]) ? result[cfg.field] : [];
+                    if (module === 'viajes') viajesDB = Array.isArray(result[cfg.field]) ? result[cfg.field] : [];
+                    if (result.revisions && result.revisions[cfg.table]) tableRevisions[cfg.table] = result.revisions[cfg.table];
+                    loadedModules.add(module);
+                    cfg.render();
+                    if (module === 'notas') populatePromotoresOptions();
+                    if (module === 'notas' || module === 'viajes') {
+                        if (loadedModules.has('notas') && loadedModules.has('viajes')) updateEstadisticas();
+                    }
+                } catch (error) {
+                    console.error('No se pudo cargar el módulo ' + module, error);
+                    setModuleLoadingMessage(module, false, error.message || 'No se pudieron cargar los datos.');
+                    throw error;
+                } finally {
+                    moduleLoadsInFlight.delete(module);
+                    setModuleLoadingMessage(module, false);
+                }
+            })();
+            moduleLoadsInFlight.set(module, task);
+            return task;
+        }
+
+        function setModuleLoadingMessage(module, loading, errorMessage = '') {
+            const bodyIds = { notas: 'tableBody', expedientes: 'expTableBody', viajes: 'viajesTableBody' };
+            const body = document.getElementById(bodyIds[module]);
+            if (!body) return;
+            if (loading && !loadedModules.has(module)) {
+                const colspan = module === 'notas' ? 8 : 7;
+                body.innerHTML = `<tr><td colspan="${colspan}" class="p-6 text-center text-slate-500"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Cargando datos…</td></tr>`;
+            } else if (errorMessage && !loadedModules.has(module)) {
+                const colspan = module === 'notas' ? 8 : 7;
+                body.innerHTML = `<tr><td colspan="${colspan}" class="p-6 text-center text-red-600">${escapeHtml(errorMessage)} <button class="underline font-semibold ml-2" onclick="retryModuleLoad('${module}')">Reintentar</button></td></tr>`;
+            }
+        }
+
+        function retryModuleLoad(module) {
+            loadModuleData(module, true).catch(() => {});
         }
 
         function hasPermission(module, action) {
@@ -1353,7 +1407,7 @@
             const tabModules = {registroTab:'notas',expedientesTab:'expedientes',viajesTab:'viajes',estadisticasTab:'estadisticas',agendaTab:'agenda',informacionTab:'informacion',personalPnaTab:'personalPna'};
             Object.keys(tabModules).forEach(tabId => { const btn=document.querySelector(`[onclick=\"switchTab('${tabId}')\"]`); if(btn) btn.classList.toggle('hidden', !hasPermission(tabModules[tabId], 'view')); const panel=document.getElementById(tabId); if(panel && !hasPermission(tabModules[tabId], 'view')) panel.classList.add('hidden'); });
             const firstAllowedTab = Object.keys(tabModules).find(tabId => hasPermission(tabModules[tabId], 'view'));
-            if (firstAllowedTab && (!document.getElementById(firstAllowedTab) || document.getElementById(firstAllowedTab).classList.contains('hidden'))) switchTab(firstAllowedTab);
+            if (firstAllowedTab) switchTab(firstAllowedTab);
             const actionVisibility = {btnNuevaNotaModal:['notas','create'],btnAutoUpload:['notas','create'],btnNuevoExpediente:['expedientes','create'],btnNuevoViaje:['viajes','create'],btnAuditLog:['admin','view'],btnGestionUsuarios:['admin','view']};
             Object.keys(actionVisibility).forEach(id=>{const el=document.getElementById(id);if(!el)return;const [module,action]=actionVisibility[id];el.classList.toggle('hidden',module==='admin'?currentUser.role!=='Administrador':!hasPermission(module,action));});
             [['exportCSV','notas'],['exportExpedientesCSV','expedientes'],['exportViajesCSV','viajes']].forEach(([fn,module])=>{document.querySelectorAll(`[onclick=\"${fn}()\"]`).forEach(el=>el.classList.toggle('hidden',!hasPermission(module,'export')));});
@@ -1402,12 +1456,14 @@
                     return;
                 }
                 document.getElementById('loginPass').value = '';
-                // El backend ya incluye estos datos: no ejecutar checkAuth/loadServerData otra vez.
-                if (Array.isArray(result.notas) && Array.isArray(result.expedientes) && Array.isArray(result.viajes)) {
+                // Mostrar la aplicación tras autenticar; los datos se cargan por sección.
+                if (result.user) {
                     applyServerData(result);
+                    loadedModules.clear();
+                    notas = []; expedientesDB = []; viajesDB = [];
                     showAuthenticatedApp();
                 } else {
-                    // Compatibilidad con despliegues antiguos que no devuelven carga inicial.
+                    // Compatibilidad con respuestas de despliegues anteriores.
                     await checkAuth();
                 }
             } catch (error) {
@@ -1422,7 +1478,7 @@
             const token = authToken;
             try { if (token) await serverRequest({ action: 'logout', token }); } catch (e) { console.warn('No se pudo invalidar la sesión en el servidor:', e); }
             sessionStorage.removeItem('dgse_auth_token'); sessionStorage.removeItem('activeUser');
-            authToken = ''; currentUser = null; dataLoaded = false; notas = []; expedientesDB = []; viajesDB = [];
+            authToken = ''; currentUser = null; dataLoaded = false; loadedModules.clear(); moduleLoadsInFlight.clear(); notas = []; expedientesDB = []; viajesDB = [];
             checkAuth();
         }
 
@@ -1802,16 +1858,21 @@
                 const base = tabId===ids[i] ? 'tab-active px-6 py-4 text-sm font-semibold flex items-center gap-2 focus:outline-none transition whitespace-nowrap' : 'px-6 py-4 text-sm font-semibold text-slate-500 flex items-center gap-2 hover:text-slate-700 focus:outline-none transition whitespace-nowrap';
                 btn.className = (hasPermission(modules[i],'view') ? '' : 'hidden ') + base;
             });
+            if (tabId === 'registroTab') loadModuleData('notas').catch(() => {});
+            if (tabId === 'expedientesTab') loadModuleData('expedientes').catch(() => {});
+            if (tabId === 'viajesTab') loadModuleData('viajes').catch(() => {});
             if (tabId === 'agendaTab') loadAgenda();
             if (tabId === 'informacionTab') loadInformacion();
             if (tabId === 'personalPnaTab') loadPersonalPNA();
             if (tabId === 'estadisticasTab') {
-                updateEstadisticas();
-                setTimeout(() => {
-                    if (chartNotasInstance) chartNotasInstance.resize();
-                    if (chartViajesInstance) chartViajesInstance.resize();
-                    inicializarMapaEstadisticas();
-                }, 150);
+                Promise.all([loadModuleData('notas'), loadModuleData('viajes')]).then(() => {
+                    updateEstadisticas();
+                    setTimeout(() => {
+                        if (chartNotasInstance) chartNotasInstance.resize();
+                        if (chartViajesInstance) chartViajesInstance.resize();
+                        inicializarMapaEstadisticas();
+                    }, 150);
+                }).catch(() => {});
             }
         }
 
@@ -2629,8 +2690,10 @@
             if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Importando…'; }
             try {
                 const result = await serverRequest({action:'importLegacyNotesFromSource', token:authToken});
-                await loadServerData();
-                populatePromotoresOptions(); renderTable(); updateEstadisticas();
+                loadedModules.delete('notas');
+                await loadModuleData('notas', true);
+                populatePromotoresOptions(); renderTable();
+                if (loadedModules.has('viajes')) updateEstadisticas();
                 alert('Importación finalizada.\nNuevas notas agregadas: ' + (result.added || 0) + '\nDuplicadas omitidas: ' + (result.duplicates || 0) + '\nFilas sin datos suficientes omitidas: ' + (result.skipped || 0) + '\nTotal de notas en el sistema: ' + (result.total || notas.length) + '\n\nNo se importaron archivos adjuntos ni se modificaron registros existentes.');
             } catch (err) {
                 alert('No se pudo importar el registro. ' + (err.message || err) + '\n\nVerifique que la cuenta propietaria del Apps Script tenga acceso de lectura a la planilla de origen.');
@@ -3402,6 +3465,7 @@
     </script>
 </body>
 </html>
+
 
 
 
