@@ -29,10 +29,29 @@
             color: #2563eb;
             font-weight: 700;
         }
-        /* Adaptación móvil sin alterar la estructura funcional de los módulos. */
-        .table-scroll { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-        .table-scroll table { min-width: 720px; }
+        /* Tablas adaptables: priorizar lectura completa sin obligar a desplazar horizontalmente la página. */
+        .table-scroll { width: 100%; max-width: 100%; overflow-x: hidden; -webkit-overflow-scrolling: touch; }
+        .table-scroll table { width: 100%; min-width: 0; table-layout: fixed; }
         .form-control { width: 100%; min-width: 0; }
+        main .tab-content .overflow-x-auto { max-width: 100%; }
+        main .tab-content .overflow-x-auto > table,
+        main .tab-content table.min-w-full,
+        main .tab-content table.w-full { width: 100% !important; min-width: 0 !important; table-layout: fixed; }
+        main .tab-content table th,
+        main .tab-content table td { white-space: normal !important; overflow-wrap: anywhere; word-break: normal; vertical-align: top; }
+        main .tab-content table th { line-height: 1.25; }
+        main .tab-content table td { line-height: 1.4; }
+        main .tab-content table td .flex { flex-wrap: wrap; min-width: 0; }
+        main .tab-content table td button,
+        main .tab-content table td a { max-width: 100%; white-space: normal !important; overflow-wrap: anywhere; }
+        /* Las tablas extensas se ajustan dentro de su tarjeta; las acciones permanecen dentro del ancho disponible. */
+        #tableBody td, #expedientesTableBody td, #viajesTableBody td { padding-left: .5rem; padding-right: .5rem; }
+        #tableBody td:nth-child(4), #tableBody td:nth-child(5), #tableBody td:nth-child(8),
+        #expedientesTableBody td, #viajesTableBody td { overflow-wrap: anywhere; }
+        @media (max-width: 900px) {
+            main .tab-content table { font-size: .75rem; }
+            main .tab-content table th, main .tab-content table td { padding: .4rem .35rem !important; }
+        }
         @media (max-width: 640px) {
             body { padding-bottom: 1rem; }
             header .max-w-7xl { align-items: flex-start; gap: .75rem; flex-direction: column; }
@@ -2688,7 +2707,7 @@
             let proximas = 0;
 
             notas.forEach(n => {
-                if (n.limite && normalizeNotaEstado(n.estado) !== 'Contestado' && normalizeNotaEstado(n.estado) !== 'Archivado') {
+                if (n.limite && normalizeNotaEstado(notaEstadoRaw(n)) !== 'Contestado' && normalizeNotaEstado(notaEstadoRaw(n)) !== 'Archivado') {
                     const limiteFecha = new Date(n.limite + 'T00:00:00');
                     const diffDays = Math.ceil((limiteFecha - hoy) / (1000 * 60 * 60 * 24));
 
@@ -2745,20 +2764,31 @@
             renderExpedientesTable();
         }
 
+        function notaEstadoRaw(nota) {
+            if (!nota || typeof nota !== 'object') return String(nota || '');
+            return nota.estado ?? nota.estatus ?? nota.situacion ?? nota.status ?? nota.estadoNota ?? nota.estado_nota ?? '';
+        }
         function normalizeNotaEstado(value) {
-            const estado = String(value || '').trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/\s+/g, ' ');
-            if (/^(contestado|contestada|contestados|contestadas|respondido|respondida|respondidos|respondidas)$/.test(estado) || /^(contestado|contestada)\b/.test(estado)) return 'Contestado';
-            if (/^en espera$|^espera$/.test(estado)) return 'En espera';
-            if (/^archivad[oa]s?$/.test(estado)) return 'Archivado';
-            if (/^pendiente(s)?$/.test(estado)) return 'Pendiente';
-            return String(value || '').trim();
+            const estado = String(value ?? '')
+                .replace(/[\u200B-\u200D\uFEFF]/g, '')
+                .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                .toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim().replace(/\s+/g, ' ');
+            // Aceptar variantes históricas y textos compuestos (p. ej. "Contestado / Finalizado").
+            if (/contestad|respondid|respuesta recibida|respondio/.test(estado)) return 'Contestado';
+            if (/archivad|archivada|archivado/.test(estado)) return 'Archivado';
+            if (/en espera|en pausa|espera/.test(estado)) return 'En espera';
+            if (/pendient|por contestar|sin responder/.test(estado)) return 'Pendiente';
+            return String(value ?? '').trim();
         }
         function updateMetrics() {
-            document.getElementById('metricTotal').innerText = notas.length;
-            document.getElementById('metricPendientes').innerText = notas.filter(n => normalizeNotaEstado(n.estado) === 'Pendiente').length;
-            document.getElementById('metricEspera').innerText = notas.filter(n => normalizeNotaEstado(n.estado) === 'En espera').length;
-            document.getElementById('metricContestados').innerText = notas.filter(n => normalizeNotaEstado(n.estado) === 'Contestado').length;
-            document.getElementById('metricArchivados').innerText = notas.filter(n => normalizeNotaEstado(n.estado) === 'Archivado').length;
+            const rows = Array.isArray(notas) ? notas : [];
+            const countState = state => rows.filter(n => normalizeNotaEstado(notaEstadoRaw(n)) === state).length;
+            const setMetric = (id, value) => { const node = document.getElementById(id); if (node) node.textContent = String(value); };
+            setMetric('metricTotal', rows.length);
+            setMetric('metricPendientes', countState('Pendiente'));
+            setMetric('metricEspera', countState('En espera'));
+            setMetric('metricContestados', countState('Contestado'));
+            setMetric('metricArchivados', countState('Archivado'));
         }
 
         function renderTable() {
@@ -2792,7 +2822,7 @@
 
                 let matchEstado = true;
                 if (filterEstado === 'URGENTES') {
-                    if (n.limite && normalizeNotaEstado(n.estado) !== 'Contestado' && normalizeNotaEstado(n.estado) !== 'Archivado') {
+                    if (n.limite && normalizeNotaEstado(notaEstadoRaw(n)) !== 'Contestado' && normalizeNotaEstado(notaEstadoRaw(n)) !== 'Archivado') {
                         const limiteFecha = new Date(n.limite + 'T00:00:00');
                         const diffDays = Math.ceil((limiteFecha - hoy) / (1000 * 60 * 60 * 24));
                         matchEstado = (diffDays <= 5);
@@ -2800,7 +2830,7 @@
                         matchEstado = false;
                     }
                 } else if (filterEstado !== 'TODOS') {
-                    matchEstado = (normalizeNotaEstado(n.estado) === normalizeNotaEstado(filterEstado));
+                    matchEstado = (normalizeNotaEstado(notaEstadoRaw(n)) === normalizeNotaEstado(filterEstado));
                 }
 
                 let matchMes = true;
@@ -2841,12 +2871,12 @@
 
             renderItemsChunked(body, filtered, n => {
                 let badgeClass = 'bg-yellow-100 text-yellow-800 border-yellow-300';
-                if (n.estado === 'En espera') badgeClass = 'bg-orange-100 text-orange-800 border-orange-300';
-                if (normalizeNotaEstado(n.estado) === 'Contestado') badgeClass = 'bg-green-100 text-green-800 border-green-300';
-                if (n.estado === 'Archivado') badgeClass = 'bg-slate-200 text-slate-700 border-slate-300';
+                if (normalizeNotaEstado(notaEstadoRaw(n)) === 'En espera') badgeClass = 'bg-orange-100 text-orange-800 border-orange-300';
+                if (normalizeNotaEstado(notaEstadoRaw(n)) === 'Contestado') badgeClass = 'bg-green-100 text-green-800 border-green-300';
+                if (normalizeNotaEstado(notaEstadoRaw(n)) === 'Archivado') badgeClass = 'bg-slate-200 text-slate-700 border-slate-300';
 
                 let alertaBadge = '';
-                if (n.limite && normalizeNotaEstado(n.estado) !== 'Contestado' && normalizeNotaEstado(n.estado) !== 'Archivado') {
+                if (n.limite && normalizeNotaEstado(notaEstadoRaw(n)) !== 'Contestado' && normalizeNotaEstado(notaEstadoRaw(n)) !== 'Archivado') {
                     const limiteFecha = new Date(n.limite + 'T00:00:00');
                     const diffDays = Math.ceil((limiteFecha - hoy) / (1000 * 60 * 60 * 24));
 
@@ -2858,9 +2888,9 @@
                 }
 
                 let rowClass = 'row-pendiente';
-                if (n.estado === 'En espera') rowClass = 'row-espera';
-                if (normalizeNotaEstado(n.estado) === 'Contestado') rowClass = 'row-contestado';
-                if (n.estado === 'Archivado') rowClass = 'row-archivado';
+                if (normalizeNotaEstado(notaEstadoRaw(n)) === 'En espera') rowClass = 'row-espera';
+                if (normalizeNotaEstado(notaEstadoRaw(n)) === 'Contestado') rowClass = 'row-contestado';
+                if (normalizeNotaEstado(notaEstadoRaw(n)) === 'Archivado') rowClass = 'row-archivado';
 
                 const attachmentButtons = [];
                 if (n.adjuntoNotaId) { const nombrePDF = String(n.adjuntoNotaNombre || (n.nroNota + '.pdf')); attachmentButtons.push(`<button type="button" data-action="open-pdf" data-file-id="${escapeHtml(n.adjuntoNotaId)}" data-file-name="${escapeHtml(nombrePDF)}" class="text-blue-600 hover:text-blue-800 font-bold"><i class="fa-solid fa-file-pdf"></i> Nota original</button>`); }
@@ -2879,7 +2909,7 @@
                             <span class="font-semibold text-slate-700">${formatFechaLatina(n.limite)}</span>
                             ${alertaBadge}
                         </td>
-                        <td class="p-3"><span class="px-2 py-1 rounded-full text-[11px] font-bold border ${badgeClass}">${escapeHtml(n.estado || '-') }</span></td>
+                        <td class="p-3"><span class="px-2 py-1 rounded-full text-[11px] font-bold border ${badgeClass}">${escapeHtml(normalizeNotaEstado(notaEstadoRaw(n)) || '-') }</span></td>
                         <td class="p-3 text-slate-600">${escapeHtml(n.respuesta || '-') }</td>
                         <td class="p-3 whitespace-nowrap">${adjuntosHtml}</td>
                         <td class="p-3 text-center whitespace-nowrap">${hasPermission('notas','edit') ? `<button type="button" onclick="editNota('${escapeHtml(String(n.id))}')" class="text-blue-600 hover:text-blue-800 mr-2" title="Editar"><i class="fa-solid fa-pen-to-square"></i></button>` : ''}${hasPermission('notas','delete') ? `<button type="button" onclick="deleteNota('${escapeHtml(String(n.id))}')" class="text-red-600 hover:text-red-800" title="Eliminar"><i class="fa-solid fa-trash"></i></button>` : ''}</td>
@@ -3734,6 +3764,23 @@
 </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
