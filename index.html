@@ -30,10 +30,10 @@
             font-weight: 700;
         }
         /* Tablas adaptables: priorizar lectura completa sin obligar a desplazar horizontalmente la página. */
-        .table-scroll { width: 100%; max-width: 100%; overflow-x: hidden; -webkit-overflow-scrolling: touch; }
+        .table-scroll { width: 100%; max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
         .table-scroll table { width: 100%; min-width: 0; table-layout: fixed; }
         .form-control { width: 100%; min-width: 0; }
-        main .tab-content .overflow-x-auto { max-width: 100%; }
+        main .tab-content .overflow-x-auto { max-width: 100%; overflow-x: auto; }
         main .tab-content .overflow-x-auto > table,
         main .tab-content table.min-w-full,
         main .tab-content table.w-full { width: 100% !important; min-width: 0 !important; table-layout: fixed; }
@@ -41,6 +41,9 @@
         main .tab-content table td { white-space: normal !important; overflow-wrap: anywhere; word-break: normal; vertical-align: top; }
         main .tab-content table th { line-height: 1.25; }
         main .tab-content table td { line-height: 1.4; }
+        main .tab-content table td .truncate { white-space: normal !important; overflow: visible !important; text-overflow: clip !important; display: block; }
+        main .tab-content table td { min-width: 0; }
+        #tableBody td:nth-child(4), #tableBody td:nth-child(5), #tableBody td:nth-child(8), #expTableBody td:nth-child(4) { overflow-wrap: anywhere; white-space: normal !important; }
         main .tab-content table td .flex { flex-wrap: wrap; min-width: 0; }
         main .tab-content table td button,
         main .tab-content table td a { max-width: 100%; white-space: normal !important; overflow-wrap: anywhere; }
@@ -57,7 +60,8 @@
             header .max-w-7xl { align-items: flex-start; gap: .75rem; flex-direction: column; }
             header .max-w-7xl > div:last-child { width: 100%; flex-wrap: wrap; gap: .5rem; }
             #userInfo { max-width: 100%; overflow-wrap: anywhere; }
-            main.max-w-7xl { padding-left: .5rem; padding-right: .5rem; margin-top: .5rem; }
+            main { width: 96%; max-width: none; margin-left: auto; margin-right: auto; }
+            main { padding-left: .25rem; padding-right: .25rem; margin-top: .5rem; }
             main .rounded-2xl.p-6 { padding: .875rem; }
             main .text-xl { font-size: 1rem; line-height: 1.4; }
             main .flex.justify-between.items-center { align-items: flex-start; flex-wrap: wrap; }
@@ -224,7 +228,7 @@
     <div id="appScreen" class="hidden">
         
         <header class="bg-slate-900 text-white shadow-lg sticky top-0 z-30">
-            <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="w-[96%] max-w-none mx-auto px-2 py-3 flex justify-between items-center">
                 <div class="flex items-center space-x-3">
                     <img src="HERLADICO_DGSE_ANTIGUO.png" class="h-12 w-auto object-contain" alt="Escudo Oficial DGSE" onerror="this.style.display='none'">
                     <div>
@@ -265,7 +269,7 @@
         <div id="passwordExpiryWarning" class="hidden max-w-7xl mx-auto mt-3 px-4">
             <div class="rounded-lg border border-amber-300 bg-amber-50 text-amber-900 px-4 py-3 text-sm flex gap-2 items-start"><i class="fa-solid fa-triangle-exclamation mt-0.5"></i><div id="passwordExpiryWarningText">Su contraseña está próxima a vencer.</div><button type="button" onclick="openChangePasswordModal(false)" class="ml-auto underline font-semibold whitespace-nowrap">Cambiar ahora</button></div>
         </div>
-        <main class="max-w-7xl mx-auto px-4 mt-6">
+        <main class="w-[96%] max-w-none mx-auto px-2 mt-4">
 
             
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 mb-6">
@@ -2791,6 +2795,39 @@
             setMetric('metricArchivados', countState('Archivado'));
         }
 
+        const DGSE_PAGE_SIZE = 30;
+        const dgsePageByTable = { notas: 1, expedientes: 1 };
+        function renderTablePagination(tableBodyId, totalItems, pageKey, renderFn) {
+            const body = document.getElementById(tableBodyId);
+            if (!body) return 1;
+            const pages = Math.max(1, Math.ceil(totalItems / DGSE_PAGE_SIZE));
+            let page = Math.min(Math.max(1, Number(dgsePageByTable[pageKey]) || 1), pages);
+            dgsePageByTable[pageKey] = page;
+            let nav = document.getElementById(tableBodyId + 'Pagination');
+            if (!nav) {
+                nav = document.createElement('div');
+                nav.id = tableBodyId + 'Pagination';
+                nav.className = 'flex flex-wrap items-center justify-between gap-3 px-3 py-3 mt-2 rounded-xl border border-slate-200 bg-white';
+                const wrapper = body.closest('.overflow-x-auto');
+                if (wrapper && wrapper.parentNode) wrapper.insertAdjacentElement('afterend', nav);
+                else body.insertAdjacentElement('afterend', nav);
+            }
+            const first = totalItems ? ((page - 1) * DGSE_PAGE_SIZE + 1) : 0;
+            const last = Math.min(page * DGSE_PAGE_SIZE, totalItems);
+            const btn = (label, target, disabled, active=false) => `<button type="button" ${disabled?'disabled':''} onclick="setDGSEPage('${pageKey}',${target})" class="px-3 py-1.5 rounded-lg border text-sm font-semibold ${active?'bg-blue-700 text-white border-blue-700':'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'} ${disabled?'opacity-40 cursor-not-allowed':''}">${label}</button>`;
+            let pageButtons = '';
+            const startPage = Math.max(1, Math.min(page - 2, pages - 4));
+            const endPage = Math.min(pages, startPage + 4);
+            for (let n = startPage; n <= endPage; n++) pageButtons += btn(String(n), n, n === page, n === page);
+            nav.innerHTML = `<span class="text-sm text-slate-600">Mostrando <strong>${first}–${last}</strong> de <strong>${totalItems}</strong> registros</span><div class="flex items-center gap-1.5">${btn('‹ Anterior',page-1,page<=1)}${pageButtons}${btn('Siguiente ›',page+1,page>=pages)}</div>`;
+            return page;
+        }
+        function setDGSEPage(pageKey, page) {
+            dgsePageByTable[pageKey] = Math.max(1, Number(page) || 1);
+            if (pageKey === 'notas') renderTable();
+            else if (pageKey === 'expedientes') renderExpedientesTable();
+        }
+
         function renderTable() {
             const body = document.getElementById('tableBody');
             const search = document.getElementById('searchInput').value.toLowerCase();
@@ -2861,6 +2898,8 @@
             };
             filtered.sort((a, b) => fechaOrden(b.fecha) - fechaOrden(a.fecha) || String(b.nroNota || '').localeCompare(String(a.nroNota || ''), 'es', {numeric:true}));
 
+            const notasPage = renderTablePagination('tableBody', filtered.length, 'notas');
+            const notasPageItems = filtered.slice((notasPage - 1) * DGSE_PAGE_SIZE, notasPage * DGSE_PAGE_SIZE);
             if (filtered.length === 0) {
                 body.innerHTML = `<tr><td colspan="10" class="p-4 text-center text-slate-400">No se encontraron notas registradas.</td></tr>`;
                 updateMetrics();
@@ -2869,7 +2908,7 @@
                 return;
             }
 
-            renderItemsChunked(body, filtered, n => {
+            renderItemsChunked(body, notasPageItems, n => {
                 let badgeClass = 'bg-yellow-100 text-yellow-800 border-yellow-300';
                 if (normalizeNotaEstado(notaEstadoRaw(n)) === 'En espera') badgeClass = 'bg-orange-100 text-orange-800 border-orange-300';
                 if (normalizeNotaEstado(notaEstadoRaw(n)) === 'Contestado') badgeClass = 'bg-green-100 text-green-800 border-green-300';
@@ -2903,7 +2942,7 @@
                         <td class="p-3 whitespace-nowrap font-medium">${formatFechaLatina(n.fecha)}</td>
                         <td class="p-3 font-bold text-slate-700">${escapeHtml(n.promotor || '-') }</td>
                         <td class="p-3 font-bold text-blue-900">${escapeHtml(n.nroNota || '-')}</td>
-                        <td class="p-3 font-medium text-slate-800 max-w-xs truncate" title="${escapeHtml(n.referencia || '')}">${escapeHtml(n.referencia || '-') }</td>
+                        <td class="p-3 font-medium text-slate-800 whitespace-normal break-words" title="${escapeHtml(n.referencia || '')}">${escapeHtml(n.referencia || '-') }</td>
                         <td class="p-3 font-semibold text-slate-700">${escapeHtml(n.accion || '-') }</td>
                         <td class="p-3 whitespace-nowrap">
                             <span class="font-semibold text-slate-700">${formatFechaLatina(n.limite)}</span>
@@ -3103,12 +3142,14 @@
                 return matchSearch && matchEstado;
             });
 
+            const expedientesPage = renderTablePagination('expTableBody', filtered.length, 'expedientes');
+            const expedientesPageItems = filtered.slice((expedientesPage - 1) * DGSE_PAGE_SIZE, expedientesPage * DGSE_PAGE_SIZE);
             if (filtered.length === 0) {
                 body.innerHTML = `<tr><td colspan="9" class="p-4 text-center text-slate-400">No se encontraron expedientes.</td></tr>`;
                 updateEstadisticas(); return;
             }
 
-            renderItemsChunked(body, filtered, exp => {
+            renderItemsChunked(body, expedientesPageItems, exp => {
                 let badgeClass = 'bg-blue-100 text-blue-800 border-blue-300';
                 if (exp.estado === 'Devuelto') badgeClass = 'bg-red-100 text-red-800 border-red-300';
                 if (exp.estado === 'Finalizado') badgeClass = 'bg-green-100 text-green-800 border-green-300';
@@ -3128,7 +3169,7 @@
                         <td class="p-3 whitespace-nowrap font-medium">${formatFechaLatina(exp.fecha)}</td>
                         <td class="p-3 font-bold text-amber-900">${escapeHtml(exp.nroExpediente || '-') }</td>
                         <td class="p-3 font-semibold text-slate-700">${escapeHtml(exp.iniciador || '-') }</td>
-                        <td class="p-3 text-slate-800 max-w-xs truncate" title="${escapeHtml(exp.extracto || '')}">${escapeHtml(exp.extracto || '-') }</td>
+                        <td class="p-3 text-slate-800 whitespace-normal break-words" title="${escapeHtml(exp.extracto || '')}">${escapeHtml(exp.extracto || '-') }</td>
                         <td class="p-3">-</td>
                         <td class="p-3"><span class="px-2 py-1 rounded-full text-[11px] font-bold border ${badgeClass}">${escapeHtml(exp.estado || '-') }</span>${alertaAntiguedad}</td>
                         <td class="p-3 font-semibold text-slate-700">${escapeHtml(exp.pase || '-') }</td>
@@ -3764,6 +3805,21 @@
 </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
