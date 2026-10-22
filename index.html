@@ -559,8 +559,8 @@
                             <button onclick="openViajeModal()" id="btnNuevoViaje" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-3.5 py-2 rounded-lg transition shadow flex items-center gap-1.5">
                                 <i class="fa-solid fa-plus"></i> Carga Manual
                             </button>
-                            <button onclick="exportViajesCSV()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-semibold px-3 py-2 rounded-lg transition flex items-center gap-1">
-                                <i class="fa-solid fa-download"></i> Exportar
+                            <button onclick="exportViajesPDF()" id="btnExportViajesPDF" class="bg-sky-700 hover:bg-sky-800 text-white text-xs font-semibold px-3 py-2 rounded-lg transition flex items-center gap-1">
+                                <i class="fa-solid fa-file-pdf"></i> Exportar PDF
                             </button>
                         </div>
                     </div>
@@ -1582,11 +1582,12 @@
             } else { warning.classList.add('hidden'); }
             const tabModules = {registroTab:'notas',expedientesTab:'expedientes',viajesTab:'viajes',estadisticasTab:'estadisticas',agendaTab:'agenda',informacionTab:'informacion',personalPnaTab:'personalPna'};
             Object.keys(tabModules).forEach(tabId => { const btn=document.querySelector(`[onclick=\"switchTab('${tabId}')\"]`); if(btn) btn.classList.toggle('hidden', !hasPermission(tabModules[tabId], 'view')); const panel=document.getElementById(tabId); if(panel && !hasPermission(tabModules[tabId], 'view')) panel.classList.add('hidden'); });
+            applyReadOnlyPresentation();
             const firstAllowedTab = Object.keys(tabModules).find(tabId => hasPermission(tabModules[tabId], 'view'));
             if (firstAllowedTab) switchTab(firstAllowedTab);
             const actionVisibility = {btnNuevaNotaModal:['notas','create'],btnAutoUpload:['notas','create'],btnNuevoExpediente:['expedientes','create'],btnNuevoViaje:['viajes','create'],btnAuditLog:['admin','view'],btnGestionUsuarios:['admin','view']};
             Object.keys(actionVisibility).forEach(id=>{const el=document.getElementById(id);if(!el)return;const [module,action]=actionVisibility[id];el.classList.toggle('hidden',module==='admin'?currentUser.role!=='Administrador':!hasPermission(module,action));});
-            [['exportCSV','notas'],['exportExpedientesCSV','expedientes'],['exportViajesCSV','viajes']].forEach(([fn,module])=>{document.querySelectorAll(`[onclick=\"${fn}()\"]`).forEach(el=>el.classList.toggle('hidden',!hasPermission(module,'export')));});
+            [['exportCSV','notas'],['exportExpedientesCSV','expedientes'],['exportViajesPDF','viajes'],['exportViajesCSV','viajes']].forEach(([fn,module])=>{document.querySelectorAll(`[onclick=\"${fn}()\"]`).forEach(el=>el.classList.toggle('hidden',!hasPermission(module,'export')));});
             document.querySelectorAll('[onclick=\"exportAgendaPDF(\'DGSE\')\"],[onclick=\"exportAgendaPDF(\'PERSONAL\')\"]').forEach(el=>el.classList.toggle('hidden',!hasPermission('agenda','export')));
             if (initialDataLoaded) { populatePromotoresOptions(); if (hasPermission('notas','view')) renderTable(); if (hasPermission('expedientes','view')) renderExpedientesTable(); if (hasPermission('viajes','view')) renderViajesTable(); }
         }
@@ -1853,7 +1854,7 @@
         function resetInfoForm(){document.getElementById('infoForm').reset();document.getElementById('infoId').value='';infoPdfFile=null;document.getElementById('infoPdfStatus').textContent='El texto se puede extraer sin conservar el PDF original.';}
         async function saveInformacionForm(e){e.preventDefault();if(!hasPermission('informacion','create')&&!hasPermission('informacion','edit')){alert('No tiene permiso para publicar información.');return;}const btn=document.getElementById('infoSaveBtn');btn.disabled=true;try{let pdf=null;if(infoPdfFile&&document.getElementById('infoKeepPdf').checked){const dataUrl=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=()=>reject(new Error('No se pudo leer el PDF'));r.readAsDataURL(infoPdfFile);});const up=await subirPDFAGoogleDrive(dataUrl,infoPdfFile.name,'informacion');pdf={fileId:up.fileId,fileName:up.fileName||infoPdfFile.name,mimeType:'application/pdf'};}const oldInfo=infoItems.find(x=>String(x.id)===String(document.getElementById('infoId').value));const item={id:document.getElementById('infoId').value||'info-'+Date.now(),titulo:document.getElementById('infoTitle').value.trim(),tipo:document.getElementById('infoType').value,fecha:document.getElementById('infoDate').value,texto:document.getElementById('infoBody').value.trim(),pdf:pdf||(oldInfo&&oldInfo.pdf)||null};await serverRequest({action:'saveInformacion',token:authToken,item});resetInfoForm();await loadInformacion();alert('Información publicada.');}catch(err){alert('No se pudo publicar la información: '+err.message);}finally{btn.disabled=false;}}
         function quickInfoFilter(tipo){const filter=document.getElementById('infoFilter');if(filter)filter.value=tipo||'';renderInformacion();const target=document.getElementById('infoList');if(target)target.scrollIntoView({behavior:'smooth',block:'nearest'});}
-        function renderInformacion(){const q=(document.getElementById('infoSearch')?.value||'').toLowerCase(),f=document.getElementById('infoFilter')?.value||'';const list=infoItems.filter(x=>(!f||x.tipo===f)&&(!q||[x.titulo,x.tipo,x.texto].some(v=>String(v||'').toLowerCase().includes(q)))).sort((a,b)=>String(b.fecha||b.createdAt||'').localeCompare(String(a.fecha||a.createdAt||'')));document.getElementById('infoList').innerHTML=list.length?list.map(x=>`<article class="group border border-slate-200 border-l-4 border-l-sky-500 rounded-xl p-4 md:p-5 bg-white shadow-sm hover:shadow-md hover:border-sky-200 transition"><div class="flex flex-wrap justify-between gap-2"><h3 class="font-bold text-slate-800">${escapeHtml(x.titulo||'Sin título')}</h3><span class="text-xs font-bold rounded-full px-3 py-1 ${x.tipo==='CORREO'?'bg-sky-100 text-sky-800':x.tipo==='MOI'?'bg-violet-100 text-violet-800':x.tipo==='REGLAMENTO'?'bg-amber-100 text-amber-800':x.tipo==='DIRECTIVAS'?'bg-emerald-100 text-emerald-800':'bg-pink-100 text-pink-800'}">${escapeHtml(x.tipo||'Información')}</span></div><p class="text-xs text-slate-500 mt-1"><i class="fa-regular fa-calendar mr-1"></i>${escapeHtml(x.fecha||'Sin fecha')}</p><p class="text-sm mt-3 whitespace-pre-wrap break-words text-slate-700">${escapeHtml(x.texto||'Sin descripción')}</p>${x.pdf&&x.pdf.fileId?`<button data-action="open-pdf" data-file-id="${escapeHtml(x.pdf.fileId)}" data-file-name="${escapeHtml(x.pdf.fileName||'Información.pdf')}" class="text-blue-700 text-xs font-bold mt-3">Ver PDF original</button>`:''}${hasPermission('informacion','edit')?`<button onclick="editInfoItem('${escapeHtml(x.id)}')" class="text-amber-700 text-xs font-bold mt-3 ml-3">Editar</button>`:''}${hasPermission('informacion','delete')?`<button onclick="removeInfoItem('${escapeHtml(x.id)}')" class="text-red-700 text-xs font-bold mt-3 ml-3">Eliminar</button>`:''}</article>`).join(''):'<p class="text-sm text-slate-500 border rounded-lg p-4">No hay información publicada.</p>';const form=document.getElementById('infoForm');if(form)form.querySelectorAll('input,select,textarea,button').forEach(el=>{if(el.type!=='hidden')el.disabled=!hasPermission('informacion','create')&&!hasPermission('informacion','edit');});}
+        function renderInformacion(){const q=(document.getElementById('infoSearch')?.value||'').toLowerCase(),f=document.getElementById('infoFilter')?.value||'';const list=infoItems.filter(x=>(!f||x.tipo===f)&&(!q||[x.titulo,x.tipo,x.texto].some(v=>String(v||'').toLowerCase().includes(q)))).sort((a,b)=>String(b.fecha||b.createdAt||'').localeCompare(String(a.fecha||a.createdAt||'')));document.getElementById('infoList').innerHTML=list.length?list.map(x=>`<article class="group border border-slate-200 border-l-4 border-l-sky-500 rounded-xl p-4 md:p-5 bg-white shadow-sm hover:shadow-md hover:border-sky-200 transition"><div class="flex flex-wrap justify-between gap-2"><h3 class="font-bold text-slate-800">${escapeHtml(x.titulo||'Sin título')}</h3><span class="text-xs font-bold rounded-full px-3 py-1 ${x.tipo==='CORREO'?'bg-sky-100 text-sky-800':x.tipo==='MOI'?'bg-violet-100 text-violet-800':x.tipo==='REGLAMENTO'?'bg-amber-100 text-amber-800':x.tipo==='DIRECTIVAS'?'bg-emerald-100 text-emerald-800':'bg-pink-100 text-pink-800'}">${escapeHtml(x.tipo||'Información')}</span></div><p class="text-xs text-slate-500 mt-1"><i class="fa-regular fa-calendar mr-1"></i>${escapeHtml(x.fecha||'Sin fecha')}</p><p class="text-sm mt-3 whitespace-pre-wrap break-words text-slate-700">${escapeHtml(x.texto||'Sin descripción')}</p>${x.pdf&&x.pdf.fileId?`<button data-action="open-pdf" data-file-id="${escapeHtml(x.pdf.fileId)}" data-file-name="${escapeHtml(x.pdf.fileName||'Información.pdf')}" class="text-blue-700 text-xs font-bold mt-3">Ver PDF original</button>`:''}${hasPermission('informacion','edit')?`<button onclick="editInfoItem('${escapeHtml(x.id)}')" class="text-amber-700 text-xs font-bold mt-3 ml-3">Editar</button>`:''}${hasPermission('informacion','delete')?`<button onclick="removeInfoItem('${escapeHtml(x.id)}')" class="text-red-700 text-xs font-bold mt-3 ml-3">Eliminar</button>`:''}</article>`).join(''):'<p class="text-sm text-slate-500 border rounded-lg p-4">No hay información publicada.</p>';const form=document.getElementById('infoForm');if(form)form.querySelectorAll('input,select,textarea,button').forEach(el=>{if(el.type!=='hidden')el.disabled=!hasPermission('informacion','create')&&!hasPermission('informacion','edit');});applyReadOnlyPresentation();}
         async function removeInfoItem(id){if(!hasPermission('informacion','delete'))return;if(!confirm('¿Eliminar esta publicación de información?'))return;try{await serverRequest({action:'deleteInformacion',token:authToken,id});await loadInformacion();}catch(e){alert(e.message);}}
         function editInfoItem(id){const x=infoItems.find(a=>String(a.id)===String(id));if(!x||!hasPermission('informacion','edit'))return;document.getElementById('infoForm').querySelectorAll('input,select,textarea,button').forEach(el=>{if(el.type!=='hidden')el.disabled=false;});document.getElementById('infoId').value=x.id;document.getElementById('infoTitle').value=x.titulo||'';document.getElementById('infoType').value=['CORREO','MOI','REGLAMENTO','DIRECTIVAS','OTROS'].includes(String(x.tipo||'').toUpperCase())?String(x.tipo).toUpperCase():'OTROS';document.getElementById('infoDate').value=x.fecha||'';document.getElementById('infoBody').value=x.texto||'';infoPdfFile=null;document.getElementById('infoKeepPdf').checked=false;document.getElementById('infoPdfStatus').textContent=x.pdf?'Ya tiene un PDF original vinculado; seleccione otro solo si desea adjuntar uno nuevo.':'No hay PDF original guardado.';}
         async function openPermissionsEditor(username){if(!currentUser||currentUser.role!=='Administrador')return;if(String(username).toLowerCase()===String(currentUser.username).toLowerCase()){alert('Por seguridad, no puede modificar sus propios permisos.');return;}permissionEditorUser=username;const user=usersDB[username]||{};document.getElementById('permissionsUserLabel').textContent=username.toUpperCase();const rows=document.getElementById('permissionRows');rows.innerHTML=Object.entries(PERMISSION_MODULES).map(([module,label])=>`<tr class="border-t"><td class="p-2 font-semibold min-w-[170px]"><div>${label}</div><div class="flex gap-1 mt-1"><button type="button" onclick="setPermissionRow('${module}',true)" class="text-[10px] text-blue-700 underline">Seleccionar todo</button><button type="button" onclick="setPermissionRow('${module}',false)" class="text-[10px] text-slate-500 underline">Deseleccionar</button></div></td>${PERMISSION_ACTIONS.map(a=>`<td class="p-2 text-center"><input type="checkbox" data-module="${module}" data-action="${a}" ${user.permissions&&user.permissions[module]&&user.permissions[module][a]===true?'checked':''}></td>`).join('')}</tr>`).join('');document.getElementById('toggleUserEnabledBtn').textContent=user.enabled===false?'Habilitar cuenta':'Deshabilitar cuenta';document.getElementById('permissionsModal').classList.remove('hidden');}
@@ -1932,7 +1933,7 @@
         function pnaTable(headers, rows, sheetName){
             rows=(rows||[]).filter(row=>!row.__blankRow);
             if(!rows.length)return '<div class="p-4 text-sm text-slate-500">No hay dependencias cargadas para esta PZ.</div>';
-            const canManage=!!sheetName, shownHeaders=headers.filter(k=>k!=='__rowNumber'&&k!=='__blankRow');
+            const canManage=!!sheetName && (hasPermission('personalPna','edit') || hasPermission('personalPna','create')), shownHeaders=headers.filter(k=>k!=='__rowNumber'&&k!=='__blankRow');
             return `<div class="overflow-x-auto rounded-xl border border-slate-200"><table class="min-w-full text-sm"><thead class="bg-gradient-to-r from-blue-50 to-indigo-50"><tr>${shownHeaders.map(k=>`<th class="text-left px-3 py-2 font-bold text-slate-700 whitespace-nowrap border-b border-blue-100">${escapeHtml(k)}</th>`).join('')}${canManage?'<th class="text-center px-3 py-2 font-bold text-slate-700 border-b border-blue-100">Acciones</th>':''}</tr></thead><tbody>${rows.map((row,i)=>`<tr class="${i%2?'bg-slate-50/70':'bg-white'} hover:bg-sky-50 transition-colors">${shownHeaders.map(k=>`<td class="px-3 py-2 border-b border-slate-100 text-slate-700 whitespace-nowrap">${escapeHtml(row[k]??'')}</td>`).join('')}${canManage?`<td class="px-3 py-2 border-b border-slate-100 whitespace-nowrap text-center"><button type="button" onclick="pnaEditRecord('${escapeHtml(sheetName)}',${Number(row.__rowNumber)||0})" class="rounded-lg bg-blue-100 hover:bg-blue-200 text-blue-800 px-2.5 py-1.5 text-xs font-bold mr-1"><i class="fa-solid fa-pen"></i> Editar</button><button type="button" onclick="pnaDeleteRecord('${escapeHtml(sheetName)}',${Number(row.__rowNumber)||0})" class="rounded-lg bg-rose-100 hover:bg-rose-200 text-rose-800 px-2.5 py-1.5 text-xs font-bold"><i class="fa-solid fa-trash"></i> Eliminar</button></td>`:''}</tr>`).join('')}</tbody></table></div>`;
         }
         function pnaEditRecord(sheetName,rowNumber){
@@ -2014,7 +2015,7 @@
             const metadata=[['Responsable PZ',jefe],['JEOP de PZ',jeop],['Ubicación',zoneLocation]].filter(x=>x[1]);
             const headers=selected.headers.filter(h=>!/^__(rowNumber|blankRow)$/.test(h));
             const rows=selected.rows.map(row=>{const copy={};headers.forEach(h=>copy[h]=row[h]??'');return copy;});
-            area.innerHTML=`<div class="bg-gradient-to-r from-blue-950 via-blue-800 to-indigo-800 text-white p-5 rounded-2xl shadow-lg mb-5 border border-blue-700 text-center"><h3 class="text-lg font-bold tracking-wide uppercase text-blue-300">${escapeHtml(regionName)} (${escapeHtml(pnaRegion)})</h3>${director?`<p class="text-sm font-semibold text-slate-200 mt-1"><i class="fa-solid fa-user-shield text-blue-400 mr-1.5"></i>Director: ${escapeHtml(director)}</p>`:''}${subdirector?`<p class="text-xs text-slate-400 mt-0.5">Subdirector: ${escapeHtml(subdirector)}</p>`:''}</div><div class="mb-3 text-center"><p class="text-xs font-bold uppercase text-slate-500 tracking-wider">Prefecturas de Zona pertenecientes a ${escapeHtml(pnaRegion)}</p></div><div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">${zoneCards}</div><section class="bg-gradient-to-br from-sky-50 via-white to-indigo-50 border border-sky-200 rounded-2xl p-4 md:p-5 shadow-sm"><div class="flex flex-col md:flex-row justify-between items-start gap-3 mb-4 border-b border-slate-200 pb-3"><div><h4 class="text-base font-bold text-slate-800 uppercase flex items-center gap-2"><i class="fa-solid fa-building text-blue-600"></i>${escapeHtml(selected.name||selected.code)}</h4><p class="text-xs text-slate-500 mt-1">Perteneciente a ${escapeHtml(pnaRegion)} · Fuente: ${escapeHtml(selected.sheetName)}</p></div>${metadata.length?`<div class="text-xs text-left bg-gradient-to-br from-white to-sky-50 p-3 rounded-lg border border-sky-200 shadow-sm">${metadata.map(x=>`<p class="text-slate-700 py-0.5"><strong>${escapeHtml(x[0])}:</strong> ${escapeHtml(x[1])}</p>`).join('')}</div>`:''}${selected.zoneRowNumber?`<button type="button" onclick="pnaEditRecord('${escapeHtml(selected.sheetName)}',${Number(selected.zoneRowNumber)})" class="rounded-lg bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white px-3 py-2 text-xs font-extrabold shadow"><i class="fa-solid fa-user-pen mr-1"></i> Editar responsable y JEOP de esta PZ</button>`:''}</div><h5 class="text-xs font-bold uppercase text-slate-600 mb-2 flex items-center gap-1.5"><i class="fa-solid fa-list text-slate-400"></i> Dependencias de ${escapeHtml(selected.code)}</h5>${pnaTable(headers,selected.rows,selected.sheetName)}</section>`;
+            area.innerHTML=`<div class="bg-gradient-to-r from-blue-950 via-blue-800 to-indigo-800 text-white p-5 rounded-2xl shadow-lg mb-5 border border-blue-700 text-center"><h3 class="text-lg font-bold tracking-wide uppercase text-blue-300">${escapeHtml(regionName)} (${escapeHtml(pnaRegion)})</h3>${director?`<p class="text-sm font-semibold text-slate-200 mt-1"><i class="fa-solid fa-user-shield text-blue-400 mr-1.5"></i>Director: ${escapeHtml(director)}</p>`:''}${subdirector?`<p class="text-xs text-slate-400 mt-0.5">Subdirector: ${escapeHtml(subdirector)}</p>`:''}</div><div class="mb-3 text-center"><p class="text-xs font-bold uppercase text-slate-500 tracking-wider">Prefecturas de Zona pertenecientes a ${escapeHtml(pnaRegion)}</p></div><div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">${zoneCards}</div><section class="bg-gradient-to-br from-sky-50 via-white to-indigo-50 border border-sky-200 rounded-2xl p-4 md:p-5 shadow-sm"><div class="flex flex-col md:flex-row justify-between items-start gap-3 mb-4 border-b border-slate-200 pb-3"><div><h4 class="text-base font-bold text-slate-800 uppercase flex items-center gap-2"><i class="fa-solid fa-building text-blue-600"></i>${escapeHtml(selected.name||selected.code)}</h4><p class="text-xs text-slate-500 mt-1">Perteneciente a ${escapeHtml(pnaRegion)} · Fuente: ${escapeHtml(selected.sheetName)}</p></div>${metadata.length?`<div class="text-xs text-left bg-gradient-to-br from-white to-sky-50 p-3 rounded-lg border border-sky-200 shadow-sm">${metadata.map(x=>`<p class="text-slate-700 py-0.5"><strong>${escapeHtml(x[0])}:</strong> ${escapeHtml(x[1])}</p>`).join('')}</div>`:''}${selected.zoneRowNumber&&(hasPermission('personalPna','edit')||hasPermission('personalPna','create'))?`<button type="button" onclick="pnaEditRecord('${escapeHtml(selected.sheetName)}',${Number(selected.zoneRowNumber)})" class="rounded-lg bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white px-3 py-2 text-xs font-extrabold shadow"><i class="fa-solid fa-user-pen mr-1"></i> Editar responsable y JEOP de esta PZ</button>`:''}</div><h5 class="text-xs font-bold uppercase text-slate-600 mb-2 flex items-center gap-1.5"><i class="fa-solid fa-list text-slate-400"></i> Dependencias de ${escapeHtml(selected.code)}</h5>${pnaTable(headers,selected.rows,selected.sheetName)}</section>`;
             return total;
         }
         function renderPersonalPNA(){
@@ -2031,11 +2032,29 @@
             area.innerHTML=blocks.length?blocks.join(''):'<div class="bg-white border border-slate-200 rounded-xl p-6 text-center text-slate-500">No hay registros en esta categoría o la búsqueda no produjo resultados.</div>';
         }
 
+        function applyReadOnlyPresentation() {
+            if (!currentUser) return;
+            const canWrite = module => hasPermission(module, 'create') || hasPermission(module, 'edit');
+            const toggle = (selector, visible) => document.querySelectorAll(selector).forEach(node => node.classList.toggle('hidden', !visible));
+            // Agenda: la consulta conserva calendario, filtros y exportación; se ocultan los controles de alta.
+            toggle('#agendaEditor', canWrite('agenda'));
+            toggle('#agendaTab button[onclick^="agendaQuickType("]', canWrite('agenda'));
+            // Información general: ocultar el formulario completo, no mostrar campos deshabilitados.
+            toggle('#infoForm', canWrite('informacion'));
+            // Personal PNA: acciones de mantenimiento y edición de responsables solo para perfiles autorizados.
+            toggle('#personalPnaTab [data-pna-edit], #personalPnaTab .pna-edit-control', canWrite('personalPna'));
+            const pnaRefresh = document.querySelector('#personalPnaTab button[onclick="loadPersonalPNA(true)"]');
+            if (pnaRefresh) pnaRefresh.classList.remove('hidden'); // actualizar datos es una acción de consulta
+            const viajeCreate = document.getElementById('btnNuevoViaje');
+            if (viajeCreate) viajeCreate.classList.toggle('hidden', !canWrite('viajes'));
+        }
+
         function switchTab(tabId) {
             const required = {registroTab:'notas',expedientesTab:'expedientes',viajesTab:'viajes',estadisticasTab:'estadisticas',agendaTab:'agenda',informacionTab:'informacion',personalPnaTab:'personalPna'}[tabId];
             if (required && !hasPermission(required, 'view')) { alert('Su usuario no tiene permiso para consultar este módulo.'); return; }
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             const target = document.getElementById(tabId); if (target) target.classList.remove('hidden');
+            applyReadOnlyPresentation();
             ['Registro','Expedientes','Viajes','Estadisticas','Agenda','Informacion','PersonalPna'].forEach((name,i) => {
                 const ids=['registroTab','expedientesTab','viajesTab','estadisticasTab','agendaTab','informacionTab','personalPnaTab'];
                 const modules=['notas','expedientes','viajes','estadisticas','agenda','informacion','personalPna'];
@@ -2669,7 +2688,7 @@
             let proximas = 0;
 
             notas.forEach(n => {
-                if (n.limite && n.estado !== 'Contestado' && n.estado !== 'Archivado') {
+                if (n.limite && normalizeNotaEstado(n.estado) !== 'Contestado' && normalizeNotaEstado(n.estado) !== 'Archivado') {
                     const limiteFecha = new Date(n.limite + 'T00:00:00');
                     const diffDays = Math.ceil((limiteFecha - hoy) / (1000 * 60 * 60 * 24));
 
@@ -2726,12 +2745,20 @@
             renderExpedientesTable();
         }
 
+        function normalizeNotaEstado(value) {
+            const estado = String(value || '').trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/\s+/g, ' ');
+            if (/^(contestado|contestada|contestados|contestadas|respondido|respondida|respondidos|respondidas)$/.test(estado) || /^(contestado|contestada)\b/.test(estado)) return 'Contestado';
+            if (/^en espera$|^espera$/.test(estado)) return 'En espera';
+            if (/^archivad[oa]s?$/.test(estado)) return 'Archivado';
+            if (/^pendiente(s)?$/.test(estado)) return 'Pendiente';
+            return String(value || '').trim();
+        }
         function updateMetrics() {
             document.getElementById('metricTotal').innerText = notas.length;
-            document.getElementById('metricPendientes').innerText = notas.filter(n => n.estado === 'Pendiente').length;
-            document.getElementById('metricEspera').innerText = notas.filter(n => n.estado === 'En espera').length;
-            document.getElementById('metricContestados').innerText = notas.filter(n => n.estado === 'Contestado').length;
-            document.getElementById('metricArchivados').innerText = notas.filter(n => n.estado === 'Archivado').length;
+            document.getElementById('metricPendientes').innerText = notas.filter(n => normalizeNotaEstado(n.estado) === 'Pendiente').length;
+            document.getElementById('metricEspera').innerText = notas.filter(n => normalizeNotaEstado(n.estado) === 'En espera').length;
+            document.getElementById('metricContestados').innerText = notas.filter(n => normalizeNotaEstado(n.estado) === 'Contestado').length;
+            document.getElementById('metricArchivados').innerText = notas.filter(n => normalizeNotaEstado(n.estado) === 'Archivado').length;
         }
 
         function renderTable() {
@@ -2765,7 +2792,7 @@
 
                 let matchEstado = true;
                 if (filterEstado === 'URGENTES') {
-                    if (n.limite && n.estado !== 'Contestado' && n.estado !== 'Archivado') {
+                    if (n.limite && normalizeNotaEstado(n.estado) !== 'Contestado' && normalizeNotaEstado(n.estado) !== 'Archivado') {
                         const limiteFecha = new Date(n.limite + 'T00:00:00');
                         const diffDays = Math.ceil((limiteFecha - hoy) / (1000 * 60 * 60 * 24));
                         matchEstado = (diffDays <= 5);
@@ -2773,7 +2800,7 @@
                         matchEstado = false;
                     }
                 } else if (filterEstado !== 'TODOS') {
-                    matchEstado = (n.estado === filterEstado);
+                    matchEstado = (normalizeNotaEstado(n.estado) === normalizeNotaEstado(filterEstado));
                 }
 
                 let matchMes = true;
@@ -2815,11 +2842,11 @@
             renderItemsChunked(body, filtered, n => {
                 let badgeClass = 'bg-yellow-100 text-yellow-800 border-yellow-300';
                 if (n.estado === 'En espera') badgeClass = 'bg-orange-100 text-orange-800 border-orange-300';
-                if (n.estado === 'Contestado') badgeClass = 'bg-green-100 text-green-800 border-green-300';
+                if (normalizeNotaEstado(n.estado) === 'Contestado') badgeClass = 'bg-green-100 text-green-800 border-green-300';
                 if (n.estado === 'Archivado') badgeClass = 'bg-slate-200 text-slate-700 border-slate-300';
 
                 let alertaBadge = '';
-                if (n.limite && n.estado !== 'Contestado' && n.estado !== 'Archivado') {
+                if (n.limite && normalizeNotaEstado(n.estado) !== 'Contestado' && normalizeNotaEstado(n.estado) !== 'Archivado') {
                     const limiteFecha = new Date(n.limite + 'T00:00:00');
                     const diffDays = Math.ceil((limiteFecha - hoy) / (1000 * 60 * 60 * 24));
 
@@ -2832,7 +2859,7 @@
 
                 let rowClass = 'row-pendiente';
                 if (n.estado === 'En espera') rowClass = 'row-espera';
-                if (n.estado === 'Contestado') rowClass = 'row-contestado';
+                if (normalizeNotaEstado(n.estado) === 'Contestado') rowClass = 'row-contestado';
                 if (n.estado === 'Archivado') rowClass = 'row-archivado';
 
                 const attachmentButtons = [];
@@ -3637,6 +3664,30 @@
             }
         }
 
+        function exportViajesPDF() {
+            if (!hasPermission('viajes','export')) { alert('Su usuario no tiene permiso para exportar viajes.'); return; }
+            const search = (document.getElementById('searchViajesInput')?.value || '').trim().toLowerCase();
+            const statusFilter = document.getElementById('filterEstadoViajes')?.value || '';
+            const locationFilter = filtroUbicacionViajesRapido || '';
+            const filtered = viajesDB.filter(v => {
+                const people = Array.isArray(v.personas) ? v.personas : [];
+                const text = [v.lugar,v.evento,v.invita,v.calidad,v.gastosCargo,v.estado,...people.flatMap(p=>[p.grado,p.apellido,p.destino])].map(x=>String(x||'').toLowerCase()).join(' ');
+                const raw = String(v.estado || v.estatus || v.situacion || '').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+                const key = /rechaz|cancelad|anulad/.test(raw) ? 'rechazado' : /continua|activo|en curso|iniciado|viajando|comisionado|en viaje|vigente/.test(raw) ? 'continua' : /finaliz|termin|regres|cerrad|cumplid|realizad/.test(raw) ? 'finalizado' : 'proximo';
+                const loc = !locationFilter || (locationFilter === 'argentina' ? esViajeEnArgentina(v) : !esViajeEnArgentina(v));
+                return (!search || text.includes(search)) && (!statusFilter || key === statusFilter) && loc;
+            });
+            const w = window.open('', '_blank');
+            if (!w) { alert('Permita las ventanas emergentes para exportar los viajes a PDF.'); return; }
+            const esc = value => escapeHtml(value == null ? '' : String(value));
+            const rows = filtered.map(v => {
+                const people = (Array.isArray(v.personas) ? v.personas : []).map(p => `${p.grado||''} ${p.apellido||''}${p.destino ? ' — '+p.destino : ''}`).join('<br>') || '—';
+                return `<tr><td>${people}</td><td>${esc(v.evento||'—')}</td><td>${esc(v.salida||'')}</td><td>${esc(v.llegada||'')}</td><td>${esc(v.lugar||'—')}</td><td>${esc(v.invita||'—')}</td><td>${esc(v.calidad||'—')}</td><td>${esc(v.gastosCargo||'—')}</td><td>${esc(v.estado||'—')}</td></tr>`;
+            }).join('');
+            w.document.write(`<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Control de viajes DGSE</title><style>body{font-family:Arial,sans-serif;color:#172033;margin:24px}h1{font-size:20px;color:#1e3a5f;margin:0 0 6px}p{font-size:11px;color:#475569;margin:4px 0 16px}table{width:100%;border-collapse:collapse;font-size:9px}th,td{border:1px solid #cbd5e1;padding:6px;text-align:left;vertical-align:top}th{background:#e2e8f0;color:#1e293b}tr:nth-child(even){background:#f8fafc}.foot{margin-top:16px;font-size:10px;color:#64748b}@page{size:landscape;margin:12mm}@media print{button{display:none}}</style></head><body><h1>Dirección General de Seguridad · Control de viajes</h1><p>Generado: ${new Date().toLocaleString('es-AR')} · Registros incluidos: ${filtered.length}${search?' · Búsqueda: '+esc(search):''}</p><table><thead><tr><th>Personal en comisión</th><th>Evento / misión</th><th>Partida</th><th>Llegada</th><th>Destino</th><th>Invita</th><th>Calidad</th><th>Gastos a cargo</th><th>Estado</th></tr></thead><tbody>${rows || '<tr><td colspan="9">No hay viajes que coincidan con los filtros seleccionados.</td></tr>'}</tbody></table><p class="foot">Documento interno DGSE · ${filtered.length} viaje(s)</p><script>window.onload=()=>window.print()<\/script></body></html>`);
+            w.document.close();
+        }
+
         function exportViajesCSV() {
             if (!hasPermission('viajes','export')) { alert('Su usuario no tiene permiso para exportar viajes.'); return; }
             let csv = 'Grado,Apellido y Nombre,Destino,Evento,Salida,Llegada,Lugar,Invita,Calidad,GastosCargo,Estado\n';
@@ -3683,6 +3734,23 @@
 </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
